@@ -44,33 +44,10 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
     tinode = widget.tinode;
   }
 
-  Future<void> getMsgRoomList() async {
-    me = tinode.getMeTopic();
 
-    me.onSubsUpdated.listen((value) {
-      for (var item in value) {
-        print('Subscription[' +
-            item.topic.toString() +
-            ']: ' +
-            item.public['fn'] +
-            ' - Unread Messages:' +
-            item.unread.toString());
-      }
-
-      setState(() {
-        roomList = value;
-      });
-      print("room List : ${roomList.length}");
-    });
-    await me.subscribe(MetaGetBuilder(me).withLaterSub(null).build(), null);
-  }
 
   List<String> clickFriendList = [];
-  // void onClickMakeRoom() {
-  //  var data =  tinode.newTopic();
-  //  var data2 = tinode.getFndTopic();
 
-  // }
   late Topic _groupTopic;
   late Topic _opponentTopic;
 
@@ -180,7 +157,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
 
       // 사용자 초대
       await _groupTopic.invite(userId, 'JRWPAS');
-
+      Get.to(()=>MessageRoomScreen(tinode: tinode, clickTopic: _groupTopic.roomId));
       print('User $userId invited to group chat');
     } catch (e) {
       print('Failed to invite user to group chat: $e');

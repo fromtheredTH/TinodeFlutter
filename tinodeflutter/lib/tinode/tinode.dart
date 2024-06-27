@@ -215,6 +215,7 @@ class Tinode {
   void _doSubscriptions() {
     _onMessageSubscription ??= _connectionService.onMessage.listen((input) {
       _onConnectionMessage(input);
+
     });
 
     _onConnectedSubscription ??= _connectionService.onOpen.listen((_) {

@@ -69,23 +69,42 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
       setState(() {
         _searchResults = msg.sub!.map((dynamic sub) {
           return User(
-            id: sub.user >> 'Unknown ID',
-            name: sub.public != null ? sub.public['fn'] ?? 'Unknown' : 'Unknown',
-            email: sub.public != null ? sub.public['email'] ?? 'No Email' : 'No Email',
+            id: sub['user'] ?? 'Unknown ID',
+            name: sub['public']?['fn'] ?? 'Unknown',
+            email: sub['public']?['email'] ?? 'No Email',
           );
         }).toList();
       });
     }
   }
 
-  Future<void> _searchUsers(String query) async{
+  Future<void> _searchUsers(String query) async {
     try {
-
-      GetQuery getQuery = GetQuery(
-        what: 'sub',
-        sub: GetOptsType(user: 'test2'),
+      // SetParams 객체를 생성하여 검색 쿼리 설정
+      SetParams setParams = SetParams(
+        desc: TopicDescription(
+          public: query, // 유저 이름을 검색 키워드로 설정
+        ),
       );
-      var data = await _fndTopic.getMeta(getQuery);
+
+      // fnd 토픽에 메타데이터 설정 요청 보내기
+      var ctrl = await _fndTopic.setMeta(setParams);
+
+      // 메타데이터 응답 처리
+      if (ctrl != null && ctrl.params != null) {
+        var results = ctrl.params['sub'];
+        if (results != null) {
+          setState(() {
+            _searchResults = results.map((dynamic sub) {
+              return User(
+                id: sub['user'] ?? 'Unknown ID',
+                name: sub['public']?['fn'] ?? 'Unknown',
+                email: sub['public']?['email'] ?? 'No Email',
+              );
+            }).toList();
+          });
+        }
+      }
     } catch (err) {
       print("err search : $err");
     }
@@ -122,8 +141,10 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
           ),
           InkWell(
             onTap: () {
-              if(!inputController.value.text.isEmpty)_searchUsers(inputController.value.text);
-              else showToast("입력해주세요");
+              if (!inputController.value.text.isEmpty)
+                _searchUsers(inputController.value.text);
+              else
+                showToast("입력해주세요");
               FocusManager.instance.primaryFocus?.unfocus();
             },
             child: Container(

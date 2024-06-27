@@ -42,7 +42,7 @@ class _LoginState extends State<Login> {
     var key = 'AQAAAAABAAC5Ym2pu9wKC_cbu2omxbD6';
     // var host = 'sandbox.tinode.co';
     var host = '54.180.163.159:6060';
-    id = idController.value.text == "" ? "test123" : idController.value.text;
+    id = idController.value.text == "" ? "test3" : idController.value.text;
     pw = pwController.value.text == "" ? "qwer123!" : pwController.value.text;
     var loggerEnabled = true;
     tinode = Tinode(

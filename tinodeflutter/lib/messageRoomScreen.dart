@@ -1,6 +1,3 @@
-
-
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -26,26 +23,25 @@ import 'package:permission_handler/permission_handler.dart';
 class MessageRoomScreen extends StatefulWidget {
   Tinode tinode;
   String clickTopic;
-  MessageRoomScreen({super.key , required this.tinode, required this.clickTopic});
+  MessageRoomScreen(
+      {super.key, required this.tinode, required this.clickTopic});
 
   @override
   State<MessageRoomScreen> createState() => _MessageRoomScreenState();
 }
 
 class _MessageRoomScreenState extends State<MessageRoomScreen> {
-
-
   late Tinode tinode;
   late Topic roomTopic;
   late Topic me;
-  String clickTopic="";
+  String clickTopic = "";
   List<DataMessage> msgList = [];
   AutoScrollController mainController = AutoScrollController();
   TextEditingController inputController = TextEditingController();
   PositionRetainedScrollPhysics physics = PositionRetainedScrollPhysics();
   final ImagePicker _picker = ImagePicker();
 
-@override
+  @override
   void initState() {
     super.initState();
     tinode = widget.tinode;
@@ -54,51 +50,20 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
   }
 
   @override
-  void dispose()
-  {
+  void dispose() {
     super.dispose();
-    tinode.leave(clickTopic,false);
+    //tinode.leave(clickTopic, false);
   }
 
-
-List<TopicSubscription> roomList = [];
-
-  // Future<void> getMsgRoomList() async {
-  //   me = tinode.getMeTopic();
-
-  //   me.onSubsUpdated.listen((value) {
-  //     for (var item in value) {
-  //       print('Subscription[' +
-  //           item.topic.toString() +
-  //           ']: ' +
-  //           item.public['fn'] +
-  //           ' - Unread Messages:' +
-  //           item.unread.toString());
-  //     }
-      
-  //     setState(() {roomList = value;});
-  //     print("room List : ${roomList.length}");
-  //   });
-  //   try{
-  //   await me.subscribe(MetaGetBuilder(me).withLaterSub(null).build(), null);
-  //   }
-  //   catch(err)
-  //   {
-  //     print(
-  //       "err : $err"
-  //     );
-  //   }
-  // }
+  List<TopicSubscription> roomList = [];
 
   Future<void> getMsgList() async {
     roomTopic = tinode.getTopic(clickTopic);
-     try{
-      if(!roomTopic.isSubscribed)
+    try {
+      if (!roomTopic.isSubscribed)
         await roomTopic.subscribe(
-        MetaGetBuilder(roomTopic).withData(null, null, null).build(), null);
-    }
-    catch(err)
-    {
+            MetaGetBuilder(roomTopic).withData(null, null, null).build(), null);
+    } catch (err) {
       print("err roomTopic : $err");
     }
     roomTopic.onData.listen((value) {
@@ -115,9 +80,10 @@ List<TopicSubscription> roomList = [];
       } catch (err) {
         print("err roomTopic : ");
       }
-    }); 
+    });
   }
-Future<void> _pickFile() async {
+
+  Future<void> _pickFile() async {
     final PermissionStatus status = await Permission.storage.request();
     if (status.isGranted) {
       final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
@@ -127,7 +93,7 @@ Future<void> _pickFile() async {
     }
   }
 
-   Future<void> _uploadFile(XFile file) async {
+  Future<void> _uploadFile(XFile file) async {
     // 파일을 Tinode 서버에 업로드하는 코드
     // 예: Tinode의 파일 업로드 API를 사용하여 파일을 업로드
   }
@@ -156,16 +122,15 @@ Future<void> _pickFile() async {
     addMsg(content);
   }
 
-
-   void deleteMsg(int msgId) {
-    if(msgId==-1) {
+  void deleteMsg(int msgId) {
+    if (msgId == -1) {
       showToast('cant remove');
       return;
     }
-    DelRange delRange = DelRange(low: msgId, hi: msgId ,all: false);
-   
-  List<DelRange> delRangeList = [delRange];
-    roomTopic.deleteMessages(delRangeList,  true).then((ctrl) {
+    DelRange delRange = DelRange(low: msgId, hi: msgId, all: false);
+
+    List<DelRange> delRangeList = [delRange];
+    roomTopic.deleteMessages(delRangeList, true).then((ctrl) {
       print('Message deleted: $ctrl');
     }).catchError((err) {
       print('Failed to delete message: $err');
@@ -174,17 +139,18 @@ Future<void> _pickFile() async {
 
   Future<void> addMsg(String input) async {
     //await roomTopic.subscribe(MetaGetBuilder(roomTopic).withData(null,null,null).build(),null);
-
-    var msg = roomTopic.createMessage(input, true);
-    print("msg : $msg");
-    await roomTopic.publishMessage(msg);
-    showToast("chat add");
+    if (roomTopic.isSubscribed) {
+      var msg = roomTopic.createMessage(input, true);
+      print("msg : $msg");
+      var result = await roomTopic.publishMessage(msg);
+      if(result?.text == "accepted")
+      showToast("chat add");
+    }
   }
-
 
   @override
   Widget build(BuildContext context) {
-   return Scaffold(
+    return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text("채팅방"),
@@ -193,8 +159,6 @@ Future<void> _pickFile() async {
         width: double.infinity,
         height: double.infinity,
         child: Column(children: [
-          
-       
           SizedBox(
               // SizedBox 대신 Container를 사용 가능
               width: double.infinity,
@@ -277,21 +241,25 @@ Future<void> _pickFile() async {
                     controller: mainController,
                     index: index,
                     child: GestureDetector(
-                        onLongPress: () => {deleteMsg(msgList[index].seq ?? -1)},
+                        onLongPress: () =>
+                            {deleteMsg(msgList[index].seq ?? -1)},
                         child: Stack(
                           children: [
                             Container(
                               height: 30,
-                              child: Row(
-                                children:[
+                              child: Row(children: [
                                 AppText(
-                                text: msgList[index].content.toString(),
-                                color: Colors.black,
-                              ),
-                              SizedBox(width: 10,),
-                              AppText(text: msgList[index].ts.toString(), color: Colors.grey,),
-                              ]
-                            ),
+                                  text: msgList[index].content.toString(),
+                                  color: Colors.black,
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                AppText(
+                                  text: msgList[index].ts.toString(),
+                                  color: Colors.grey,
+                                ),
+                              ]),
                             )
                           ],
                         )),
@@ -300,6 +268,6 @@ Future<void> _pickFile() async {
           ),
         ]),
       ),
-   );
+    );
   }
 }

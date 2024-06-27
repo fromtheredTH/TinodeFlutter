@@ -42,33 +42,79 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
   void initState() {
     super.initState();
     tinode = widget.tinode;
-    getMsgRoomList();
+    me = widget.tinode.getMeTopic();
+    _setupListeners();
+  //  _initializeTopic();
+    // getMsgRoomList();
   }
 
-  Future<void> getMsgRoomList() async {
+   void _initializeTopic() async {
     me = tinode.getMeTopic();
-    try {
-      me.onSubsUpdated.listen((value) {
-        // for (var item in value) {
-        //   print('Subscription[' +
-        //       item.topic.toString() +
-        //       ']: ' +
-        //       item.public['fn'] +
-        //       ' - Unread Messages:' +
-        //       item.unread.toString());
-        // }
+    await me.subscribe(MetaGetBuilder(me).withLaterSub(null).build(), null);
+    _loadRooms();
+    _setupListeners();
+  }
 
-        setState(() {
-          roomList = value;
-        });
-        print("room List : ${roomList.length}");
+  void _loadRooms() {
+    var subs = me.subscribers;
+    setState(() {
+      roomList = subs.values.toList();
+       roomList.sort((a, b) => b.updated!.compareTo(a.updated!));
+    });
+  }
+  
+  void _setupListeners() async{
+
+    me.onSubsUpdated.listen((value) {
+      print("Subs updated: $value");
+      setState(() {
+        roomList = value;
+        roomList.sort((a, b) => b.updated!.compareTo(a.updated!));
       });
+    });
 
+    me.onPres.listen((event) {
+      print("Presence event: $event");
+      if (event.what == 'acs') {
+       // getMsgRoomList();
+       print("come acs");
+      }
+    });
+    await me.subscribe(MetaGetBuilder(me).withLaterSub(null).build(), null);
+  }
+
+
+  Future<void> getMsgRoomList() async {
+    // me = tinode.getMeTopic();
+    try {
+      // me.onSubsUpdated.listen((value) {
+      //   // for (var item in value) {
+      //   //   print('Subscription[' +
+      //   //       item.topic.toString() +
+      //   //       ']: ' +
+      //   //       item.public['fn'] +
+      //   //       ' - Unread Messages:' +
+      //   //       item.unread.toString());
+      //   // }
+
+      //   setState(() {
+      //   roomList = value;
+      //    roomList.sort((a, b) => b.updated!.compareTo(a.updated!));
+      //   });
+        
+      //   print("room List : ${roomList.length}");
+      // });
+
+      // me.onData.listen((data) {
+      //   // 필요한 경우 데이터를 처리할 수 있습니다.
+      //   print("Data received: $data");
+      // });
       await me.subscribe(MetaGetBuilder(me).withLaterSub(null).build(), null);
     } catch (err) {
       print("err : $err");
     }
   }
+
 
   String clickTopic = "";
   void onClickMsgRoom(String clickTopic) {
@@ -160,7 +206,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
                         onLongPress: () => {},
                         child: Stack(
                           children: [
-                            if (roomList[index].unread != null)
+                            
                               InkWell(
                                 onTap: () {
                                   onClickMsgRoom(
@@ -177,10 +223,10 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
                                     SizedBox(
                                       width: 10,
                                     ),
-                                    if (roomList[index].created != null)
+                                    if (roomList[index].updated != null)
                                       AppText(
                                         text: (roomList[index]
-                                            .created
+                                            .updated
                                             .toString()),
                                         fontSize: 30,
                                         color: Colors.black,
@@ -188,11 +234,12 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
                                     SizedBox(
                                       width: 10,
                                     ),
+                                     if (roomList[index].unread != null && roomList[index].unread != 0) ...[
                                     AppText(
                                       text: roomList[index].unread.toString(),
                                       fontSize: 30,
                                       color: Colors.red,
-                                    ),
+                                    ),]
                                   ]),
                                 ),
                               ),

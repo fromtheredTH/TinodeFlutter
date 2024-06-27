@@ -175,6 +175,7 @@ class Topic {
   static const int DEBOUNCE_MESSAGE_RECEIVED_TIME = 300;
   static const int DEFAULT_MESSAGE_LIMIT = DEFAULT_CACHE_MESSAGE_LIMIT;
 
+
   Topic(String topicName) {
     _resolveDependencies();
     name = topicName;
@@ -194,6 +195,8 @@ class Topic {
       fetchMoreLocalMessages(isFirstPage: true);
     }
   }
+
+  
 
   Future<void> fetchMoreLocalMessages(
       {int limit = DEFAULT_MESSAGE_LIMIT,
@@ -394,7 +397,7 @@ class Topic {
     return ctrl;
   }
 
-  /// Request topic metadata from the serve
+  /// Request topic metadata from the server
   Future getMeta(GetQuery params) {
     // Send {get} message, return promise.
     return _tinodeService.getMeta(name ?? '', params);
