@@ -12,7 +12,7 @@ Future<void> main() async {
   await EasyLocalization.ensureInitialized();
  // GetIt.I.registerSingleton<SocialService>(SocialService());
   setupLocator();
-  runApp(const GetMaterialApp(home: MyApp()));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {

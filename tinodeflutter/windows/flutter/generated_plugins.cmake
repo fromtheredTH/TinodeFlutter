@@ -3,7 +3,16 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  app_links
+  connectivity_plus_windows
+  file_selector_windows
+  flutter_secure_storage_windows
+  modal_progress_hud_nsn
+  objectbox_flutter_libs
   permission_handler_windows
+  screen_brightness_windows
+  share_plus
+  url_launcher_windows
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

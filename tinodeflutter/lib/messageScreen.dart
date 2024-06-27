@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:tinode/tinode.dart';
+import 'tinode/tinode.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:http/http.dart';
 

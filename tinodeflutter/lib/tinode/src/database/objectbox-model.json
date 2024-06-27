@@ -1,0 +1,137 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "2:7500374954732282090",
+      "lastPropertyId": "15:3882290172258990645",
+      "name": "DataMessage",
+      "properties": [
+        {
+          "id": "2:1545068481723978007",
+          "name": "topic",
+          "type": 9
+        },
+        {
+          "id": "3:5629718895506784170",
+          "name": "from",
+          "type": 9
+        },
+        {
+          "id": "4:6244017526639838738",
+          "name": "ts",
+          "type": 10
+        },
+        {
+          "id": "5:3343702600643972194",
+          "name": "seq",
+          "type": 6
+        },
+        {
+          "id": "6:8497395922862948872",
+          "name": "noForwarding",
+          "type": 1
+        },
+        {
+          "id": "7:1361745614401308380",
+          "name": "hi",
+          "type": 6
+        },
+        {
+          "id": "8:6768784378071748402",
+          "name": "mark",
+          "type": 6
+        },
+        {
+          "id": "9:8080767349429141016",
+          "name": "dbHead",
+          "type": 9
+        },
+        {
+          "id": "10:4732332771195243480",
+          "name": "dbContent",
+          "type": 9
+        },
+        {
+          "id": "12:2676264290457955547",
+          "name": "combinedId",
+          "type": 9,
+          "flags": 2080,
+          "indexId": "3:6669793052934164781"
+        },
+        {
+          "id": "14:6562255994424126639",
+          "name": "localTopicId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "5:5365880262889030653",
+          "relationTarget": "LocalTopic"
+        },
+        {
+          "id": "15:3882290172258990645",
+          "name": "id",
+          "type": 6,
+          "flags": 129
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "7:7523939529630017019",
+      "lastPropertyId": "2:4984847510489244727",
+      "name": "LocalTopic",
+      "properties": [
+        {
+          "id": "1:1480729267301426515",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4984847510489244727",
+          "name": "name",
+          "type": 9
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "7:7523939529630017019",
+  "lastIndexId": "5:5365880262889030653",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [
+    7595507953879236273,
+    5825008752108115567,
+    4669327825780138909,
+    1418740078404418352,
+    1986949763417790528
+  ],
+  "retiredIndexUids": [
+    3734032233424004645,
+    4524952478530561359
+  ],
+  "retiredPropertyUids": [
+    8401172950085984679,
+    6653102471760011849,
+    7139542189916757959,
+    5632662201352881675,
+    8491904116446346437,
+    8551816917586839958,
+    5860732589279765184,
+    8787319704378319453,
+    480838723607652497,
+    1614294361819380032,
+    9113196365372014521,
+    2273434555358412392,
+    8514496487745646617,
+    1766405141132696244,
+    5442303229141186181,
+    645643751041858705
+  ],
+  "retiredRelationUids": [],
+  "version": 1
+}
