@@ -113,7 +113,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
       case eChatType.IMAGE:
         return imageTile(context, dataMessage, getImageBase64Decoder(dataMessage.content['ent'][0]['data']['val']), index);
       case eChatType.VIDEO:
-        return videoTile(context, getImageBase64Decoder(dataMessage.content['ent'][0]['data']['preview']), index);
+        return videoTile(context, dataMessage, getImageBase64Decoder(dataMessage.content['ent'][0]['data']['preview']), index);
       default:
         return Container();
     }
@@ -204,8 +204,21 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
       ),
     );
   }
+  String formatMilliseconds(int milliseconds) {
+  // 밀리초를 초로 변환
+  int totalSeconds = (milliseconds / 1000).floor();
 
-    Widget videoTile(BuildContext context, Image img, int index,) {
+  // 분과 초를 계산
+  int minutes = totalSeconds ~/ 60;
+  int seconds = totalSeconds % 60;
+
+  // 초가 한 자리 수일 경우 앞에 0을 추가
+  String formattedSeconds = seconds < 10 ? '0$seconds' : '$seconds';
+
+  return '$minutes:$formattedSeconds';
+}
+
+    Widget videoTile(BuildContext context, DataMessage dataMessage, Image img, int index,) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -253,6 +266,12 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
                         width: 40, height: 40),
                   ),
                 ),
+                AppText(
+                  text: formatMilliseconds(dataMessage.content['ent'][0]['data']['duration']),
+                  textAlign: TextAlign.end,
+                  color: Colors.white,
+                  fontSize: 20,
+                )
               // if (info.fileProgress != null &&
               //     info.totalProgress != null &&
               //     info.file != null)
