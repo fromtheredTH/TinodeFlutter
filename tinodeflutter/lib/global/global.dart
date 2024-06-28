@@ -12,6 +12,7 @@ int gCurrentId = 0;
 bool gPushClick = false;
 
 enum eChatType {
+  NONE,
   TEXT,
   IMAGE,
   VIDEO,

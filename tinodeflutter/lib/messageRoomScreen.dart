@@ -2,6 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:tinodeflutter/global/global.dart';
+import 'Constants/ColorConstants.dart';
+import 'Constants/ImageConstants.dart';
+import 'components/image_viewer.dart';
 import 'tinode/tinode.dart';
 import 'tinode/src/models/message.dart';
 import 'package:tinodeflutter/app_text.dart';
@@ -19,6 +24,8 @@ import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class MessageRoomScreen extends StatefulWidget {
   Tinode tinode;
@@ -52,10 +59,8 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
   @override
   void dispose() {
     super.dispose();
-    //tinode.leave(clickTopic, false);
+    roomTopic.leave(false);
   }
-
-  List<TopicSubscription> roomList = [];
 
   Future<void> getMsgList() async {
     roomTopic = tinode.getTopic(clickTopic);
@@ -64,23 +69,264 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
         await roomTopic.subscribe(
             MetaGetBuilder(roomTopic).withData(null, null, null).build(), null);
     } catch (err) {
-      print("err roomTopic : $err");
+      print("err roomTopic getMsgList : $err");
     }
-    roomTopic.onData.listen((value) {
+    roomTopic.onData.listen((data) {
       try {
-        if (value != null) {
-          print('DataMessage: ' + value.content);
-          msgList.insert(0, value);
+        if (data != null) {
+          //print('DataMessage: ' + data.content);
+          msgList.insert(0, data);
           setState(() {
-            if (value.ts != null)
-              msgList.sort((a, b) => b.ts!.compareTo(a.ts!));
+            if (data.ts != null) msgList.sort((a, b) => b.ts!.compareTo(a.ts!));
           });
-          //showToast("${value.content}");
         }
       } catch (err) {
-        print("err roomTopic : ");
+        print("err roomTopic getMsgList : $err");
       }
     });
+  }
+
+  void videoRendrProcess() {}
+  void audioRenderProcess() {}
+
+  eChatType checkMsgType(DataMessage dataMessage) {
+    if (dataMessage.content is Map) {
+      print("map content!");
+      switch (dataMessage.content['ent'][0]['tp']) {
+        case 'IM':
+          print("image");
+          return eChatType.IMAGE;
+        case 'VD':
+          print("video");
+          return eChatType.VIDEO;
+      }
+      return eChatType.NONE;
+    } else {
+      return eChatType.TEXT;
+    }
+  }
+
+  Widget selectMsgWidget(DataMessage dataMessage, int index) {
+    switch (checkMsgType(dataMessage)) {
+      case eChatType.TEXT:
+        return textTile(index);
+      case eChatType.IMAGE:
+        return imageTile(context, dataMessage, getImageBase64Decoder(dataMessage.content['ent'][0]['data']['val']), index);
+      case eChatType.VIDEO:
+        return videoTile(context, getImageBase64Decoder(dataMessage.content['ent'][0]['data']['preview']), index);
+      default:
+        return Container();
+    }
+  }
+
+  void fullView(BuildContext context, int index, Image img) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ImageViewer(
+                  images: ["test"],
+                  selected: index,
+                  isVideo: false,
+                  img: img,
+                  //  user: getUser(),
+                ))).then((value) {
+      // if (value == "delete") {
+      //   onDelete();
+      // }
+    });
+  }
+
+  late Uint8List imageDecode;
+
+  Image getImageBase64Decoder(String base64)  {
+    imageDecode = Base64Decoder().convert(base64);
+   return Image.memory(
+      imageDecode,
+      // width: 200,
+      // height: 200,
+      fit: BoxFit.cover,
+      width: Get.width * 0.4,
+      height: Get.width * 0.4,
+    );
+  }
+
+  Widget imageTile(BuildContext context, DataMessage dataMessage, Image img, int index) {
+    return Container(
+      constraints: BoxConstraints(maxWidth: Get.width * 0.65),
+      child: Stack(
+        children: [
+          GestureDetector(
+              onTap: () {
+                fullView(context, 0, img);
+              },
+              onLongPress: (){
+                deleteMsgForAllPerson(msgList[index].seq ?? -1);
+              },
+              child: img,
+              // info.file.isNotEmpty
+              //     ? Image.file(
+              //         info.file[0],
+              //         fit: BoxFit.cover,
+              //       )
+              //     : CachedNetworkImage(imageUrl: arr[0], fit: BoxFit.cover),
+              ),
+          // if (info.fileProgress != null &&
+          //     info.totalProgress != null &&
+          //     info.file != null)
+          //   Positioned.fill(
+          //       child: Container(
+          //     color: Colors.black.withOpacity(0.5),
+          //     child: Center(
+          //         child: Column(
+          //       mainAxisAlignment: MainAxisAlignment.center,
+          //       crossAxisAlignment: CrossAxisAlignment.center,
+          //       children: [
+          //         CircularPercentIndicator(
+          //           radius: 12.0,
+          //           lineWidth: 1.0,
+          //           percent: info.fileProgress!.toDouble() /
+          //               info.totalProgress!.toDouble(),
+          //           progressColor: Colors.white,
+          //         ),
+          //         SizedBox(
+          //           height: 2,
+          //         ),
+          //         AppText(
+          //           text:
+          //               "${sizeStr(info.fileProgress!, info.totalProgress!)} / ${totalSizeStr(info.totalProgress!)}",
+          //           color: Colors.white,
+          //           fontSize: 14,
+          //         ),
+          //       ],
+          //     )),
+          //   )),
+        ],
+      ),
+    );
+  }
+
+    Widget videoTile(BuildContext context, Image img, int index,) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ImageViewer(
+                      // images: (info.contents ?? '').split(","),
+                      images: ["test"],
+                      selected: 0,
+                      isVideo: true, 
+                      img: img,
+                      // user: getUser(),
+                    ))).then((value) {
+          // if (value == "delete") {
+          //   onDelete();
+          // }
+        });
+      },
+      onLongPress: (){
+        deleteMsgForAllPerson(msgList[index].seq ?? -1);
+      },
+      child: Container(
+          constraints: BoxConstraints(maxWidth: 240),
+          child: Stack(
+            children: [
+              img,
+              // info.file.isNotEmpty
+              //     ? Image.file(
+              //         info.file[0],
+              //         fit: BoxFit.cover,
+              //       )
+              //     : (info.contents ?? '').split(",").length != 2
+              //         ? Container(color: Colors.black)
+              //         : CachedNetworkImage(
+              //             imageUrl: (info.contents ?? '').split(",")[1],
+              //             fit: BoxFit.cover,
+              //           ),
+              // if (info.fileProgress == null &&
+              //     info.totalProgress == null &&
+              //     info.file.isEmpty)
+                Positioned.fill(
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Image.asset(ImageConstants.playVideo,
+                        width: 40, height: 40),
+                  ),
+                ),
+              // if (info.fileProgress != null &&
+              //     info.totalProgress != null &&
+              //     info.file != null)
+              //   Positioned.fill(
+              //       child: Container(
+              //     color: Colors.black.withOpacity(0.5),
+              //     child: Center(
+              //         child: Column(
+              //       mainAxisAlignment: MainAxisAlignment.center,
+              //       crossAxisAlignment: CrossAxisAlignment.center,
+              //       children: [
+              //         CircularPercentIndicator(
+              //           radius: 12.0,
+              //           lineWidth: 1.0,
+              //           percent: info.fileProgress!.toDouble() /
+              //               info.totalProgress!.toDouble(),
+              //           progressColor: Colors.white,
+              //         ),
+              //         SizedBox(
+              //           height: 2,
+              //         ),
+              //         AppText(
+              //           text:
+              //               "${sizeStr(info.fileProgress!, info.totalProgress!)} / ${totalSizeStr(info.totalProgress!)}",
+              //           color: Colors.white,
+              //           fontSize: 14,
+              //         ),
+              //       ],
+              //     )),
+              //   )),
+            ],
+          )),
+    );
+  }
+
+  Widget textTile(int index) {
+    return GestureDetector(
+        onLongPress: () => {deleteMsgForAllPerson(msgList[index].seq ?? -1)},
+        child: Stack(
+          children: [
+            Container(
+              height: 30,
+              child: Row(children: [
+                AppText(
+                  text: msgList[index].content.toString(),
+                  color: Colors.black,
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                AppText(
+                  text: msgList[index].ts.toString(),
+                  color: Colors.grey,
+                ),
+              ]),
+            )
+          ],
+        ));
+    // return Container(
+    //   constraints: BoxConstraints(maxWidth: Get.width * 0.65),
+    //   decoration: BoxDecoration(
+    //     color:
+    //         mine ? ColorConstants.colorMyMessage : ColorConstants.white5Percent,
+    //     borderRadius: BorderRadius.circular(8),
+    //   ),
+    //   padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+    //   child: AppText(
+    //     text: info.unsended_at != null
+    //         ? 'deleted_msg'.tr()
+    //         : (info.contents ?? ''),
+    //     fontSize: 14,
+    //     fontWeight: FontWeight.w400,
+    //   ),
+    // );
   }
 
   Future<void> _pickFile() async {
@@ -122,7 +368,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     addMsg(content);
   }
 
-  void deleteMsg(int msgId) {
+  void deleteMsgForAllPerson(int msgId) {
     if (msgId == -1) {
       showToast('cant remove');
       return;
@@ -137,14 +383,37 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     });
   }
 
+  void deleteMsgForOnlyMyRoom(int msgId) {
+    if (msgId == -1) {
+      showToast('cant remove');
+      return;
+    }
+    DelRange delRange = DelRange(low: msgId, hi: msgId, all: false);
+
+    List<DelRange> delRangeList = [delRange];
+    roomTopic.deleteMessages(delRangeList, false).then((ctrl) {
+      print('Message deleted: $ctrl');
+      setState(() {
+        msgList = msgList;
+      });
+    }).catchError((err) {
+      print('Failed to delete message: $err');
+    });
+  }
+
+  void deleteTopic() // chat room leave
+  {
+    roomTopic.deleteTopic(false);
+    Get.back();
+  }
+
   Future<void> addMsg(String input) async {
     //await roomTopic.subscribe(MetaGetBuilder(roomTopic).withData(null,null,null).build(),null);
     if (roomTopic.isSubscribed) {
       var msg = roomTopic.createMessage(input, true);
       print("msg : $msg");
       var result = await roomTopic.publishMessage(msg);
-      if(result?.text == "accepted")
-      showToast("chat add");
+      if (result?.text == "accepted") showToast("chat add");
     }
   }
 
@@ -208,22 +477,41 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
                       ),
                     ]),
                   ),
-                  SizedBox(
-                    // SizedBox 대신 Container를 사용 가능
-                    width: 100,
-                    height: 30,
-                    child: FilledButton(
-                      onPressed: () {
-                        if (inputController.value.text != "") {
-                          addMsg(inputController.value.text);
-                          inputController.clear();
-                        } else
-                          showToast("내용을 입력하세요");
-                        FocusManager.instance.primaryFocus?.unfocus();
-                      },
-                      child: Text('전송'),
-                    ),
-                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        // SizedBox 대신 Container를 사용 가능
+                        width: 120,
+                        height: 30,
+                        child: FilledButton(
+                          onPressed: () {
+                            if (inputController.value.text != "") {
+                              addMsg(inputController.value.text);
+                              inputController.clear();
+                            } else
+                              showToast("내용을 입력하세요");
+                            FocusManager.instance.primaryFocus?.unfocus();
+                          },
+                          child: Text('text 전송'),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      SizedBox(
+                        // SizedBox 대신 Container를 사용 가능
+                        width: 100,
+                        height: 30,
+                        child: FilledButton(
+                          onPressed: () {
+                            deleteTopic();
+                          },
+                          child: Text('방 삭제'),
+                        ),
+                      ),
+                    ],
+                  )
                 ],
               )),
           Expanded(
@@ -240,29 +528,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
                     key: ValueKey(index),
                     controller: mainController,
                     index: index,
-                    child: GestureDetector(
-                        onLongPress: () =>
-                            {deleteMsg(msgList[index].seq ?? -1)},
-                        child: Stack(
-                          children: [
-                            Container(
-                              height: 30,
-                              child: Row(children: [
-                                AppText(
-                                  text: msgList[index].content.toString(),
-                                  color: Colors.black,
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                AppText(
-                                  text: msgList[index].ts.toString(),
-                                  color: Colors.grey,
-                                ),
-                              ]),
-                            )
-                          ],
-                        )),
+                    child: selectMsgWidget(msgList[index], index),
                   );
                 }),
           ),

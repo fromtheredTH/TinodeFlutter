@@ -97,6 +97,7 @@ dev_dependencies:
   wechat_camera_picker: ^4.2.1
   device_info_plus: ^9.1.1
   android_id: ^0.3.6
+  url_launcher: ^6.2.5
 
 
 

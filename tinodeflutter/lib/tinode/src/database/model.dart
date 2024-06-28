@@ -76,7 +76,7 @@ class DataMessage extends Equatable {
 
   bool? noForwarding = false;
 
-  int? hi;
+  int? hi =-1;
 
   // ToDo: workaround with a flag to force update new message list after reacting msg
   int mark = 0;

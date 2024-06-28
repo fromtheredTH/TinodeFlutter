@@ -157,7 +157,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
 
       // 사용자 초대
       await _groupTopic.invite(userId, 'JRWPAS');
-      Get.to(()=>MessageRoomScreen(tinode: tinode, clickTopic: _groupTopic.roomId));
+      Get.to(()=>MessageRoomScreen(tinode: tinode, clickTopic: _groupTopic.name ?? ""));
       print('User $userId invited to group chat');
     } catch (e) {
       print('Failed to invite user to group chat: $e');

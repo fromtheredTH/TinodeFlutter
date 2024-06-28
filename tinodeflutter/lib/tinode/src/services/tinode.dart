@@ -406,7 +406,7 @@ class TinodeService {
     return _send(packet);
   }
 
-  /// Delete the topic all together. Requires Owner permission
+  /// Delete the topic all together. Requires Owner permission  // chat room = topic
   Future deleteTopic(String topicName, bool hard) async {
     var packet = _packetGenerator.generate(packet_types.Del, topicName);
     var data = packet.data as DelPacketData;
