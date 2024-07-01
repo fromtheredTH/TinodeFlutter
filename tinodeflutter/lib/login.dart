@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:tinodeflutter/global/global.dart';
 import 'tinode/tinode.dart';
 import 'tinode/src/models/message.dart';
 import 'package:tinodeflutter/app_text.dart';
@@ -39,9 +40,9 @@ class _LoginState extends State<Login> {
   String deviceLocale = 'en-US';
 
   void loginProcesss() async {
-    var key = 'AQAAAAABAAC5Ym2pu9wKC_cbu2omxbD6';
+    var key = apiKey;
     // var host = 'sandbox.tinode.co';
-    var host = '54.180.163.159:6060';
+    var host = hostAddres;
     id = idController.value.text == "" ? "test3" : idController.value.text;
     pw = pwController.value.text == "" ? "qwer123!" : pwController.value.text;
     var loggerEnabled = true;
@@ -58,6 +59,7 @@ class _LoginState extends State<Login> {
     try {
       var result = await tinode.loginBasic(id, pw, null);
       print('User Id: ' + result.params['user'].toString());
+      token = result.params['token'];
       showToast("login 완료");
       Get.offAll(MessageRoomListScreen(
         tinode: tinode,

@@ -111,9 +111,18 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
       case eChatType.TEXT:
         return textTile(index);
       case eChatType.IMAGE:
-        return imageTile(context, dataMessage, getImageBase64Decoder(dataMessage.content['ent'][0]['data']['val']), index);
+        return imageTile(
+            context,
+            dataMessage,
+            getImageBase64Decoder(dataMessage.content['ent'][0]['data']['val']),
+            index);
       case eChatType.VIDEO:
-        return videoTile(context, dataMessage, getImageBase64Decoder(dataMessage.content['ent'][0]['data']['preview']), index);
+        return videoTile(
+            context,
+            dataMessage,
+            getImageBase64Decoder(
+                dataMessage.content['ent'][0]['data']['preview']),
+            index);
       default:
         return Container();
     }
@@ -138,9 +147,9 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
 
   late Uint8List imageDecode;
 
-  Image getImageBase64Decoder(String base64)  {
+  Image getImageBase64Decoder(String base64) {
     imageDecode = Base64Decoder().convert(base64);
-   return Image.memory(
+    return Image.memory(
       imageDecode,
       // width: 200,
       // height: 200,
@@ -150,26 +159,36 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     );
   }
 
-  Widget imageTile(BuildContext context, DataMessage dataMessage, Image img, int index) {
+  String videoUrl ="";
+  
+  String getVideoUrl(DataMessage dataMessage)
+  {
+    videoUrl = "http://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$token";
+    print("video url : $videoUrl");
+    return videoUrl;
+  }
+
+  Widget imageTile(
+      BuildContext context, DataMessage dataMessage, Image img, int index) {
     return Container(
       constraints: BoxConstraints(maxWidth: Get.width * 0.65),
       child: Stack(
         children: [
           GestureDetector(
-              onTap: () {
-                fullView(context, 0, img);
-              },
-              onLongPress: (){
-                deleteMsgForAllPerson(msgList[index].seq ?? -1);
-              },
-              child: img,
-              // info.file.isNotEmpty
-              //     ? Image.file(
-              //         info.file[0],
-              //         fit: BoxFit.cover,
-              //       )
-              //     : CachedNetworkImage(imageUrl: arr[0], fit: BoxFit.cover),
-              ),
+            onTap: () {
+              fullView(context, 0, img);
+            },
+            onLongPress: () {
+              deleteMsgForAllPerson(msgList[index].seq ?? -1);
+            },
+            child: img,
+            // info.file.isNotEmpty
+            //     ? Image.file(
+            //         info.file[0],
+            //         fit: BoxFit.cover,
+            //       )
+            //     : CachedNetworkImage(imageUrl: arr[0], fit: BoxFit.cover),
+          ),
           // if (info.fileProgress != null &&
           //     info.totalProgress != null &&
           //     info.file != null)
@@ -204,21 +223,27 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
       ),
     );
   }
+
   String formatMilliseconds(int milliseconds) {
-  // 밀리초를 초로 변환
-  int totalSeconds = (milliseconds / 1000).floor();
+    // 밀리초를 초로 변환
+    int totalSeconds = (milliseconds / 1000).floor();
 
-  // 분과 초를 계산
-  int minutes = totalSeconds ~/ 60;
-  int seconds = totalSeconds % 60;
+    // 분과 초를 계산
+    int minutes = totalSeconds ~/ 60;
+    int seconds = totalSeconds % 60;
 
-  // 초가 한 자리 수일 경우 앞에 0을 추가
-  String formattedSeconds = seconds < 10 ? '0$seconds' : '$seconds';
+    // 초가 한 자리 수일 경우 앞에 0을 추가
+    String formattedSeconds = seconds < 10 ? '0$seconds' : '$seconds';
 
-  return '$minutes:$formattedSeconds';
-}
+    return '$minutes:$formattedSeconds';
+  }
 
-    Widget videoTile(BuildContext context, DataMessage dataMessage, Image img, int index,) {
+  Widget videoTile(
+    BuildContext context,
+    DataMessage dataMessage,
+    Image img,
+    int index,
+  ) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -226,9 +251,9 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
             MaterialPageRoute(
                 builder: (context) => ImageViewer(
                       // images: (info.contents ?? '').split(","),
-                      images: ["test"],
+                      images: [getVideoUrl(dataMessage)], // video url
                       selected: 0,
-                      isVideo: true, 
+                      isVideo: true,
                       img: img,
                       // user: getUser(),
                     ))).then((value) {
@@ -237,7 +262,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
           // }
         });
       },
-      onLongPress: (){
+      onLongPress: () {
         deleteMsgForAllPerson(msgList[index].seq ?? -1);
       },
       child: Container(
@@ -259,19 +284,20 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
               // if (info.fileProgress == null &&
               //     info.totalProgress == null &&
               //     info.file.isEmpty)
-                Positioned.fill(
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Image.asset(ImageConstants.playVideo,
-                        width: 40, height: 40),
-                  ),
+              Positioned.fill(
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Image.asset(ImageConstants.playVideo,
+                      width: 40, height: 40),
                 ),
-                AppText(
-                  text: formatMilliseconds(dataMessage.content['ent'][0]['data']['duration']),
-                  textAlign: TextAlign.end,
-                  color: Colors.white,
-                  fontSize: 20,
-                )
+              ),
+              AppText(
+                text: formatMilliseconds(
+                    dataMessage.content['ent'][0]['data']['duration']),
+                textAlign: TextAlign.end,
+                color: Colors.white,
+                fontSize: 20,
+              )
               // if (info.fileProgress != null &&
               //     info.totalProgress != null &&
               //     info.file != null)
