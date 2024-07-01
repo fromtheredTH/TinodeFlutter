@@ -1,11 +1,21 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:photo_gallery/photo_gallery.dart';
 import 'package:tinodeflutter/global/global.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 import 'Constants/ColorConstants.dart';
 import 'Constants/ImageConstants.dart';
+import 'Constants/ImageUtils.dart';
+import 'Constants/utils.dart';
+import 'components/BtnBottomSheetWidget.dart';
+import 'components/GalleryBottomSheet.dart';
+import 'components/MyAssetPicker.dart';
+import 'components/btn_bottom_sheet_model.dart';
 import 'components/image_viewer.dart';
 import 'tinode/tinode.dart';
 import 'tinode/src/models/message.dart';
@@ -26,6 +36,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class MessageRoomScreen extends StatefulWidget {
   Tinode tinode;
@@ -159,11 +170,11 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     );
   }
 
-  String videoUrl ="";
-  
-  String getVideoUrl(DataMessage dataMessage)
-  {
-    videoUrl = "http://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$token";
+  String videoUrl = "";
+
+  String getVideoUrl(DataMessage dataMessage) {
+    videoUrl =
+        "http://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$token";
     print("video url : $videoUrl");
     return videoUrl;
   }
@@ -374,6 +385,237 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     // );
   }
 
+  Future<void> procAssetsWithGallery(List<Medium> assets) async {
+    Utils.showDialogWidget(context);
+    List<File> fileList = []; //image, audio
+    List<File> videoList = []; //video
+    List<File> thumbList = []; //video thumbnail
+    await Future.forEach<Medium>(assets, (file) async {
+      File? f = await file.getFile();
+      print("경로 ${f?.path}");
+      if (file.mediumType == MediumType.video) {
+        videoList.add(f!);
+        //thumbnail
+        final fileName = await VideoThumbnail.thumbnailFile(
+          video: f.path,
+          thumbnailPath: (await getTemporaryDirectory()).path,
+          imageFormat: ImageFormat.PNG,
+          quality: 100,
+        );
+        if (fileName != null) {
+          thumbList.add(File(fileName));
+        }
+      } else {
+        fileList.add(await ImageUtils.resizeImageFile(f!));
+      }
+    });
+    Get.back();
+    if (fileList.isNotEmpty) {
+      int randid = Random().nextInt(10000);
+
+      // apiP.uploadFile(
+      //     "Bearer ${await FirebaseAuth.instance.currentUser?.getIdToken()}",
+      //     fileList, (current, total) {
+      //   print("업로드 ${current} / ${total}");
+      //   ChatMsgDto emptyDto = ChatMsgDto(
+      //       id: -2,
+      //       room_id: roomDto.id,
+      //       sender_id: me!.id,
+      //       type: eChatType.IMAGE.index,
+      //       parent_id: -1,
+      //       chat_idx: randid);
+      //   emptyDto.file = fileList;
+      //   emptyDto.fileProgress = current;
+      //   emptyDto.totalProgress = total;
+      //   receiveMsg(roomDto, emptyDto);
+      // }).then((value) {
+      // List<ChatMsgDto> list =
+      //     msgList.where((e) => (e.id == -2 && e.chat_idx == randid)).toList();
+      // if (list.isNotEmpty) {
+      //   int index = msgList.indexOf(list.first);
+      //   msgList.removeAt(index);
+      // }
+
+      // List<FileDto> images =
+      //     value.result.where((element) => element.type == "image").toList();
+      // List<FileDto> audios =
+      //     value.result.where((element) => element.type == "sound").toList();
+      // onFileSend(images, eChatType.IMAGE.index);
+
+      // for (int i = 0; i < audios.length; i++) {
+      //   //개별적 메시지로 발송
+      //   List<FileDto> audio = [audios[i]];
+      //   onFileSend(audio, eChatType.AUDIO.index);
+      // }
+
+      // if (videoList.isNotEmpty && videoList.length == thumbList.length) {
+      //   uploadVideo(videoList, thumbList, 0);
+      // }
+      // }).catchError((Object obj) {
+      //   setState(() {
+      //     List<ChatMsgDto> list = msgList
+      //         .where((e) => (e.id == -2 && e.chat_idx == randid))
+      //         .toList();
+      //     if (list.isNotEmpty) {
+      //       int index = msgList.indexOf(list.first);
+      //       msgList.removeAt(index);
+      //     }
+      //   });
+      //   showToast("connection_failed".tr());
+      // }
+      // );
+    } else {
+      if (videoList.isNotEmpty && videoList.length == thumbList.length) {
+        uploadVideo(videoList, thumbList, 0);
+      }
+    }
+  }
+
+  Future<void> procAssets(List<AssetEntity>? assets) async {
+    if (assets != null) {
+      Utils.showDialogWidget(context);
+      List<File> fileList = []; //image, audio
+      List<File> videoList = []; //video
+      List<File> thumbList = []; //video thumbnail
+      await Future.forEach<AssetEntity>(assets, (file) async {
+        File? f = await file.originFile;
+
+        if (file.type == AssetType.video) {
+          videoList.add(f!);
+          //thumbnail
+          final fileName = await VideoThumbnail.thumbnailFile(
+            video: f.path,
+            thumbnailPath: (await getTemporaryDirectory()).path,
+            imageFormat: ImageFormat.PNG,
+            quality: 100,
+          );
+          if (fileName != null) {
+            thumbList.add(File(fileName));
+          }
+        } else {
+          fileList.add(await ImageUtils.resizeImageFile(f!));
+        }
+      });
+      Get.back();
+      if (fileList.isNotEmpty) {
+        int randid = Random().nextInt(10000);
+
+        // apiP.uploadFile(
+        //     "Bearer ${await FirebaseAuth.instance.currentUser?.getIdToken()}",
+        //     fileList, (current, total) {
+        //   ChatMsgDto emptyDto = ChatMsgDto(
+        //       id: -2,
+        //       room_id: roomDto.id,
+        //       sender_id: me!.id,
+        //       type: eChatType.IMAGE.index,
+        //       parent_id: -1,
+        //       chat_idx: randid);
+        //   emptyDto.file = fileList;
+        //   emptyDto.fileProgress = current;
+        //   emptyDto.totalProgress = total;
+        //   receiveMsg(roomDto, emptyDto);
+        // }).then((value) {
+        //   List<ChatMsgDto> list = msgList
+        //       .where((e) => (e.id == -2 && e.chat_idx == randid))
+        //       .toList();
+        //   if (list.isNotEmpty) {
+        //     int index = msgList.indexOf(list.first);
+        //     msgList.removeAt(index);
+        //   }
+
+        //   List<FileDto> images =
+        //       value.result.where((element) => element.type == "image").toList();
+        //   List<FileDto> audios =
+        //       value.result.where((element) => element.type == "sound").toList();
+        //   onFileSend(images, eChatType.IMAGE.index);
+
+        //   for (int i = 0; i < audios.length; i++) {
+        //     //개별적 메시지로 발송
+        //     List<FileDto> audio = [audios[i]];
+        //     onFileSend(audio, eChatType.AUDIO.index);
+        //   }
+
+        //   if (videoList.isNotEmpty && videoList.length == thumbList.length) {
+        //     uploadVideo(videoList, thumbList, 0);
+        //   }
+        // }).catchError((Object obj) {
+        //   setState(() {
+        //     List<ChatMsgDto> list = msgList
+        //         .where((e) => (e.id == -2 && e.chat_idx == randid))
+        //         .toList();
+        //     if (list.isNotEmpty) {
+        //       int index = msgList.indexOf(list.first);
+        //       msgList.removeAt(index);
+        //     }
+        //   });
+        //   showToast("connection_failed".tr());
+        // });
+      } else {
+        if (videoList.isNotEmpty && videoList.length == thumbList.length) {
+          uploadVideo(videoList, thumbList, 0);
+        }
+      }
+    }
+  }
+
+  Future<void> uploadVideo(
+      List<File> videoList, List<File> thumbList, int index) async {
+    if (index == videoList.length) return;
+
+    List<File> fileList = [];
+    fileList.add(videoList[index]);
+    fileList.add(thumbList[index]);
+
+    int randid = Random().nextInt(10000);
+
+    // apiP.uploadFile(
+    //     "Bearer ${await FirebaseAuth.instance.currentUser?.getIdToken()}",
+    //     fileList, (current, total) {
+    //   ChatMsgDto emptyDto = ChatMsgDto(
+    //       id: -2,
+    //       room_id: roomDto.id,
+    //       sender_id: me!.id,
+    //       type: eChatType.VIDEO.index,
+    //       parent_id: -1,
+    //       chat_idx: randid);
+    //   emptyDto.file = thumbList;
+    //   emptyDto.fileProgress = current;
+    //   emptyDto.totalProgress = total;
+    //   receiveMsg(roomDto, emptyDto);
+    // }).then((value) {
+    //   List<ChatMsgDto> list =
+    //       msgList.where((e) => (e.id == -2 && e.chat_idx == randid)).toList();
+    //   if (list.isNotEmpty) {
+    //     int index = msgList.indexOf(list.first);
+    //     msgList.removeAt(index);
+    //   }
+
+    //   List<FileDto> thumbs =
+    //       value.result.where((element) => element.type == "image").toList();
+    //   List<FileDto> videos =
+    //       value.result.where((element) => element.type == "video").toList();
+
+    //   List<FileDto> files = [];
+    //   if (thumbs.isNotEmpty && videos.isNotEmpty) {
+    //     files.add(videos[0]);
+    //     files.add(thumbs[0]);
+    //     onFileSend(files, eChatType.VIDEO.index);
+    //   }
+
+    //   uploadVideo(videoList, thumbList, index + 1);
+    // }).catchError((Object obj) {
+    //   setState(() {
+    //     List<ChatMsgDto> list =
+    //         msgList.where((e) => (e.id == -2 && e.chat_idx == randid)).toList();
+    //     if (list.isNotEmpty) {
+    //       int index = msgList.indexOf(list.first);
+    //       msgList.removeAt(index);
+    //     }
+    //   });
+    //   showToast("connection_failed".tr());
+    // });
+  }
+
   Future<void> _pickFile() async {
     final PermissionStatus status = await Permission.storage.request();
     if (status.isGranted) {
@@ -462,6 +704,94 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     }
   }
 
+  Future<bool> _promptPermissionSetting() async {
+    if (Platform.isIOS) {
+      if (await Permission.photos.request().isGranted ||
+          await Permission.storage.request().isGranted) {
+        return true;
+      }
+    }
+    if (Platform.isAndroid) {
+      if (await Permission.storage.request().isGranted ||
+          await Permission.photos.request().isGranted &&
+              await Permission.videos.request().isGranted) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool closeRoom = false;
+
+  Widget fileButtonWidget() {
+    return InkWell(
+      onTap: () async {
+        if (closeRoom) return;
+        if (await _promptPermissionSetting()) {
+          List<BtnBottomSheetModel> items = [];
+          items
+              .add(BtnBottomSheetModel(ImageConstants.cameraIcon, "camera", 0));
+          items
+              .add(BtnBottomSheetModel(ImageConstants.albumIcon, "gallery", 1));
+
+          Get.bottomSheet(
+              enterBottomSheetDuration: Duration(milliseconds: 100),
+              exitBottomSheetDuration: Duration(milliseconds: 100),
+              BtnBottomSheetWidget(
+                btnItems: items,
+                onTapItem: (sheetIdx) async {
+                  if (sheetIdx == 0) {
+                    AssetEntity? assets =
+                        await MyAssetPicker.pickCamera(context, true);
+                    if (assets != null) {
+                      procAssets([assets]);
+                    }
+                  } else {
+                    if (await _promptPermissionSetting()) {
+                      showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          isDismissible: true,
+                          backgroundColor: Colors.transparent,
+                          constraints: BoxConstraints(
+                            minHeight: 0.4,
+                            maxHeight: Get.height * 0.95,
+                          ),
+                          builder: (BuildContext context) {
+                            return DraggableScrollableSheet(
+                                initialChildSize: 0.5,
+                                minChildSize: 0.4,
+                                maxChildSize: 0.9,
+                                expand: false,
+                                builder: (_, controller) => GalleryBottomSheet(
+                                      controller: controller,
+                                      onTapSend: (results) {
+                                        procAssetsWithGallery(results);
+                                      },
+                                    ));
+                          });
+                    }
+                  }
+                },
+              ));
+        }
+      },
+      child: Container(
+        width: 35,
+        height: 35,
+        child: Center(
+          child: Image.asset(
+            closeRoom
+                ? "assets/image/ic_add_disable.png"
+                : ImageConstants.chatPlus,
+            width: 20,
+            height: 20,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -476,7 +806,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
           SizedBox(
               // SizedBox 대신 Container를 사용 가능
               width: double.infinity,
-              height: 100,
+              height: 250,
               child: Column(
                 children: [
                   Container(
@@ -556,7 +886,27 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
                         ),
                       ),
                     ],
-                  )
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [ 
+                Stack(
+                    children: [
+                      Container(
+                        color: Colors.black,
+                        width: 30,
+                        height: 30,
+                      ),
+                      fileButtonWidget(),
+                    ],
+                  ),
+                  AppText(text: '사진/동영상 선택', fontSize: 20,),
+                ],
+               ),
+                  
                 ],
               )),
           Expanded(

@@ -50,7 +50,7 @@ class AppText extends StatelessWidget {
        // fontSize: fontSize == null ? Get.width * 0.03 : fontSize! < 1 ? Get.height * fontSize! : fontSize,
         fontSize: fontSize == null ? 12.0 : 12,
         fontWeight: fontWeight ?? FontWeight.w400,
-        color: color ?? Colors.white,
+        color: color ?? Colors.black,
       ),
     );
   }

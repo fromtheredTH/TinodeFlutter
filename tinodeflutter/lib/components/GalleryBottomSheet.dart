@@ -213,7 +213,7 @@ class _GalleryBottomSheet extends State<GalleryBottomSheet> {
         maxHeight: Get.height*0.9
       ),
       decoration: BoxDecoration(
-          color: Colors.amber,
+          color: ColorConstants.colorBg1,
           borderRadius: BorderRadius.only(topRight: Radius.circular(24), topLeft: Radius.circular(24))
       ),
       child: Stack(
