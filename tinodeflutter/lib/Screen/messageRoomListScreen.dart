@@ -2,24 +2,27 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'tinode/tinode.dart';
-import 'tinode/src/models/message.dart';
+import 'package:tinodeflutter/Screen/FriendListScreen.dart';
+import 'package:tinodeflutter/Screen/ProfileScreen.dart';
+
 import 'package:tinodeflutter/SearchUser.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:http/http.dart';
 import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:get/get_core/src/get_main.dart';
-import 'package:tinodeflutter/messageRoomAddScreen.dart';
+import 'package:tinodeflutter/model/userModel.dart';
 
-import 'package:tinodeflutter/messageRoomListScreen.dart';
-import 'package:tinodeflutter/messageRoomScreen.dart';
 import '../components/item/PositionRetainedScrollPhysics.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_it/get_it.dart';
+
+import '../tinode/tinode.dart';
+import 'messageRoomAddScreen.dart';
+import 'messageRoomScreen.dart';
 
 class MessageRoomListScreen extends StatefulWidget {
   Tinode tinode;
@@ -37,6 +40,8 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
   TextEditingController inputController = TextEditingController();
   PositionRetainedScrollPhysics physics = PositionRetainedScrollPhysics();
   List<TopicSubscription> roomList = [];
+
+  User user = User(id: '11', name: 'dd',nickname: 'dd', email: 'dd',picture: '');
 
   @override
   void initState() {
@@ -141,7 +146,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
               InkWell(
                 onTap: () => {Get.to(SerachUserScreen(tinode: tinode))},
                 child: Container(
-                  width: 100,
+                  width: 80,
                   height: 50,
                   margin:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
@@ -165,7 +170,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
               InkWell(
                 onTap: () => {Get.to(MessageRoomAddScreen(tinode: tinode))},
                 child: Container(
-                  width: 100,
+                  width: 80,
                   height: 50,
                   margin:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
@@ -183,8 +188,50 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
                   ),
                 ),
               ),
+              InkWell(
+                onTap: () => {Get.to(ProfileScreen(tinode: tinode, user: user))},
+                child: Container(
+                  width: 70,
+                  height: 50,
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.black,
+                        width: 2.0,
+                      ),
+                      borderRadius: const BorderRadius.all(Radius.circular(4))),
+                  child: AppText(
+                    text: "프로필",
+                    color: Colors.black,
+                  ),
+                ),
+              ),
             ],
           ),
+           InkWell(
+                onTap: () => {Get.to(FriendListScreen(tinode: tinode,))},
+                child: Container(
+                  width: 70,
+                  height: 50,
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.black,
+                        width: 2.0,
+                      ),
+                      borderRadius: const BorderRadius.all(Radius.circular(4))),
+                  child: AppText(
+                    text: "친구",
+                    color: Colors.black,
+                  ),
+                ),
+              ),
           SizedBox(
             height: 10,
           ),

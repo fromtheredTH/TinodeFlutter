@@ -14,6 +14,7 @@ bool gPushClick = false;
 const apiKey = "AQAAAAABAAC5Ym2pu9wKC_cbu2omxbD6";
 const hostAddres = "54.180.163.159:6060";
 String token ="";
+String url_encoded_token ="";
 
 enum eChatType {
   NONE,

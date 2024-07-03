@@ -38,11 +38,12 @@ class ImageViewer extends StatefulWidget {
   final List<String> images;
   final int selected;
   final bool isVideo;
-  final Image img;
+ // final Image img;
  // final User? user;
 
   ImageViewer(
-      {super.key, required this.images, this.selected = 0, required this.isVideo, required this.img,
+      {super.key, required this.images, this.selected = 0, required this.isVideo, 
+      //required this.img,
       //required this.user
       });
 

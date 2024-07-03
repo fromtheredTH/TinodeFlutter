@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'Screen/messageRoomScreen.dart';
 import 'tinode/tinode.dart';
 import 'tinode/src/models/message.dart';
 import 'package:tinodeflutter/app_text.dart';
@@ -10,8 +11,6 @@ import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:get/get_core/src/get_main.dart';
 
-import 'package:tinodeflutter/messageRoomListScreen.dart';
-import 'package:tinodeflutter/messageRoomScreen.dart';
 import '../components/item/PositionRetainedScrollPhysics.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:get/get.dart';
@@ -72,6 +71,8 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
             id: sub['user'] ?? 'Unknown ID',
             name: sub['public']?['fn'] ?? 'Unknown',
             email: sub['public']?['email'] ?? 'No Email',
+            picture: "",
+            nickname: '',
           );
         }).toList();
       });
@@ -100,6 +101,8 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
                 id: sub['user'] ?? 'Unknown ID',
                 name: sub['public']?['fn'] ?? 'Unknown',
                 email: sub['public']?['email'] ?? 'No Email',
+                picture: "",
+                nickname: '',
               );
             }).toList();
           });

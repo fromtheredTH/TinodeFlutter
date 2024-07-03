@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:tinodeflutter/global/global.dart';
+import 'Screen/messageRoomListScreen.dart';
 import 'tinode/tinode.dart';
 import 'tinode/src/models/message.dart';
 import 'package:tinodeflutter/app_text.dart';
@@ -11,7 +12,6 @@ import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:get/get_core/src/get_main.dart';
 
-import 'package:tinodeflutter/messageRoomListScreen.dart';
 import '../components/item/PositionRetainedScrollPhysics.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:get/get.dart';
@@ -60,6 +60,9 @@ class _LoginState extends State<Login> {
       var result = await tinode.loginBasic(id, pw, null);
       print('User Id: ' + result.params['user'].toString());
       token = result.params['token'];
+      url_encoded_token = Uri.encodeComponent(result.params['token']);
+      print("token : $token");
+      print("url token : $url_encoded_token");
       showToast("login 완료");
       Get.offAll(MessageRoomListScreen(
         tinode: tinode,

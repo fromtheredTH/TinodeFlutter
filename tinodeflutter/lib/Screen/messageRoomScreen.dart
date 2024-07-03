@@ -6,26 +6,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_gallery/photo_gallery.dart';
+import 'package:tinodeflutter/Constants/ImageConstants.dart';
+import 'package:tinodeflutter/Constants/ImageUtils.dart';
+import 'package:tinodeflutter/Constants/utils.dart';
+import 'package:tinodeflutter/components/BtnBottomSheetWidget.dart';
+import 'package:tinodeflutter/components/GalleryBottomSheet.dart';
+import 'package:tinodeflutter/components/MyAssetPicker.dart';
+import 'package:tinodeflutter/components/btn_bottom_sheet_model.dart';
+import 'package:tinodeflutter/components/image_viewer.dart';
+import 'package:tinodeflutter/global/DioClient.dart';
 import 'package:tinodeflutter/global/global.dart';
+import 'package:tinodeflutter/tinode/src/models/del-range.dart';
+import 'package:tinodeflutter/tinode/src/models/message.dart';
+import 'package:tinodeflutter/tinode/tinode.dart';
+import 'package:tinodeflutter/utils/write_log.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
-import 'Constants/ColorConstants.dart';
-import 'Constants/ImageConstants.dart';
-import 'Constants/ImageUtils.dart';
-import 'Constants/utils.dart';
-import 'components/BtnBottomSheetWidget.dart';
-import 'components/GalleryBottomSheet.dart';
-import 'components/MyAssetPicker.dart';
-import 'components/btn_bottom_sheet_model.dart';
-import 'components/image_viewer.dart';
-import 'tinode/tinode.dart';
-import 'tinode/src/models/message.dart';
+import '../tinode/src/database/model.dart';
+
 import 'package:tinodeflutter/app_text.dart';
 import 'package:http/http.dart';
 import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:get/get_core/src/get_main.dart';
 
-import 'package:tinodeflutter/messageRoomListScreen.dart';
 import '../components/item/PositionRetainedScrollPhysics.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:get/get.dart';
@@ -85,7 +88,10 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     roomTopic.onData.listen((data) {
       try {
         if (data != null) {
-          //print('DataMessage: ' + data.content);
+          if(data.content is String)
+            print('DataMessage: ' + data.content);
+          else
+            print("첨부파일 입니다.");
           msgList.insert(0, data);
           setState(() {
             if (data.ts != null) msgList.sort((a, b) => b.ts!.compareTo(a.ts!));
@@ -122,11 +128,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
       case eChatType.TEXT:
         return textTile(index);
       case eChatType.IMAGE:
-        return imageTile(
-            context,
-            dataMessage,
-            getImageBase64Decoder(dataMessage.content['ent'][0]['data']['val']),
-            index);
+        return imageTile(context, dataMessage, index);
       case eChatType.VIDEO:
         return videoTile(
             context,
@@ -139,15 +141,15 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     }
   }
 
-  void fullView(BuildContext context, int index, Image img) {
+  void fullView(BuildContext context, int index, String imageUrl) {
     Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) => ImageViewer(
-                  images: ["test"],
+                  images: [imageUrl],
                   selected: index,
                   isVideo: false,
-                  img: img,
+
                   //  user: getUser(),
                 ))).then((value) {
       // if (value == "delete") {
@@ -170,29 +172,73 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     );
   }
 
-  String videoUrl = "";
-
-  String getVideoUrl(DataMessage dataMessage) {
-    videoUrl =
-        "http://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$token";
-    print("video url : $videoUrl");
-    return videoUrl;
+  Future<String> encodeFileToBase64(File file) async {
+    List<int> bytes = await file.readAsBytes();
+    String base64Image = base64Encode(bytes);
+    return base64Image;
   }
 
-  Widget imageTile(
-      BuildContext context, DataMessage dataMessage, Image img, int index) {
+  String fileUrl = "";
+
+  String getFileUrl(DataMessage dataMessage) {
+    fileUrl =
+        "http://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+    print("file url : $fileUrl");
+    return fileUrl;
+  }
+
+  Widget getUrltoImage(String imageUrl) {
+    return Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
+      loadingBuilder: (BuildContext context, Widget child,
+          ImageChunkEvent? loadingProgress) {
+        if (loadingProgress == null) {
+          return child;
+        } else {
+          return Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      (loadingProgress.expectedTotalBytes ?? 1)
+                  : null,
+            ),
+          );
+        }
+      },
+      errorBuilder:
+          (BuildContext context, Object error, StackTrace? stackTrace) {
+        return Center(
+          child: Text('Failed to load image'),
+        );
+      },
+    );
+  }
+
+  Widget imageTile(BuildContext context, DataMessage dataMessage, int index) {
+    bool isBase64 = false;
+    if (dataMessage.content['ent'][0]['data']['ref'] != null) {
+      isBase64 = false;
+    } else {
+      isBase64 = true;
+    }
     return Container(
       constraints: BoxConstraints(maxWidth: Get.width * 0.65),
       child: Stack(
         children: [
           GestureDetector(
             onTap: () {
-              fullView(context, 0, img);
+              fullView(
+                  context, 0, dataMessage.content['ent'][0]['data']['ref']);
             },
             onLongPress: () {
               deleteMsgForAllPerson(msgList[index].seq ?? -1);
             },
-            child: img,
+            child: isBase64
+                ? getImageBase64Decoder(
+                    dataMessage.content['ent'][0]['data']['val'])
+                : getUrltoImage(getFileUrl(dataMessage)),
+
             // info.file.isNotEmpty
             //     ? Image.file(
             //         info.file[0],
@@ -262,10 +308,9 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
             MaterialPageRoute(
                 builder: (context) => ImageViewer(
                       // images: (info.contents ?? '').split(","),
-                      images: [getVideoUrl(dataMessage)], // video url
+                      images: [getFileUrl(dataMessage)], // video url
                       selected: 0,
                       isVideo: true,
-                      img: img,
                       // user: getUser(),
                     ))).then((value) {
           // if (value == "delete") {
@@ -412,6 +457,22 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     Get.back();
     if (fileList.isNotEmpty) {
       int randid = Random().nextInt(10000);
+      List<String> imageList = [];
+      // base64 encode
+      for (File item in fileList) {
+        String base64Image = await encodeFileToBase64(item);
+        imageList.add(base64Image);
+      }
+      const int chunkSize = 1000;
+      print("imageList[0].length ${imageList[0].length}");
+      // for (int i = 0; i < imageList[0].length; i += chunkSize) {
+      //   int end = (i + chunkSize < imageList[0].length) ? i + chunkSize : imageList[0].length;
+      //   print(imageList[0].substring(i, end));
+      // }
+      WriteLog.write(imageList[0], fileName: "base64.txt");
+      await sendImage(imageList, fileList);
+
+      //publish to server
 
       // apiP.uploadFile(
       //     "Bearer ${await FirebaseAuth.instance.currentUser?.getIdToken()}",
@@ -471,7 +532,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     }
   }
 
-  Future<void> procAssets(List<AssetEntity>? assets) async {
+  Future<void> procAssetsWithCamera(List<AssetEntity>? assets) async {
     if (assets != null) {
       Utils.showDialogWidget(context);
       List<File> fileList = []; //image, audio
@@ -616,6 +677,75 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     // });
   }
 
+  Future<void> sendImage(List<String> imageList, List<File> fileList) async {
+    try {
+      for (int i = 0; i < imageList.length; i++) {
+        // Message 객체 생성
+
+        // 메시지를 발행하여 서버에 전송
+        var result = await DioClient.postUploadFile(fileList[i].path);
+
+        if (result.data['ctrl']['code'] == 200)
+          print("${result.data['ctrl']['params']['url'].toString()}");
+
+        String urlPath = result.data['ctrl']['params']['url'];
+
+        Message message = Message(
+          roomTopic.name,
+          {
+            "txt": " ",
+            "ent": [
+              {
+                "tp": "IM",
+                "data": {"mime": "image/png", "ref": urlPath}
+              }
+            ]
+          },
+          false, // echo 설정
+          head: {"mime": "text/x-drafty"},
+        );
+
+        var pub_result = await roomTopic.publishMessage(message);
+
+        if(pub_result?.text =='accepted') showToast('complete');
+        
+
+        print('이미지가 성공적으로 서버에 전송되었습니다.');
+
+        // 발송한 메시지 만들어주기
+        // int seq = msgList.isEmpty ? (msgList[0].seq ?? 0 + 1) : 0;
+        // DataMessage datamessage = DataMessage(
+        //   topic: roomTopic.name,
+        //   content: {
+        //     "txt": " ",
+        //     "ent": [
+        //       {
+        //         "tp": "IM",
+        //         "data": {
+        //           "mime": "image/png",
+        //           "ref": result.data['ctrl']['params']['url'].toString()
+        //         }
+        //       }
+        //     ]
+        //   },
+        //   ts: DateTime.now(),
+        //   seq: seq,
+        // );
+        // setState(() {
+        // //  msgList.insert(0, datamessage);
+        // });
+      }
+    } catch (err) {
+      print("image send err: $err");
+    }
+
+    // PacketGenerator 객체를 Message 객체에 설정
+    // message._packetGenerator = packetGenerator;
+
+    // Tinode 서버에 연결
+    //await tinode.connect();
+  }
+
   Future<void> _pickFile() async {
     final PermissionStatus status = await Permission.storage.request();
     if (status.isGranted) {
@@ -699,8 +829,12 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     if (roomTopic.isSubscribed) {
       var msg = roomTopic.createMessage(input, true);
       print("msg : $msg");
-      var result = await roomTopic.publishMessage(msg);
-      if (result?.text == "accepted") showToast("chat add");
+      try {
+        var result = await roomTopic.publishMessage(msg);
+        if (result?.text == "accepted") showToast("chat add");
+      } catch (err) {
+        print("err : $err");
+      }
     }
   }
 
@@ -744,7 +878,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
                     AssetEntity? assets =
                         await MyAssetPicker.pickCamera(context, true);
                     if (assets != null) {
-                      procAssets([assets]);
+                      procAssetsWithCamera([assets]);
                     }
                   } else {
                     if (await _promptPermissionSetting()) {
@@ -890,23 +1024,25 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
                   SizedBox(
                     height: 5,
                   ),
-               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [ 
-                Stack(
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                        color: Colors.black,
-                        width: 30,
-                        height: 30,
+                      Stack(
+                        children: [
+                          Container(
+                            color: Colors.black,
+                            width: 30,
+                            height: 30,
+                          ),
+                          fileButtonWidget(),
+                        ],
                       ),
-                      fileButtonWidget(),
+                      AppText(
+                        text: '사진/동영상 선택',
+                        fontSize: 20,
+                      ),
                     ],
                   ),
-                  AppText(text: '사진/동영상 선택', fontSize: 20,),
-                ],
-               ),
-                  
                 ],
               )),
           Expanded(

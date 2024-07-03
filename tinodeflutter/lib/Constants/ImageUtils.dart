@@ -402,9 +402,12 @@ class ImageUtils {
     print("이미지 파일 사이즈 ${decodedImage.width} : ${decodedImage.height}");
     if(decodedImage.height > 1920){
       final resizeBytes = await resizeImage(bytes, height: 1920);
+      // print("${endocdeImageresizeBytes}");
       if (resizeBytes != null) {
         File imageFile = await ImageUtils
             .imageToFile(resizeBytes, Random().nextInt(10000));
+            print("ima");
+            
         return imageFile;
       }
     }
