@@ -6,6 +6,7 @@ class User {
   late String picture;
   late bool isFreind=false;
 
+
   User({required this.id, required this.nickname, required this.name, required this.email, required this.picture});
 
 

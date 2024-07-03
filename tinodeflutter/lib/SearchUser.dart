@@ -94,6 +94,7 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
       // 메타데이터 응답 처리
       if (ctrl != null && ctrl.params != null) {
         var results = ctrl.params['sub'];
+
         if (results != null) {
           setState(() {
             _searchResults = results.map((dynamic sub) {
@@ -108,6 +109,32 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
           });
         }
       }
+      // GetQuery 객체를 생성하여 검색 결과 요청
+      GetQuery getQuery = GetQuery(
+        topic : "fnd",
+        what: 'sub',
+        //sub: GetOptsType(user: query), // 적절한 GetOptsType 설정
+      );
+
+      // fnd 토픽에 메타데이터 요청 보내기
+      var meta = await _fndTopic.getMeta(getQuery);
+
+      // 메타데이터 응답 처리
+      if (meta != null && meta.sub != null) {
+        setState(() {
+          _searchResults = meta.sub!.map((sub) {
+            return User(
+              id: sub.user ?? 'Unknown ID',
+              name: sub.public?['fn'] ?? 'Unknown',
+              email: sub.public?['email'] ?? 'No Email',
+              picture: "",
+              nickname: '',
+            );
+          }).toList();
+        });
+      }
+
+      //await _fndTopic.getMeta(params)
     } catch (err) {
       print("err search : $err");
     }

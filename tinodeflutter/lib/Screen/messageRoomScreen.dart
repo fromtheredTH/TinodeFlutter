@@ -92,6 +92,8 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
             print('DataMessage: ' + data.content);
           else
             print("첨부파일 입니다.");
+          
+          if(msgList.length!=0 &&  msgList[0].seq == data.seq) return;
           msgList.insert(0, data);
           setState(() {
             if (data.ts != null) msgList.sort((a, b) => b.ts!.compareTo(a.ts!));
@@ -102,9 +104,6 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
       }
     });
   }
-
-  void videoRendrProcess() {}
-  void audioRenderProcess() {}
 
   eChatType checkMsgType(DataMessage dataMessage) {
     if (dataMessage.content is Map) {
@@ -677,6 +676,9 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     // });
   }
 
+  // Future<void> sendVideo()
+
+
   Future<void> sendImage(List<String> imageList, List<File> fileList) async {
     try {
       for (int i = 0; i < imageList.length; i++) {
@@ -709,9 +711,6 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
 
         if(pub_result?.text =='accepted') showToast('complete');
         
-
-        print('이미지가 성공적으로 서버에 전송되었습니다.');
-
         // 발송한 메시지 만들어주기
         // int seq = msgList.isEmpty ? (msgList[0].seq ?? 0 + 1) : 0;
         // DataMessage datamessage = DataMessage(
@@ -775,15 +774,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     }
   }
 
-  Future<void> onTextSend() async {
-    // hideKeyboard();
-    if (inputController.text.replaceAll(" ", "").isEmpty) {
-      return;
-    }
-    String content = inputController.text;
-    // addMsg(content, 0, replyIdx != -1 ? msgList[replyIdx].id : 0);
-    addMsg(content);
-  }
+ 
 
   void deleteMsgForAllPerson(int msgId) {
     if (msgId == -1) {
@@ -825,7 +816,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
   }
 
   Future<void> addMsg(String input) async {
-    //await roomTopic.subscribe(MetaGetBuilder(roomTopic).withData(null,null,null).build(),null);
+   
     if (roomTopic.isSubscribed) {
       var msg = roomTopic.createMessage(input, true);
       print("msg : $msg");
@@ -835,6 +826,12 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
       } catch (err) {
         print("err : $err");
       }
+    }
+    else{
+      getMsgList();
+      var s = await roomTopic.subscribe(MetaGetBuilder(roomTopic).withData(null,null,null).build(),null);
+
+      addMsg(input);
     }
   }
 

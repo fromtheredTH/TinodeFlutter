@@ -1,3 +1,4 @@
+
 import '../../tinode/src/models/topic-names.dart' as topic_names;
 import '../../tinode/src/models/topic-subscription.dart';
 import '../../tinode/src/models/server-messages.dart';
@@ -46,6 +47,8 @@ class TopicFnd extends Topic {
     }
     return ctrl;
   }
+
+
 
   List<TopicSubscription> get contacts {
     return _contacts.values.toList();
