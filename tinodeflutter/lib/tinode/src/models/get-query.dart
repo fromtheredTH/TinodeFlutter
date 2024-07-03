@@ -1,7 +1,7 @@
 class GetOptsType {
   DateTime? ims;
   int? limit;
-  String? topic;
+  String? topic; //추가됨
   String? user;
 
   GetOptsType({
