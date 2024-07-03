@@ -253,11 +253,8 @@ class Topic {
     message.setStatus(message_status.SENDING);
 
     try {
-      var response = await _tinodeService.publishMessage(message);
-      print("111");
-
-      //Map<String, dynamic> response2 = response;
-      var ctrl = response;
+      var response = await _tinodeService.publishMessage(message); //ctrl message return
+      var ctrl = response; // change point
 
       message.ts = ctrl.ts;
       var seq = ctrl.params['seq'];
