@@ -253,9 +253,7 @@ class Topic {
     message.setStatus(message_status.SENDING);
 
     try {
-      var response =
-          await _tinodeService.publishMessage(message); //ctrl message return
-      print("1111");
+      var response = await _tinodeService.publishMessage(message); //ctrl message return
       var ctrl = response; // change point
 
       message.ts = ctrl.ts;
@@ -264,7 +262,6 @@ class Topic {
         message.setStatus(message_status.SENT);
       }
       routeData(message.asDataMessage(_authService.userId ?? '', seq));
-      print("ddd");
       return ctrl;
     } catch (e) {
       _loggerService.warn('Message rejected by the server');
@@ -726,14 +723,11 @@ class Topic {
   /// Process data message
   void routeData(DataMessage data) {
     if (data.content != null) {
-      if (touched == null) {
+      if (touched!.isBefore(data.ts!)) {
         touched = data.ts;
-      } else {
-        if (touched!.isBefore(data.ts!)) {
-          touched = data.ts;
-        }
       }
     }
+
     if (data.seq! > _maxSeq) {
       _maxSeq = data.seq!;
     }
@@ -1109,13 +1103,7 @@ class Topic {
     // Check for missing messages at the end.
     // All messages could be missing or it could be a new topic with no messages.
     var last = _messages.length > 0 ? _messages.getLast() : null;
-    var maxSeq;
-    if(seq!=null)
-      maxSeq = max(seq!, _maxSeq);
-    else {
-      seq = 1;
-      maxSeq = max(seq!, _maxSeq);
-    }
+    var maxSeq = max(seq!, _maxSeq);
     if ((maxSeq > 0 && last == null) ||
         (last != null &&
             (((last.hi != null && last.hi! > 0) ? last.hi : last.seq)! <
