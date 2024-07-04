@@ -89,6 +89,11 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
     
     await me.subscribe(MetaGetBuilder(me).withLaterSub(null).build(), null);
 
+    getMyInfo();
+  }
+
+  Future<void> getMyInfo() async
+  {
     //내 data 받아오기
     GetQuery getQuery = GetQuery(
       what: 'sub desc tags cred',
@@ -273,7 +278,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
                                   height: 40,
                                   child: Row(children: [
                                     AppText(
-                                      text: roomList[index].topic.toString(),
+                                      text: roomList[index].public !=null ? roomList[index].public['fn'] : "혼자인 방",
                                       fontSize: 30,
                                       color: Colors.black,
                                     ),

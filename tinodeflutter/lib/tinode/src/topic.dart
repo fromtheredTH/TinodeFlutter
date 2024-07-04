@@ -848,7 +848,8 @@ class Topic {
                 user: userId, updated: DateTime.now(), acs: user.acs)
           ]);
         }
-
+        case 'msg':
+        print("msg pres");
         break;
       default:
         _loggerService.log('Ignored presence update ' + (pres.what ?? ''));
