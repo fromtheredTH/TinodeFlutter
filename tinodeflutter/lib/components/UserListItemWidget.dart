@@ -24,8 +24,8 @@ import '../../Constants/utils.dart';
 
 
 class UserListItemWidget extends StatefulWidget {
-  UserListItemWidget({Key? key, required this.user, this.isGoProfile = true, this.isShowAction = true, this.isMini=false, required this.deleteUser, this.followUser, this.unFollowUser}) : super(key: key);
-  User user;
+  UserListItemWidget({Key? key, required this.userTopicSub, this.isGoProfile = true, this.isShowAction = true, this.isMini=false, required this.deleteUser, this.followUser, this.unFollowUser}) : super(key: key);
+  TopicSubscription userTopicSub;
   bool isShowAction;
   bool isMini;
   bool isGoProfile;
@@ -39,12 +39,12 @@ class UserListItemWidget extends StatefulWidget {
 }
 
 class _UserListItemWidget extends State<UserListItemWidget> {
-  late User user;
+  late TopicSubscription userTopicSub;
   late Tinode tinode;
 
   @override
   void initState() {
-    user = widget.user;
+    userTopicSub = widget.userTopicSub;
     super.initState();
   }
 
@@ -61,8 +61,8 @@ class _UserListItemWidget extends State<UserListItemWidget> {
               child: GestureDetector(
                 onTap: (){
                   if(widget.isGoProfile){
-                    if(user.id != 0) {
-                      Get.to(ProfileScreen(user: user, tinode: tinode,));
+                    if(userTopicSub.user != 0) {
+                      Get.to(ProfileScreen(userTopicSub: userTopicSub, tinode: tinode,));
                     }
                   }
                 },
@@ -76,8 +76,8 @@ class _UserListItemWidget extends State<UserListItemWidget> {
                       GestureDetector(
                         onTap: (){
                           if(widget.isGoProfile){
-                            if(user.id != 0) {
-                              Get.to(ProfileScreen(user: user, tinode: tinode,));
+                            if(userTopicSub.user != 0) {
+                              Get.to(ProfileScreen(userTopicSub: userTopicSub, tinode: tinode,));
                             }
                           }
                         },
@@ -89,7 +89,7 @@ class _UserListItemWidget extends State<UserListItemWidget> {
                                 shape: BoxShape.circle
                             ),
                             child: ImageUtils.ProfileImage(
-                                user.picture,
+                                userTopicSub.public.picture,
                                 widget.isMini ? 24 : 45,
                                 widget.isMini ? 24 : 45
                             ),
@@ -110,12 +110,12 @@ class _UserListItemWidget extends State<UserListItemWidget> {
                                     child: GestureDetector(
                                       onTap: (){
                                         if(widget.isGoProfile){
-                                          if(user.id != 0) {
-                                            Get.to(ProfileScreen(user: user, tinode: tinode,));
+                                          if(userTopicSub.user != 0) {
+                                            Get.to(ProfileScreen(userTopicSub: userTopicSub, tinode: tinode,));
                                           }
                                         }
                                       },
-                                      child: AppText(text: user.id != 0 ? user.nickname : "deleted_account".tr(),
+                                      child: AppText(text: userTopicSub.user != 0 ? userTopicSub.public['fn'] : "deleted_account".tr(),
                                           fontSize: widget.isMini ? 12 : 13,
                                           color: ColorConstants.white,
                                           textAlign: TextAlign.start,
@@ -146,12 +146,12 @@ class _UserListItemWidget extends State<UserListItemWidget> {
                                       child: GestureDetector(
                                           onTap: (){
                                             if(widget.isGoProfile){
-                                              if(user.id != 0) {
-                                                Get.to(ProfileScreen(user: user, tinode: tinode,));
+                                              if(userTopicSub.user != 0) {
+                                                Get.to(ProfileScreen(userTopicSub: userTopicSub, tinode: tinode,));
                                               }
                                             }
                                           },
-                                          child: AppText(text: user.name,
+                                          child: AppText(text: userTopicSub.user??"",
                                               fontSize: widget.isMini ? 12 : 13,
                                               color: ColorConstants.halfWhite,
                                               textAlign: TextAlign.start,
@@ -172,12 +172,12 @@ class _UserListItemWidget extends State<UserListItemWidget> {
               ),
             ),
 
-            if(widget.isShowAction && user.id != Constants.user.id)
-              !user.isFreind ?
+            if(widget.isShowAction && userTopicSub.user != Constants.user.id)
+              !userTopicSub.public.isFreind ?
                   GestureDetector(
                     onTap: () async {
                       setState(() {
-                        user.isFreind = true;
+                        userTopicSub.public.isFreind = true;
                       });
                     //  var response = await DioClient.postUserFollow(user.id);
                       setState(() {

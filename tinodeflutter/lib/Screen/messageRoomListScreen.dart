@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:tinodeflutter/Screen/FriendListScreen.dart';
 import 'package:tinodeflutter/Screen/ProfileScreen.dart';
 
@@ -41,7 +42,6 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
   PositionRetainedScrollPhysics physics = PositionRetainedScrollPhysics();
   List<TopicSubscription> roomList = [];
 
-  User user = User(id: '11', name: 'dd',nickname: 'dd', email: 'dd',picture: '');
 
   @override
   void initState() {
@@ -55,7 +55,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
 
    void _initializeTopic() async {
     me = tinode.getMeTopic();
-    await me.subscribe(MetaGetBuilder(me).withLaterSub(null).build(), null);
+    var result = await me.subscribe(MetaGetBuilder(me).withLaterSub(null).build(), null);
     _loadRooms();
     _setupListeners();
   }
@@ -85,7 +85,16 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
        print("come acs");
       }
     });
+    
     await me.subscribe(MetaGetBuilder(me).withLaterSub(null).build(), null);
+    GetQuery getQuery = GetQuery(
+      what: 'sub desc tags cred',
+      //sub: GetOptsType(user: query), // 적절한 GetOptsType 설정
+    );
+    // fnd 토픽에 메타데이터 요청 보내기
+    var meta = await me.getMeta(getQuery);
+    print("me : $meta");
+    var userId = tinode.getCurrentUserId();
   }
 
 
@@ -114,7 +123,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
       //   // 필요한 경우 데이터를 처리할 수 있습니다.
       //   print("Data received: $data");
       // });
-      await me.subscribe(MetaGetBuilder(me).withLaterSub(null).build(), null);
+      var result = await me.subscribe(MetaGetBuilder(me).withLaterSub(null).build(), null);
     } catch (err) {
       print("err : $err");
     }
@@ -189,7 +198,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
                 ),
               ),
               InkWell(
-                onTap: () => {Get.to(ProfileScreen(tinode: tinode, user: user))},
+                onTap: () => {Get.to(ProfileScreen(tinode: tinode, userTopicSub: Constants.mytopicSubscription))},
                 child: Container(
                   width: 70,
                   height: 50,

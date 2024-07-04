@@ -15,6 +15,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/tinode/src/models/topic-subscription.dart';
 
 
 import 'ImageConstants.dart';
@@ -30,6 +31,7 @@ class Constants {
   static String cachingKey = "";
   static User user = User.fromJson({});
 
+  static late TopicSubscription mytopicSubscription;
 
   static double navBarIconSize = Get.width * 0.07;
   static double navBarHeight = Get.width * 0.155;

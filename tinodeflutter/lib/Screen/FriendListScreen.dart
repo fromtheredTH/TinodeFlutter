@@ -70,6 +70,7 @@ class _FriendListScreenState extends State<FriendListScreen> {
   String? hashTag;
 
   List<User> users = <User>[];
+  List<TopicSubscription> userTopicSubList = <TopicSubscription>[];
 
 
   Future<void> getSearch(String query) async {
@@ -298,7 +299,7 @@ class _FriendListScreenState extends State<FriendListScreen> {
                                     itemCount: users.length,
                                     itemBuilder: (context, index) {
                                       Key key = Key(users[index].id.toString());
-                                      return UserListItemWidget(key: key, user: users[index], isShowAction: true, deleteUser: (){
+                                      return UserListItemWidget(key: key, userTopicSub: userTopicSubList[index], isShowAction: true, deleteUser: (){
                                         setState(() {
                                           users.removeAt(index);
                                         });
