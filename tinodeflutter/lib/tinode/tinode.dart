@@ -504,6 +504,11 @@ class Tinode {
     return _tinodeService.setMeta(topicName, params);
   }
 
+  // only for jadechat , request friend add / delete
+  Future friMeta(String topicName, String whatType) {
+    return _tinodeService.friMeta(topicName, whatType);
+  }
+
   /// Delete some or all messages in a topic
   Future deleteMessages(String topicName, List<DelRange> ranges, bool hard) {
     return _tinodeService.deleteMessages(topicName, ranges, hard);

@@ -372,6 +372,12 @@ class Topic {
     return ctrl;
   }
 
+  //only for jadechat friMeta
+    Future friMeta(String whatType) {
+    // Send {get} message, return promise.
+    return _tinodeService.friMeta(name ?? '', whatType);
+  }
+
   /// Update access mode of the current user or of another topic subscriber
   Future<CtrlMessage> updateMode(String? userId, String update) {
     var user = userId != null && userId != '' ? subscriber(userId) : null;

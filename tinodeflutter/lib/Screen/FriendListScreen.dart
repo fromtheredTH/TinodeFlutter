@@ -138,9 +138,21 @@ class _FriendListScreenState extends State<FriendListScreen> {
     GetQuery getQuery = GetQuery(
       what: 'fri',
     );
+    try{
     var data = await me.getMeta(getQuery);
     print("ddd");
+    }
+    catch(err)
+    {
+      print("get freind list : $err");
+    }
   }
+  
+  Future<void> _delFriend(String userid) async{
+    
+    var data = await tinode.friMeta(userid,'del');
+  }
+
 
 
   @override

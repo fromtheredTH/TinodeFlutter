@@ -51,6 +51,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     user = widget.user;
   }
 
+   Future<void> _delFriend(String userid) async{
+    
+    var data = await tinode.friMeta(userid,'del');
+  }
+   Future<void> _addFriend(String userid) async{
+    try{
+      var data = await tinode.friMeta(userid,'add');
+    print("ddd");
+    }
+    catch(err)
+    {
+      print("add freind : $err");
+    }
+    
+  }
+
   Future<bool> _promptPermissionSetting() async {
     if (Platform.isIOS) {
       if (await Permission.photos.request().isGranted ||
@@ -368,6 +384,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           SizedBox(
             height: 10,
           ),
+          if(user.id != Constants.user.id && !user.isFreind)
+          GestureDetector(
+            onTap: (){_addFriend(user.id);},
+            child: Container(
+              width: 120,
+              height: 40,
+              color: Colors.white,
+              child: AppText(text: "친구추가", textAlign: TextAlign.center,)
+            ),
+          )
         ]));
   }
 }

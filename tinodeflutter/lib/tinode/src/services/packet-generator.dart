@@ -93,6 +93,14 @@ class PacketGenerator {
         );
         break;
 
+      // only for jadechat
+      case packet_types.Fri:
+        packetData = FriPacketData(
+          topic: topicName,
+          what: null,
+        );
+        break;
+
       case packet_types.Del:
         packetData = DelPacketData(
           topic: topicName,

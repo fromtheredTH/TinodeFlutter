@@ -394,6 +394,24 @@ class TinodeService {
 
     return _send(packet);
   }
+    // jadechat만 추가 된 내용 / friend 추가.,삭제
+   Future friMeta(String topicName, String whatType) {
+    var packet = _packetGenerator.generate(packet_types.Fri, topicName);
+    var data = packet.data as FriPacketData;
+
+    // var what = [];
+    // what.add(whatType);
+
+    // if (what.isEmpty) {
+    //     throw Exception('Invalid {set} parameters');
+    //   }
+    
+    data.what = whatType;
+    packet.data = data;
+
+    return _send(packet);
+  }
+
 
   /// Delete some or all messages in a topic
   Future deleteMessages(String topicName, List<DelRange> ranges, bool hard) {

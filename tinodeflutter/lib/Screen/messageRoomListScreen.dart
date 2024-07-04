@@ -161,7 +161,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
                   width: 80,
                   height: 50,
                   margin:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                   decoration: BoxDecoration(
@@ -176,16 +176,14 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
                   ),
                 ),
               ),
-              SizedBox(
-                width: 10,
-              ),
+           
               InkWell(
                 onTap: () => {Get.to(MessageRoomAddScreen(tinode: tinode))},
                 child: Container(
                   width: 80,
                   height: 50,
                   margin:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                   decoration: BoxDecoration(
@@ -203,10 +201,10 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
               InkWell(
                 onTap: () => {Get.to(ProfileScreen(tinode: tinode, user: Constants.user))},
                 child: Container(
-                  width: 70,
+                  width: 80,
                   height: 50,
                   margin:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                   decoration: BoxDecoration(
@@ -216,7 +214,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
                       ),
                       borderRadius: const BorderRadius.all(Radius.circular(4))),
                   child: AppText(
-                    text: "프로필",
+                    text: "내 프로필",
                     color: Colors.black,
                   ),
                 ),

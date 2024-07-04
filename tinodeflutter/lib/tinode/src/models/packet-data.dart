@@ -185,6 +185,21 @@ class SetPacketData extends PacketData {
     };
   }
 }
+class FriPacketData extends PacketData {
+  String? topic;
+  String? what;
+
+
+  FriPacketData({this.topic, this.what });
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'topic': topic,
+      'what': what,
+    };
+  }
+}
 
 class DelPacketData extends PacketData {
   String? topic;
