@@ -51,10 +51,13 @@ class _FriendListScreenState extends State<FriendListScreen> {
     setState(() {
       isSearchMode = false;
       searchController.text = "";
+      
     });
   }
 
   late Tinode tinode;
+  late Topic me;
+
 
   bool isShowKeyboard = false;
   TextEditingController searchController = TextEditingController();
@@ -70,6 +73,7 @@ class _FriendListScreenState extends State<FriendListScreen> {
   String? hashTag;
 
   List<User> userList = <User>[];
+  List<User> friendList = <User>[];
   List<TopicSubscription> userTopicSubList = <TopicSubscription>[];
 
 
@@ -99,6 +103,9 @@ class _FriendListScreenState extends State<FriendListScreen> {
   void initState() {
    // hashTag = widget.hashTag;
     super.initState();
+    tinode = widget.tinode;
+    me = tinode.getMeTopic();
+    _getFriendList();
   //  scrollController.addListener(getNextPost);
     // if(hashTag != null){
     //   WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -126,6 +133,15 @@ class _FriendListScreenState extends State<FriendListScreen> {
     //   }
     // });
   }
+
+  Future<void> _getFriendList() async{
+    GetQuery getQuery = GetQuery(
+      what: 'fri',
+    );
+    var data = await me.getMeta(getQuery);
+    print("ddd");
+  }
+
 
   @override
   Widget build(BuildContext context) {
