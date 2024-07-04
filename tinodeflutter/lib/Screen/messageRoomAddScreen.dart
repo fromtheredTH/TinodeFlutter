@@ -43,6 +43,11 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
     tinode = widget.tinode;
   }
 
+    @override
+  void dispose() {
+    super.dispose();
+  }
+
 
 
   List<String> clickFriendList = [];
@@ -123,7 +128,6 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
 
 
       print('Meta data updated for group chat: $groupName');
-
       // 새로운 사용자를 그룹에 초대
       inviteUserToGroup("usrEiSwIao9WvQ");
 
@@ -156,6 +160,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
 
       // 사용자 초대
       await _groupTopic.invite(userId, 'JRWPAS');
+      _groupTopic.leave(true);
       Get.to(()=>MessageRoomScreen(tinode: tinode, clickTopic: _groupTopic.name ?? ""));
       print('User $userId invited to group chat');
     } catch (e) {

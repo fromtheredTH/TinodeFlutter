@@ -14,6 +14,7 @@ import 'package:tinodeflutter/components/GalleryBottomSheet.dart';
 import 'package:tinodeflutter/components/MyAssetPicker.dart';
 import 'package:tinodeflutter/components/btn_bottom_sheet_model.dart';
 import 'package:tinodeflutter/components/image_viewer.dart';
+import 'package:tinodeflutter/dto/file_dto.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
 import 'package:tinodeflutter/global/global.dart';
 import 'package:tinodeflutter/tinode/src/models/del-range.dart';
@@ -103,9 +104,6 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     });
   }
 
-  void videoRendrProcess() {}
-  void audioRenderProcess() {}
-
   eChatType checkMsgType(DataMessage dataMessage) {
     if (dataMessage.content is Map) {
       print("map content!");
@@ -133,8 +131,6 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
         return videoTile(
             context,
             dataMessage,
-            getImageBase64Decoder(
-                dataMessage.content['ent'][0]['data']['preview']),
             index);
       default:
         return Container();
@@ -180,9 +176,17 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
 
   String fileUrl = "";
 
-  String getFileUrl(DataMessage dataMessage) {
-    fileUrl =
-        "http://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+  String getFileUrl(DataMessage dataMessage, eChatType fileType) {
+    switch(fileType)
+    { case eChatType.IMAGE:
+        fileUrl ="http://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+        break;
+      case eChatType.VIDEO:
+        fileUrl ="http://$hostAddres/${dataMessage.content['ent'][0]['data']['preref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+        break;
+      default:
+        break;
+    }
     print("file url : $fileUrl");
     return fileUrl;
   }
@@ -237,7 +241,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
             child: isBase64
                 ? getImageBase64Decoder(
                     dataMessage.content['ent'][0]['data']['val'])
-                : getUrltoImage(getFileUrl(dataMessage)),
+                : getUrltoImage(getFileUrl(dataMessage,eChatType.IMAGE)),
 
             // info.file.isNotEmpty
             //     ? Image.file(
@@ -281,26 +285,17 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     );
   }
 
-  String formatMilliseconds(int milliseconds) {
-    // 밀리초를 초로 변환
-    int totalSeconds = (milliseconds / 1000).floor();
-
-    // 분과 초를 계산
-    int minutes = totalSeconds ~/ 60;
-    int seconds = totalSeconds % 60;
-
-    // 초가 한 자리 수일 경우 앞에 0을 추가
-    String formattedSeconds = seconds < 10 ? '0$seconds' : '$seconds';
-
-    return '$minutes:$formattedSeconds';
-  }
-
   Widget videoTile(
     BuildContext context,
     DataMessage dataMessage,
-    Image img,
     int index,
   ) {
+    bool isBase64 = false;
+    if (dataMessage.content['ent'][0]['data']['preref'] != null) {
+      isBase64 = false;
+    } else {
+      isBase64 = true;
+    }
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -308,7 +303,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
             MaterialPageRoute(
                 builder: (context) => ImageViewer(
                       // images: (info.contents ?? '').split(","),
-                      images: [getFileUrl(dataMessage)], // video url
+                      images: [getFileUrl(dataMessage, eChatType.VIDEO)], // video url
                       selected: 0,
                       isVideo: true,
                       // user: getUser(),
@@ -325,7 +320,10 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
           constraints: BoxConstraints(maxWidth: 240),
           child: Stack(
             children: [
-              img,
+              isBase64
+                ? getImageBase64Decoder(
+                    dataMessage.content['ent'][0]['data']['preview'])
+                : getUrltoImage(getFileUrl(dataMessage, eChatType.VIDEO)),
               // info.file.isNotEmpty
               //     ? Image.file(
               //         info.file[0],
@@ -457,22 +455,17 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     Get.back();
     if (fileList.isNotEmpty) {
       int randid = Random().nextInt(10000);
-      List<String> imageList = [];
-      // base64 encode
-      for (File item in fileList) {
-        String base64Image = await encodeFileToBase64(item);
-        imageList.add(base64Image);
-      }
-      const int chunkSize = 1000;
-      print("imageList[0].length ${imageList[0].length}");
-      // for (int i = 0; i < imageList[0].length; i += chunkSize) {
-      //   int end = (i + chunkSize < imageList[0].length) ? i + chunkSize : imageList[0].length;
-      //   print(imageList[0].substring(i, end));
-      // }
-      WriteLog.write(imageList[0], fileName: "base64.txt");
-      await sendImage(imageList, fileList);
+      // List<String> imageList = [];
 
-      //publish to server
+      // // base64 encode
+      // for (File item in fileList) {
+      //   String base64Image = await encodeFileToBase64(item);
+      //   imageList.add(base64Image);
+      // }
+      
+      // WriteLog.write(imageList[0], fileName: "base64.txt");
+
+      await sendImage(fileList);
 
       // apiP.uploadFile(
       //     "Bearer ${await FirebaseAuth.instance.currentUser?.getIdToken()}",
@@ -509,9 +502,9 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
       //   onFileSend(audio, eChatType.AUDIO.index);
       // }
 
-      // if (videoList.isNotEmpty && videoList.length == thumbList.length) {
-      //   uploadVideo(videoList, thumbList, 0);
-      // }
+      if (videoList.isNotEmpty && videoList.length == thumbList.length) {
+        uploadVideo(videoList, thumbList, 0);
+      }
       // }).catchError((Object obj) {
       //   setState(() {
       //     List<ChatMsgDto> list = msgList
@@ -522,7 +515,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
       //       msgList.removeAt(index);
       //     }
       //   });
-      //   showToast("connection_failed".tr());
+      //   showToast("connection_failed");
       // }
       // );
     } else {
@@ -560,6 +553,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
       Get.back();
       if (fileList.isNotEmpty) {
         int randid = Random().nextInt(10000);
+        await sendImage(fileList);
 
         // apiP.uploadFile(
         //     "Bearer ${await FirebaseAuth.instance.currentUser?.getIdToken()}",
@@ -584,21 +578,21 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
         //     msgList.removeAt(index);
         //   }
 
-        //   List<FileDto> images =
-        //       value.result.where((element) => element.type == "image").toList();
-        //   List<FileDto> audios =
-        //       value.result.where((element) => element.type == "sound").toList();
-        //   onFileSend(images, eChatType.IMAGE.index);
+          // List<FileDto> images =
+          //     value.result.where((element) => element.type == "image").toList();
+          // List<FileDto> audios =
+          //     value.result.where((element) => element.type == "sound").toList();
+          // onFileSend(images, eChatType.IMAGE.index);
 
-        //   for (int i = 0; i < audios.length; i++) {
-        //     //개별적 메시지로 발송
-        //     List<FileDto> audio = [audios[i]];
-        //     onFileSend(audio, eChatType.AUDIO.index);
-        //   }
+          // for (int i = 0; i < audios.length; i++) {
+          //   //개별적 메시지로 발송
+          //   List<FileDto> audio = [audios[i]];
+          //   onFileSend(audio, eChatType.AUDIO.index);
+          // }
 
-        //   if (videoList.isNotEmpty && videoList.length == thumbList.length) {
-        //     uploadVideo(videoList, thumbList, 0);
-        //   }
+          if (videoList.isNotEmpty && videoList.length == thumbList.length) {
+            uploadVideo(videoList, thumbList, 0);
+          }
         // }).catchError((Object obj) {
         //   setState(() {
         //     List<ChatMsgDto> list = msgList
@@ -609,9 +603,12 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
         //       msgList.removeAt(index);
         //     }
         //   });
-        //   showToast("connection_failed".tr());
-        // });
-      } else {
+        // showToast("connection_failed");
+        
+        // );
+
+    }
+       else { // 이미지 선택 안했을 떄 
         if (videoList.isNotEmpty && videoList.length == thumbList.length) {
           uploadVideo(videoList, thumbList, 0);
         }
@@ -623,11 +620,48 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
       List<File> videoList, List<File> thumbList, int index) async {
     if (index == videoList.length) return;
 
-    List<File> fileList = [];
-    fileList.add(videoList[index]);
-    fileList.add(thumbList[index]);
+    // List<File> fileList = [];
+    // fileList.add(videoList[index]);
+    // fileList.add(thumbList[index]);
 
     int randid = Random().nextInt(10000);
+
+    for(int i =0 ; i<videoList.length;i++)
+    {
+      try{
+      var videoResult = await DioClient.postUploadFile(videoList[i].path);
+      var thumbResult = await DioClient.postUploadFile(thumbList[i].path);
+      String videoUrlPath = videoResult.data['ctrl']['params']['url'];
+      String thumbnailUrlPath = thumbResult.data['ctrl']['params']['url'];
+      Message message = Message(
+          roomTopic.name,
+          {
+            "txt": " ",
+            "ent": [
+              {
+                "tp": "VD",
+                "data": {"mime": "video/mp4","preref":thumbnailUrlPath , "ref": videoUrlPath,
+                "duration": 100, "width":100, "height":100, "size": 100}
+              }
+            ]
+          },
+          false, // echo 설정
+          head: {"mime": "text/x-drafty"},
+        );
+
+        var pub_result = await roomTopic.publishMessage(message);
+
+        if(pub_result?.text =='accepted') showToast('complete video');
+      }
+      catch(err)
+      {
+        print("upload video err : $err");
+      }
+      
+      
+     
+    }
+
 
     // apiP.uploadFile(
     //     "Bearer ${await FirebaseAuth.instance.currentUser?.getIdToken()}",
@@ -677,9 +711,10 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     // });
   }
 
-  Future<void> sendImage(List<String> imageList, List<File> fileList) async {
+  Future<void> sendImage( //List<String> imageList, 
+  List<File> fileList) async {
     try {
-      for (int i = 0; i < imageList.length; i++) {
+      for (int i = 0; i < fileList.length; i++) {
         // Message 객체 생성
 
         // 메시지를 발행하여 서버에 전송
@@ -738,28 +773,8 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     } catch (err) {
       print("image send err: $err");
     }
-
-    // PacketGenerator 객체를 Message 객체에 설정
-    // message._packetGenerator = packetGenerator;
-
-    // Tinode 서버에 연결
-    //await tinode.connect();
   }
 
-  Future<void> _pickFile() async {
-    final PermissionStatus status = await Permission.storage.request();
-    if (status.isGranted) {
-      final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
-      if (file != null) {
-        _uploadFile(file);
-      }
-    }
-  }
-
-  Future<void> _uploadFile(XFile file) async {
-    // 파일을 Tinode 서버에 업로드하는 코드
-    // 예: Tinode의 파일 업로드 API를 사용하여 파일을 업로드
-  }
 
   void _sendMessage(String text, String? mimeType, String? fileUrl) {
     var content = {};
@@ -835,7 +850,13 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
       } catch (err) {
         print("err : $err");
       }
+    } else{
+      getMsgList();
+      // var s = await roomTopic.subscribe(MetaGetBuilder(roomTopic).withData(null,null,null).build(),null);
+
+      addMsg(input);
     }
+
   }
 
   Future<bool> _promptPermissionSetting() async {

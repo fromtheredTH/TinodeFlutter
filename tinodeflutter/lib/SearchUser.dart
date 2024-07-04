@@ -35,8 +35,7 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
   AutoScrollController mainController = AutoScrollController();
   TextEditingController inputController = TextEditingController();
   PositionRetainedScrollPhysics physics = PositionRetainedScrollPhysics();
-  List<TopicSubscription> roomList = [];
-  List<User> _searchResults = [];
+  List<TopicSubscription> _searchResults = [];
   late TopicFnd _fndTopic;
 
   @override
@@ -60,23 +59,20 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
     _fndTopic.onMeta.listen((value) {
       _handleMetaMessage(value);
     });
-    await _fndTopic.subscribe(
-          MetaGetBuilder(_fndTopic).withData(null, null, null).build(), null);
+    if(!_fndTopic.isSubscribed) await _fndTopic.subscribe(MetaGetBuilder(_fndTopic).withData(null, null, null).build(), null);
   }
 
   void _handleMetaMessage(MetaMessage msg) {
     if (msg.sub != null) {
-      print("search list : $_searchResults");
       setState(() {
-        _searchResults = msg.sub!.map((dynamic sub) {
-          return User(
-            id: sub['user'] ?? 'Unknown ID',
-            name: sub['public']?['fn'] ?? 'Unknown',
-            email: sub['public']?['email'] ?? 'No Email',
-            picture: "",
-            nickname: '',
-          );
-        }).toList();
+        try{
+        print("search list :");
+        _searchResults = msg.sub!;
+        }
+        catch(err)
+        {
+          print("err : $err");
+        }
       });
     }
   }
@@ -89,27 +85,8 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
           public: query, // 유저 이름을 검색 키워드로 설정
         ),
       );
-
       // fnd 토픽에 메타데이터 설정 요청 보내기
       var ctrl = await _fndTopic.setMeta(setParams);
-
-      // 메타데이터 응답 처리
-      if (ctrl != null && ctrl.params != null) {
-        var results = ctrl.params['sub'];
-        if (results != null) {
-          setState(() {
-            _searchResults = results.map((dynamic sub) {
-              return User(
-                id: sub['user'] ?? 'Unknown ID',
-                name: sub['public']?['fn'] ?? 'Unknown',
-                email: sub['public']?['email'] ?? 'No Email',
-                picture: "",
-                nickname: '',
-              );
-            }).toList();
-          });
-        }
-      }
 
    // GetQuery 객체를 생성하여 검색 결과 요청
     GetQuery getQuery = GetQuery(
@@ -117,22 +94,21 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
       what: 'sub',
       //sub: GetOptsType(user: query), // 적절한 GetOptsType 설정
     );
-
     // fnd 토픽에 메타데이터 요청 보내기
     var meta = await _fndTopic.getMeta(getQuery);
 
     // 메타데이터 응답 처리
     if (meta != null && meta.sub != null) {
       setState(() {
-        _searchResults = meta.sub!.map((sub) {
-          return User(
-            id: sub.user ?? 'Unknown ID',
-            name: sub.public?['fn'] ?? 'Unknown',
-            email: sub.public?['email'] ?? 'No Email',
-            picture: "",
-            nickname: '',
-          );
-        }).toList();
+        // _searchResults = meta.sub!.map((sub) {
+        //   return User(
+        //     id: sub.user ?? 'Unknown ID',
+        //     name: sub.public?['fn'] ?? 'Unknown',
+        //     email: sub.public?['email'] ?? 'No Email',
+        //     picture: "",
+        //     nickname: '',
+        //   );
+        // }).toList();
       });
       }
     } catch (err) {
@@ -146,13 +122,6 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
       return;
     }
     tinode.getFndTopic();
-
-    // TopicDescription desc = new TopicDescription(public: inputString);
-    // TopicSubscription sub = new TopicSubscription(topic: "fnd");
-    // SetParams setParams = new SetParams(desc: desc,sub: sub);
-    // tinode.setMeta(inputString, setParams);
-    //GetQuery getQuery = new GetQuery();
-    //tinode.getMeta(inputString, getQuery );
   }
 
   @override
@@ -238,53 +207,53 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
                 ],
               )),
 
-          // Expanded(
-          //   child: ListView.builder(
-          //       cacheExtent: double.infinity,
-          //       shrinkWrap: false,
-          //       padding: const EdgeInsets.all(10),
-          //       controller: mainController,
-          //       itemCount: roomList.length,
-          //       reverse: false,
-          //       physics: physics,
-          //       itemBuilder: (BuildContext context, int index) {
-          //         return AutoScrollTag(
-          //           key: ValueKey(index),
-          //           controller: mainController,
-          //           index: index,
-          //           child: GestureDetector(
-          //               onLongPress: () => {},
-          //               child: Stack(
-          //                 children: [
-          //                   InkWell(
-          //                     onTap: () {
-          //                       onClickMsgRoom(
-          //                           roomList[index].topic.toString());
-          //                     },
-          //                     child: Container(
-          //                       height: 40,
-          //                       child: Row(children: [
-          //                         AppText(
-          //                           text: roomList[index].topic.toString(),
-          //                           fontSize: 30,
-          //                           color: Colors.black,
-          //                         ),
-          //                         SizedBox(
-          //                           width: 10,
-          //                         ),
-          //                         AppText(
-          //                           text: roomList[index].unread.toString(),
-          //                           fontSize: 30,
-          //                           color: Colors.red,
-          //                         ),
-          //                       ]),
-          //                     ),
-          //                   ),
-          //                 ],
-          //               )),
-          //         );
-          //       }),
-          // ),
+          Expanded(
+            child: ListView.builder(
+                cacheExtent: double.infinity,
+                shrinkWrap: false,
+                padding: const EdgeInsets.all(10),
+                controller: mainController,
+                itemCount: _searchResults.length,
+                reverse: false,
+                physics: physics,
+                itemBuilder: (BuildContext context, int index) {
+                  return AutoScrollTag(
+                    key: ValueKey(index),
+                    controller: mainController,
+                    index: index,
+                    child: GestureDetector(
+                        onLongPress: () => {},
+                        child: Stack(
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                // onClickMsgRoom(
+                                //     roomList[index].topic.toString());
+                              },
+                              child: Container(
+                                height: 40,
+                                child: Row(children: [
+                                  AppText(
+                                    text: _searchResults[index].public['fn'].toString(),
+                                    fontSize: 30,
+                                    color: Colors.black,
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  AppText(
+                                    text: _searchResults[index].user.toString(),
+                                    fontSize: 30,
+                                    color: Colors.red,
+                                  ),
+                                ]),
+                              ),
+                            ),
+                          ],
+                        )),
+                  );
+                }),
+          ),
         ]),
       ),
     );

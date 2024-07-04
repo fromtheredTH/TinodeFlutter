@@ -1,0 +1,9 @@
+diff a/tinodeflutter/lib/Screen/messageRoomAddScreen.dart b/tinodeflutter/lib/Screen/messageRoomAddScreen.dart	(rejected hunks)
+@@ -156,7 +156,6 @@
+ 
+       // 사용자 초대
+       await _groupTopic.invite(userId, 'JRWPAS');
+-      _groupTopic.leave(true);
+       Get.to(()=>MessageRoomScreen(tinode: tinode, clickTopic: _groupTopic.name ?? ""));
+       print('User $userId invited to group chat');
+     } catch (e) {

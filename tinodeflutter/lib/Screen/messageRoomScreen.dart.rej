@@ -1,0 +1,14 @@
+diff a/tinodeflutter/lib/Screen/messageRoomScreen.dart b/tinodeflutter/lib/Screen/messageRoomScreen.dart	(rejected hunks)
+@@ -827,6 +827,12 @@
+         print("err : $err");
+       }
+     }
++    else{
++      getMsgList();
++      var s = await roomTopic.subscribe(MetaGetBuilder(roomTopic).withData(null,null,null).build(),null);
++
++      addMsg(input);
++    }
+   }
+ 
+   Future<bool> _promptPermissionSetting() async {

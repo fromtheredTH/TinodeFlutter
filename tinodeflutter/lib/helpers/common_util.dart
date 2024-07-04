@@ -180,3 +180,18 @@ String pad2(int i) {
 //   }
 //   return '';
 // }
+
+
+  String formatMilliseconds(int milliseconds) {
+    // 밀리초를 초로 변환
+    int totalSeconds = (milliseconds / 1000).floor();
+
+    // 분과 초를 계산
+    int minutes = totalSeconds ~/ 60;
+    int seconds = totalSeconds % 60;
+
+    // 초가 한 자리 수일 경우 앞에 0을 추가
+    String formattedSeconds = seconds < 10 ? '0$seconds' : '$seconds';
+
+    return '$minutes:$formattedSeconds';
+  }

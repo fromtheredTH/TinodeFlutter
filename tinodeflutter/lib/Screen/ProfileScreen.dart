@@ -1,11 +1,13 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:photo_gallery/photo_gallery.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:tinodeflutter/Constants/ColorConstants.dart';
 import 'package:tinodeflutter/Constants/Constants.dart';
@@ -15,9 +17,15 @@ import 'package:tinodeflutter/Constants/utils.dart';
 import 'package:tinodeflutter/Screen/setting_list_screen.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/components/BottomProfileWidget.dart';
+import 'package:tinodeflutter/components/BtnBottomSheetWidget.dart';
+import 'package:tinodeflutter/components/GalleryBottomSheet.dart';
+import 'package:tinodeflutter/components/MyAssetPicker.dart';
+import 'package:tinodeflutter/components/btn_bottom_sheet_model.dart';
+import 'package:tinodeflutter/global/DioClient.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
 import 'package:tinodeflutter/login.dart';
+import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class ProfileScreen extends StatefulWidget {
   Tinode tinode;
@@ -57,6 +65,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     }
     return false;
+  }
+
+  Future<void> procAssets(List<AssetEntity>? assets) async {
+    if (assets != null) {
+      await Future.forEach<AssetEntity>(assets, (file) async {
+        File? f = await file.originFile;
+        if (file.type == AssetType.image && f != null) {
+          var response = await DioClient.updateUserProfile(f, null, null, null);
+          Constants.cachingKey =
+              DateTime.now().millisecondsSinceEpoch.toString();
+          // getUserInfo();
+        }
+      });
+    }
+  }
+
+  Future<void> procAssetsWithGallery(List<Medium> assets) async {
+    await Future.forEach<Medium>(assets, (file) async {
+      File? f = await file.getFile();
+      if (file.mediumType == MediumType.image && f != null) {
+        var response = await DioClient.updateUserProfile(f, null, null, null);
+        Constants.cachingKey = DateTime.now().millisecondsSinceEpoch.toString();
+        //getUserInfo();
+      }
+    });
   }
 
   Widget QrWidget() {
@@ -231,8 +264,87 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           SizedBox(height: Get.height * 0.02),
-          Center(
-            child: ImageUtils.ProfileImage(user.picture, 150, 150),
+          Stack(
+            children: [
+              Center(
+                child: ImageUtils.ProfileImage(user.picture, 150, 150),
+              ),
+              if (user.id == Constants.user.id)
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: GestureDetector(
+                    onTap: () async {
+                      if (await _promptPermissionSetting()) {
+                        List<BtnBottomSheetModel> items = [];
+                        items.add(BtnBottomSheetModel(
+                            ImageConstants.cameraIcon, "camera", 0));
+                        items.add(BtnBottomSheetModel(
+                            ImageConstants.albumIcon, "gallery", 1));
+                        items.add(BtnBottomSheetModel(ImageConstants.deleteIcon,
+                            "current_profile_delete", 2));
+
+                        Get.bottomSheet(
+                            enterBottomSheetDuration:
+                                Duration(milliseconds: 100),
+                            exitBottomSheetDuration:
+                                Duration(milliseconds: 100),
+                            BtnBottomSheetWidget(
+                              btnItems: items,
+                              onTapItem: (sheetIdx) async {
+                                if (sheetIdx == 0) {
+                                  AssetEntity? assets =
+                                      await MyAssetPicker.pickCamera(
+                                          context, false);
+                                  if (assets != null) {
+                                    procAssets([assets]);
+                                  }
+                                } else if (sheetIdx == 1) {
+                                  if (await _promptPermissionSetting()) {
+                                    showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        isDismissible: true,
+                                        backgroundColor: Colors.transparent,
+                                        constraints: BoxConstraints(
+                                          minHeight: 0.8,
+                                          maxHeight: Get.height * 0.95,
+                                        ),
+                                        builder: (BuildContext context) {
+                                          return DraggableScrollableSheet(
+                                              initialChildSize: 0.5,
+                                              minChildSize: 0.4,
+                                              maxChildSize: 0.9,
+                                              expand: false,
+                                              builder: (_, controller) =>
+                                                  GalleryBottomSheet(
+                                                    controller: controller,
+                                                    limitCnt: 1,
+                                                    sendText: "profile_change",
+                                                    onlyImage: true,
+                                                    onTapSend: (results) {
+                                                      procAssetsWithGallery(
+                                                          results);
+                                                    },
+                                                  ));
+                                        });
+                                  }
+                                } else {
+                                  var response =
+                                      await DioClient.updateUserProfile(
+                                          null, null, true, null);
+                                  await CachedNetworkImage.evictFromCache(
+                                      user.picture);
+                                  //  getUserInfo();
+                                }
+                              },
+                            ));
+                      }
+                    },
+                    child:
+                        ImageUtils.setImage(ImageConstants.editProfile, 20, 20),
+                  ),
+                )
+            ],
           ),
           SizedBox(
             height: 10,
@@ -245,10 +357,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           Center(
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               AppText(text: tinode.userId),
-              SizedBox(width: 20,),
+              SizedBox(
+                width: 20,
+              ),
               QrWidget(),
             ],
           )),

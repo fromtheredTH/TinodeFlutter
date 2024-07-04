@@ -723,11 +723,14 @@ class Topic {
   /// Process data message
   void routeData(DataMessage data) {
     if (data.content != null) {
-      if (touched!.isBefore(data.ts!)) {
+      if (touched == null) {
         touched = data.ts;
+      } else {
+        if (touched!.isBefore(data.ts!)) {
+          touched = data.ts;
+        }
       }
     }
-
     if (data.seq! > _maxSeq) {
       _maxSeq = data.seq!;
     }
@@ -1103,7 +1106,13 @@ class Topic {
     // Check for missing messages at the end.
     // All messages could be missing or it could be a new topic with no messages.
     var last = _messages.length > 0 ? _messages.getLast() : null;
-    var maxSeq = max(seq!, _maxSeq);
+    var maxSeq;
+    if(seq!=null)
+      maxSeq = max(seq!, _maxSeq);
+    else {
+      seq = 1;
+      maxSeq = max(seq!, _maxSeq);
+    }
     if ((maxSeq > 0 && last == null) ||
         (last != null &&
             (((last.hi != null && last.hi! > 0) ? last.hi : last.seq)! <
