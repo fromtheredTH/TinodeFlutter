@@ -1,22 +1,21 @@
 class User {
-  late String id;
-  late String nickname;
-  late String name;
-  late String email;
-  late String picture;
-  late bool isFreind=false;
+   String id;
+   String name;
+   String? email;
+   String picture;
+   bool isFreind=false;
 
-  User({required this.id, required this.nickname, required this.name, required this.email, required this.picture});
+  User({required this.id, required this.name, required this.picture, });
 
 
    User.fromJson(Map<String, dynamic> json)
-      : id = json['id'] ?? 0,
+      : id = json['id'] ?? -1,
         // uid = json['uid'] ?? "",
-        name = json['name'] ?? "",
-        nickname = json['nickname'] ?? "",
+        name = json['public']['fn'] ?? "",
+       // nickname = json['nickname'] ?? "",
         // channelId = json['channel_id'] ?? "",
         email = json['email'] ?? "",
-        picture = json['picture'] ?? json["profile_img"] ?? "";
+        picture = json['public']['photo']['ref'] ?? "";
         //isFreind = json['picture'] ?? json["profile_img"] ?? "";
         // urlBanner = json['url_banner'] ?? "",
         // isDeveloper = json['is_developer'] != null ? json['is_developer'] is int ? json['is_developer'] == 1 ? true : false : json['is_developer'] : false,
@@ -42,7 +41,6 @@ class User {
       'id': id,
       // 'uid': uid,
       'name': name,
-      'nickname': nickname,
       // 'channel_id': channelId,
       'email': email,
       'picture': picture,

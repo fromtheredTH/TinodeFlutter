@@ -16,8 +16,8 @@ import '../../Constants/ImageUtils.dart';
 import '../../Constants/utils.dart';
 
 class BottomProfileWidget extends StatefulWidget{
-  BottomProfileWidget({Key? key, required this.userTopicSub, required this.setting, required this.logout}) : super(key: key);
-  TopicSubscription userTopicSub;
+  BottomProfileWidget({Key? key, required this.user, required this.setting, required this.logout}) : super(key: key);
+  User user;
   Function() setting;
   Function() logout;
 
@@ -63,14 +63,14 @@ class _BottomProfileWidget extends State<BottomProfileWidget> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    ImageUtils.ProfileImage(widget.userTopicSub.public, 50, 50),
+                    ImageUtils.ProfileImage(widget.user.picture??"", 50, 50),
                     SizedBox(width: 15),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         AppText(
-                          text: widget.userTopicSub.user != 0 ? widget.userTopicSub.public['fn'] : "deleted_account".tr(),
+                          text: widget.user.id != 0 ? widget.user.name : "deleted_account".tr(),
                           fontSize: 14,
                           maxLine: 1,
                           fontWeight: FontWeight.w700,
@@ -78,7 +78,7 @@ class _BottomProfileWidget extends State<BottomProfileWidget> {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            AppText(text: "@${widget.userTopicSub.public['fn']}",
+                            AppText(text: "@${widget.user.name}",
                                 fontSize: 12,
                                 color: ColorConstants.halfWhite),
 

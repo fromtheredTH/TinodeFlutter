@@ -21,6 +21,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_it/get_it.dart';
 
+import '../global/global.dart';
 import '../tinode/tinode.dart';
 import 'messageRoomAddScreen.dart';
 import 'messageRoomScreen.dart';
@@ -41,7 +42,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
   TextEditingController inputController = TextEditingController();
   PositionRetainedScrollPhysics physics = PositionRetainedScrollPhysics();
   List<TopicSubscription> roomList = [];
-
+  late TopicDescription topicDescription;
 
   @override
   void initState() {
@@ -87,14 +88,16 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
     });
     
     await me.subscribe(MetaGetBuilder(me).withLaterSub(null).build(), null);
+
+    //내 data 받아오기
     GetQuery getQuery = GetQuery(
       what: 'sub desc tags cred',
-      //sub: GetOptsType(user: query), // 적절한 GetOptsType 설정
     );
     // fnd 토픽에 메타데이터 요청 보내기
     var meta = await me.getMeta(getQuery);
-    print("me : $meta");
     var userId = tinode.getCurrentUserId();
+    String pictureUrl = meta.desc?.public['photo']?['ref'] != null ? changePathToLink(meta.desc?.public['photo']['ref']) : "";
+    Constants.user = User(id: userId, name: meta.desc.public['fn'], picture: pictureUrl);
   }
 
 
@@ -198,7 +201,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
                 ),
               ),
               InkWell(
-                onTap: () => {Get.to(ProfileScreen(tinode: tinode, userTopicSub: Constants.mytopicSubscription))},
+                onTap: () => {Get.to(ProfileScreen(tinode: tinode, user: Constants.user))},
                 child: Container(
                   width: 70,
                   height: 50,

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:tinodeflutter/Screen/ProfileScreen.dart';
 import 'Screen/messageRoomScreen.dart';
 import 'tinode/tinode.dart';
 import 'tinode/src/models/message.dart';
@@ -35,7 +36,7 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
   AutoScrollController mainController = AutoScrollController();
   TextEditingController inputController = TextEditingController();
   PositionRetainedScrollPhysics physics = PositionRetainedScrollPhysics();
-  List<TopicSubscription> _searchResults = [];
+  List<User> _searchResults = [];
   late TopicFnd _fndTopic;
 
   @override
@@ -67,7 +68,12 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
       setState(() {
         try{
         print("search list :");
-        _searchResults = msg.sub!;
+        for(int i = 0 ; i<msg.sub!.length ;i++)
+        {
+          String pictureUrl = msg.sub?[i].public['photo']?['ref'] != null ? changePathToLink(msg.sub?[i].public['photo']['ref']) : "";
+          User user = User(id: msg.sub?[i].user ?? "" , name : msg.sub?[i].public['fn'], picture : pictureUrl);
+          _searchResults.add(user);
+        }
         }
         catch(err)
         {
@@ -227,14 +233,13 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
                           children: [
                             InkWell(
                               onTap: () {
-                                // onClickMsgRoom(
-                                //     roomList[index].topic.toString());
+                                Get.to(()=>ProfileScreen(tinode: tinode, user: _searchResults[index]));
                               },
                               child: Container(
                                 height: 40,
                                 child: Row(children: [
                                   AppText(
-                                    text: _searchResults[index].public['fn'].toString(),
+                                    text: _searchResults[index].name.toString(),
                                     fontSize: 30,
                                     color: Colors.black,
                                   ),
@@ -242,7 +247,7 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
                                     width: 10,
                                   ),
                                   AppText(
-                                    text: _searchResults[index].user.toString(),
+                                    text: _searchResults[index].id.toString(),
                                     fontSize: 30,
                                     color: Colors.red,
                                   ),

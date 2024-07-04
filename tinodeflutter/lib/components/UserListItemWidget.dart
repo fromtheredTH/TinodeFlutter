@@ -24,8 +24,8 @@ import '../../Constants/utils.dart';
 
 
 class UserListItemWidget extends StatefulWidget {
-  UserListItemWidget({Key? key, required this.userTopicSub, this.isGoProfile = true, this.isShowAction = true, this.isMini=false, required this.deleteUser, this.followUser, this.unFollowUser}) : super(key: key);
-  TopicSubscription userTopicSub;
+  UserListItemWidget({Key? key, required this.user, this.isGoProfile = true, this.isShowAction = true, this.isMini=false, required this.deleteUser, this.followUser, this.unFollowUser}) : super(key: key);
+  User user;
   bool isShowAction;
   bool isMini;
   bool isGoProfile;
@@ -40,11 +40,12 @@ class UserListItemWidget extends StatefulWidget {
 
 class _UserListItemWidget extends State<UserListItemWidget> {
   late TopicSubscription userTopicSub;
+  late User user;
   late Tinode tinode;
 
   @override
   void initState() {
-    userTopicSub = widget.userTopicSub;
+    user = widget.user;
     super.initState();
   }
 
@@ -62,7 +63,7 @@ class _UserListItemWidget extends State<UserListItemWidget> {
                 onTap: (){
                   if(widget.isGoProfile){
                     if(userTopicSub.user != 0) {
-                      Get.to(ProfileScreen(userTopicSub: userTopicSub, tinode: tinode,));
+                      Get.to(ProfileScreen(user: user, tinode: tinode,));
                     }
                   }
                 },
@@ -77,7 +78,7 @@ class _UserListItemWidget extends State<UserListItemWidget> {
                         onTap: (){
                           if(widget.isGoProfile){
                             if(userTopicSub.user != 0) {
-                              Get.to(ProfileScreen(userTopicSub: userTopicSub, tinode: tinode,));
+                              Get.to(ProfileScreen(user: user, tinode: tinode,));
                             }
                           }
                         },
@@ -111,7 +112,7 @@ class _UserListItemWidget extends State<UserListItemWidget> {
                                       onTap: (){
                                         if(widget.isGoProfile){
                                           if(userTopicSub.user != 0) {
-                                            Get.to(ProfileScreen(userTopicSub: userTopicSub, tinode: tinode,));
+                                            Get.to(ProfileScreen(user: user, tinode: tinode,));
                                           }
                                         }
                                       },
@@ -147,7 +148,7 @@ class _UserListItemWidget extends State<UserListItemWidget> {
                                           onTap: (){
                                             if(widget.isGoProfile){
                                               if(userTopicSub.user != 0) {
-                                                Get.to(ProfileScreen(userTopicSub: userTopicSub, tinode: tinode,));
+                                                Get.to(ProfileScreen(user: user, tinode: tinode,));
                                               }
                                             }
                                           },

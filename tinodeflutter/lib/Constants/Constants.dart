@@ -29,7 +29,7 @@ class Constants {
   static String translationCode = "";
   static String translationName = "";
   static String cachingKey = "";
-  static User user = User.fromJson({});
+  static late User user;
 
   static late TopicSubscription mytopicSubscription;
 

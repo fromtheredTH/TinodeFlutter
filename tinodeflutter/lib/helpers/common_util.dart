@@ -7,6 +7,7 @@ import 'package:sprintf/sprintf.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:tinodeflutter/global/global.dart';
 
 String getLang(int uid) {
   String lang = uid == 1
@@ -194,4 +195,10 @@ String pad2(int i) {
     String formattedSeconds = seconds < 10 ? '0$seconds' : '$seconds';
 
     return '$minutes:$formattedSeconds';
+  }
+
+  String changePathToLink(String path)
+  {
+    String link = "http://$hostAddres/$path?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+    return link;
   }

@@ -69,7 +69,7 @@ class _FriendListScreenState extends State<FriendListScreen> {
 
   String? hashTag;
 
-  List<User> users = <User>[];
+  List<User> userList = <User>[];
   List<TopicSubscription> userTopicSubList = <TopicSubscription>[];
 
 
@@ -86,7 +86,7 @@ class _FriendListScreenState extends State<FriendListScreen> {
         //     .data["community"].map((json) => CommunityModel.fromJson(json)).toList().cast<
         //     CommunityModel>();
         setState(() {
-          users = userResults;
+          userList = userResults;
           // games = gameResults;
           // communities = communityResults;
           isSearchLoading = false;
@@ -269,7 +269,7 @@ class _FriendListScreenState extends State<FriendListScreen> {
                           children: [
                             SizedBox(height: 25,),
 
-                            users.isNotEmpty ?
+                            userList.isNotEmpty ?
                             Column(
                               children: [
                                 Container(
@@ -296,12 +296,12 @@ class _FriendListScreenState extends State<FriendListScreen> {
                                 ListView.builder(
                                     shrinkWrap: true,
                                     physics: NeverScrollableScrollPhysics(),
-                                    itemCount: users.length,
+                                    itemCount: userList.length,
                                     itemBuilder: (context, index) {
-                                      Key key = Key(users[index].id.toString());
-                                      return UserListItemWidget(key: key, userTopicSub: userTopicSubList[index], isShowAction: true, deleteUser: (){
+                                      Key key = Key(userList[index].id.toString());
+                                      return UserListItemWidget(key: key, user: userList[index], isShowAction: true, deleteUser: (){
                                         setState(() {
-                                          users.removeAt(index);
+                                          userList.removeAt(index);
                                         });
                                       },);
                                     }

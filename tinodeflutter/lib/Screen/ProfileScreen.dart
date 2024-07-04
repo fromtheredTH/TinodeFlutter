@@ -29,9 +29,9 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class ProfileScreen extends StatefulWidget {
   Tinode tinode;
-  TopicSubscription userTopicSub;
+  User user;
 
-  ProfileScreen({super.key, required this.tinode, required this.userTopicSub});
+  ProfileScreen({super.key, required this.tinode, required this.user});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -41,13 +41,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late Tinode tinode;
   late Topic roomTopic;
   late Topic me;
-  late TopicSubscription userTopicSub;
+  //late TopicSubscription userTopicSub;
+  late User user;
 
   @override
   void initState() {
     super.initState();
     tinode = widget.tinode;
-    userTopicSub = widget.userTopicSub;
+    user = widget.user;
   }
 
   Future<bool> _promptPermissionSetting() async {
@@ -152,7 +153,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       GestureDetector(
                         onTap: () {
                           Clipboard.setData(ClipboardData(
-                              text: "https://jade-chat.com/${userTopicSub.public['fn']}"));
+                              text: "https://jade-chat.com/${user.name}"));
                           Utils.showToast("qr_copy_complete");
                         },
                         child: Row(
@@ -209,17 +210,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Icon(Icons.arrow_back_ios, color: Colors.white)),
 
                     AppText(
-                      text: userTopicSub.user == tinode.userId //Constants.user.id
+                      text: user.id == tinode.userId //Constants.user.id
                           ? "my_page"
-                          : userTopicSub.user != 0
-                              ? userTopicSub.public['fn']
+                          : user.id != 0
+                              ? user.name
                               : "deleted_account",
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     )
                   ],
                 ),
-                userTopicSub.user == 1 // Constants.user.id
+                user.id == 1 // Constants.user.id
                     ? Row(
                         children: [
                           GestureDetector(
@@ -230,12 +231,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   exitBottomSheetDuration:
                                       Duration(milliseconds: 100),
                                   BottomProfileWidget(
-                                      userTopicSub: userTopicSub,
+                                      user: user,
                                       setting: () {
                                         Get.to(SettingListScreen(
                                           onChangedUser: (user) {
                                             setState(() {
-                                              this.userTopicSub = userTopicSub;
+                                              this.user = user;
                                             });
                                           },
                                         ));
@@ -267,9 +268,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Stack(
             children: [
               Center(
-                child: ImageUtils.ProfileImage(userTopicSub.public, 150, 150),
+                child: ImageUtils.ProfileImage(user.picture??"", 150, 150),
               ),
-              if (userTopicSub.user == Constants.user.id)
+              if (user.id == Constants.user.id)
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: GestureDetector(
@@ -328,12 +329,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                   ));
                                         });
                                   }
-                                } else {
-                                  var response =
-                                      await DioClient.updateUserProfile(
-                                          null, null, true, null);
+                                } else { // delete profile image
+                                  // var response = await DioClient.updateUserProfile( null, null, true, null);
                                   await CachedNetworkImage.evictFromCache(
-                                      userTopicSub.public.picture);
+                                      user.picture??"");
                                   //  getUserInfo();
                                 }
                               },
@@ -350,7 +349,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             height: 10,
           ),
           Center(
-            child: AppText(text: userTopicSub.public['fn']),
+            child: AppText(text: user.name),
           ),
           SizedBox(
             height: 10,
