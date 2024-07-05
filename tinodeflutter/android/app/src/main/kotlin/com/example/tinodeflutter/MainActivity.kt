@@ -1,4 +1,4 @@
-package com.example.tinodeflutter
+package com.widblack.jadechat
 
 import io.flutter.embedding.android.FlutterActivity
 
