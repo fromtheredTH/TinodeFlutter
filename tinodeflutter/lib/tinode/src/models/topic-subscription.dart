@@ -91,6 +91,8 @@ class TopicSubscription {
 
   int? unread;
 
+  bool? isFriend; // jadechat only
+
   TopicSubscription({
     this.user,
     this.updated,
@@ -110,6 +112,7 @@ class TopicSubscription {
     this.created,
     this.mode,
     this.unread,
+    this.isFriend
   });
 
    Map<String, dynamic> toJson() {
@@ -132,6 +135,7 @@ class TopicSubscription {
       'noForwarding': noForwarding,
       'mode': mode,
       'unread': unread,
+      'isFriend': isFriend,
     };
   }
 
@@ -154,6 +158,7 @@ class TopicSubscription {
       seen: msg['seen'] != null ? Seen.fromMessages(msg['seen']) : null,
       noForwarding: msg['noForwarding'] ?? false,
       mode: msg['mode'],
+      isFriend: msg['isFriend'],
     );
   }
 
@@ -176,6 +181,7 @@ class TopicSubscription {
       seen: seen,
       noForwarding: noForwarding,
       mode: mode,
+      isFriend: isFriend,
     );
   }
 

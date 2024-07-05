@@ -309,48 +309,48 @@ class _FriendListScreenState extends State<FriendListScreen> {
                                               friendList.isNotEmpty
                                                   ? Column(
                                                       children: [
-                                                        Container(
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                                  bottom: 25),
-                                                          child: Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .center,
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .center,
-                                                            children: [
-                                                              SizedBox(
-                                                                  width: 30),
-                                                              Expanded(
-                                                                  child: Container(
-                                                                      height:
-                                                                          0.5,
-                                                                      color: ColorConstants
-                                                                          .colorMain)),
-                                                              SizedBox(
-                                                                  width: 20),
-                                                              AppText(
-                                                                text:
-                                                                    "user".tr(),
-                                                                fontSize: 10,
-                                                                color: ColorConstants
-                                                                    .colorMain,
-                                                              ),
-                                                              SizedBox(
-                                                                  width: 20),
-                                                              Expanded(
-                                                                  child: Container(
-                                                                      height:
-                                                                          0.51,
-                                                                      color: ColorConstants
-                                                                          .colorMain)),
-                                                              SizedBox(
-                                                                  width: 30),
-                                                            ],
-                                                          ),
-                                                        ),
+                                                        // Container(
+                                                        //   padding:
+                                                        //       EdgeInsets.only(
+                                                        //           bottom: 25),
+                                                        //   child: Row(
+                                                        //     mainAxisAlignment:
+                                                        //         MainAxisAlignment
+                                                        //             .center,
+                                                        //     crossAxisAlignment:
+                                                        //         CrossAxisAlignment
+                                                        //             .center,
+                                                        //     children: [
+                                                        //       SizedBox(
+                                                        //           width: 30),
+                                                        //       Expanded(
+                                                        //           child: Container(
+                                                        //               height:
+                                                        //                   0.5,
+                                                        //               color: ColorConstants
+                                                        //                   .colorMain)),
+                                                        //       SizedBox(
+                                                        //           width: 20),
+                                                        //       AppText(
+                                                        //         text:
+                                                        //             "user".tr(),
+                                                        //         fontSize: 10,
+                                                        //         color: ColorConstants
+                                                        //             .colorMain,
+                                                        //       ),
+                                                        //       SizedBox(
+                                                        //           width: 20),
+                                                        //       Expanded(
+                                                        //           child: Container(
+                                                        //               height:
+                                                        //                   0.51,
+                                                        //               color: ColorConstants
+                                                        //                   .colorMain)),
+                                                        //       SizedBox(
+                                                        //           width: 30),
+                                                        //     ],
+                                                        //   ),
+                                                        // ),
                                                         ListView.builder(
                                                             shrinkWrap: true,
                                                             physics:
