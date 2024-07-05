@@ -75,6 +75,12 @@ dependencies:
   device_info_plus: ^9.1.1
   android_id: ^0.3.6
   url_launcher: ^6.2.5
+  flutter_callkit_incoming: ^2.0.4+1
+  agora_rtc_engine: ^6.0.0
+  firebase_core: ^2.18.0
+  firebase_auth: ^4.10.1
+  firebase_messaging: ^14.7.10
+  flutter_local_notifications: ^16.3.0
 
 
 

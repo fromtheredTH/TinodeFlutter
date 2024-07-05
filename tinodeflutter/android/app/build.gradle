@@ -2,6 +2,7 @@ plugins {
     id "com.android.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
+//    id "com.google.gms.google-services"
 }
 
 def localProperties = new Properties()
@@ -23,7 +24,8 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.example.tinodeflutter"
+//    namespace "com.fromthered.zempie.dev"
+    namespace "com.widblack.jadechat"
     compileSdkVersion 34
     ndkVersion flutter.ndkVersion
 
@@ -41,22 +43,68 @@ android {
     }
 
     defaultConfig {
+        //multiDexEnabled true
+
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.example.tinodeflutter"
+//        applicationId "com.fromthered.zempie.dev"
+        applicationId "com.widblack.jadechat"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion 21
-        targetSdkVersion flutter.targetSdkVersion
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
+        targetSdkVersion 33
+        multiDexEnabled true
+        versionCode 2024070512
+        versionName "1.1.30"
+    }
+
+    signingConfigs {
+        release {
+            keyAlias 'jadechat_keystore'
+            keyPassword '8VVqMs4^'
+            storeFile file('../../jadechat_keys/jadechat_keystore.p12')
+            storePassword '8VVqMs4^'
+        }
+        debug {
+            keyAlias 'jadechat_keystore'
+            keyPassword '8VVqMs4^'
+            storeFile file('../../jadechat_keys/jadechat_keystore.p12')
+            storePassword '8VVqMs4^'
+        }
+//        release {
+//            keyAlias 'zempie_dev'ㅇ
+//            keyPassword 'HrCh#Op0'
+//            storeFile file('../../keys/zempie.dev.keystore')
+//            storePassword 'HrCh#Op0'
+//        }
+//        debug{
+//            keyAlias 'zempie_dev'
+//            keyPassword 'HrCh#Op0'
+//            storeFile file('../../keys/zempie.dev.keystore')
+//            storePassword 'HrCh#Op0'
+//        }
     }
 
     buildTypes {
+        debug {
+            shrinkResources false
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt') // Add these lines
+        }
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
+            minifyEnabled true // Add these lines
+            shrinkResources true // Add these lines
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt') // Add these lines
         }
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+        // Or, if you prefer, you can continue to check for errors in release builds,
+        // but continue the build even when errors are found:
+        abortOnError false
     }
 }
 

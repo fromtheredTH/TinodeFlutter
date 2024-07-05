@@ -3,10 +3,14 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  agora_rtc_engine
   app_links
   connectivity_plus_windows
   file_selector_windows
+  firebase_auth
+  firebase_core
   flutter_secure_storage_windows
+  iris_method_channel
   modal_progress_hud_nsn
   objectbox_flutter_libs
   permission_handler_windows

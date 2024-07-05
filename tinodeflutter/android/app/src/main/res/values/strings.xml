@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="flutter_downloader_notification_started">다운로드 시작</string>
+    <string name="flutter_downloader_notification_in_progress">다운로드 진행중</string>
+    <string name="flutter_downloader_notification_canceled">다운로드 취소</string>
+    <string name="flutter_downloader_notification_failed">다운로드 실패</string>
+    <string name="flutter_downloader_notification_complete">다운로드 완료</string>
+    <string name="flutter_downloader_notification_paused">다운로드 중지</string>
+    <string name="default_notification_channel_id">jadechat_notification_channel_id</string>
+
+    <string name="app_name">JadeChat</string>
+    <string name="facebook_app_id">2461801087295883</string>
+    <string name="fb_login_protocol_scheme">fb2461801087295883</string>
+    <string name="facebook_client_token">1e8bb1fef47ab157862eeacfcf8af8b0</string>
+</resources>

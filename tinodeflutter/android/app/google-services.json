@@ -1,0 +1,64 @@
+{
+  "project_info": {
+    "project_number": "360596887858",
+    "firebase_url": "https://jade-chat-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "jade-chat",
+    "storage_bucket": "jade-chat.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:360596887858:android:c97a2adca34b56f206df2b",
+        "android_client_info": {
+          "package_name": "com.widblack.jadechat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "360596887858-a90stdroi17j4jt5rahf26kkl76d50r6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.widblack.jadechat",
+            "certificate_hash": "d048ca431c09fef78c6a54f4556a48ba38be6fb3"
+          }
+        },
+        {
+          "client_id": "360596887858-vib65lvbqk72fj7039qej9j0po1uuj8n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.widblack.jadechat",
+            "certificate_hash": "6e4970903c442b2e58a803d5861a2c16e7e21b31"
+          }
+        },
+        {
+          "client_id": "360596887858-8lqn5d0ii1kaj941b5ag8eiipvt44do5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDf223X5HxkTcGKt2fEQWdlcCTAJf_gc-k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "360596887858-8lqn5d0ii1kaj941b5ag8eiipvt44do5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "360596887858-8j8prv6nv3ra3stcfat60p4drpc78bd6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.widblack.jadechat",
+                "app_store_id": "6499414852"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
