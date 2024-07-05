@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_gallery/photo_gallery.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:tinodeflutter/Constants/ColorConstants.dart';
 import 'package:tinodeflutter/Constants/Constants.dart';
@@ -51,20 +52,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     user = widget.user;
   }
 
-   Future<void> _delFriend(String userid) async{
-    
-    var data = await tinode.friMeta(userid,'del');
+  Future<void> _delFriend(String userid) async {
+    var data = await tinode.friMeta(userid, 'del');
   }
-   Future<void> _addFriend(String userid) async{
-    try{
-      var data = await tinode.friMeta(userid,'add');
-    print("ddd");
-    }
-    catch(err)
-    {
+
+  Future<void> _addFriend(String userid) async {
+    try {
+      var data = await tinode.friMeta(userid, 'add');
+      print("ddd");
+    } catch (err) {
       print("add freind : $err");
     }
-    
   }
 
   Future<bool> _promptPermissionSetting() async {
@@ -112,7 +110,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget QrWidget() {
     return GestureDetector(
       onTap: () async {
-        if (Constants.userQrCode != null) {
           double currentBright = await ScreenBrightness().current;
           await ScreenBrightness().setScreenBrightness(1.0);
           // ignore: use_build_context_synchronously
@@ -122,7 +119,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             //바깥 영역 터치시 닫을지 여부 결정
             builder: ((context) {
               return Dialog(
-                backgroundColor: ColorConstants.colorBg1,
+                backgroundColor: Colors.grey[300],
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)),
                 child: Container(
@@ -158,10 +155,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       SizedBox(
                         height: 15,
                       ),
-                      Image.memory(
-                        Constants.userQrCode!,
-                        width: Get.width * 0.4,
-                        height: Get.width * 0.4,
+                      // Image.memory(
+                      //   Constants.userQrCode!,
+                      //   width: Get.width * 0.4,
+                      //   height: Get.width * 0.4,
+                      // ),
+                      QrImageView(
+                        data: 'https://jade-chat.com/${user.name}',
+                        version: QrVersions.auto,
+                        size: Get.width * 0.4,
                       ),
                       SizedBox(
                         height: 15,
@@ -196,7 +198,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ).then((value) async {
             await ScreenBrightness().setScreenBrightness(currentBright);
           });
-        }
+        
       },
       child: ImageUtils.setImage(ImageConstants.qr, 25, 25),
     );
@@ -236,7 +238,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     )
                   ],
                 ),
-                user.id == 1 // Constants.user.id
+                user.id == Constants.user.id 
                     ? Row(
                         children: [
                           GestureDetector(
@@ -250,6 +252,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       user: user,
                                       setting: () {
                                         Get.to(SettingListScreen(
+                                          tinode: tinode,
                                           onChangedUser: (user) {
                                             setState(() {
                                               this.user = user;
@@ -284,7 +287,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Stack(
             children: [
               Center(
-                child: ImageUtils.ProfileImage(user.picture??"", 150, 150),
+                child: ImageUtils.ProfileImage(user.picture ?? "", 150, 150),
               ),
               if (user.id == Constants.user.id)
                 Align(
@@ -345,10 +348,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                   ));
                                         });
                                   }
-                                } else { // delete profile image
+                                } else {
+                                  // delete profile image
                                   // var response = await DioClient.updateUserProfile( null, null, true, null);
                                   await CachedNetworkImage.evictFromCache(
-                                      user.picture??"");
+                                      user.picture ?? "");
                                   //  getUserInfo();
                                 }
                               },
@@ -384,16 +388,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
           SizedBox(
             height: 10,
           ),
-          if(user.id != Constants.user.id && !user.isFreind)
-          GestureDetector(
-            onTap: (){_addFriend(user.id);},
-            child: Container(
-              width: 120,
-              height: 40,
-              color: Colors.white,
-              child: AppText(text: "친구추가", textAlign: TextAlign.center,)
-            ),
-          )
+          if (user.id != Constants.user.id && !user.isFreind)
+            GestureDetector(
+              onTap: () {
+                _addFriend(user.id);
+              },
+              child: Container(
+                  width: 120,
+                  height: 40,
+                  color: Colors.white,
+                  child: AppText(
+                    text: "친구추가",
+                    textAlign: TextAlign.center,
+                  )),
+            )
         ]));
   }
 }

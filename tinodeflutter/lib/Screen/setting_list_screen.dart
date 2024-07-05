@@ -15,8 +15,11 @@ import 'package:get/get.dart' hide Trans;
 import 'package:get/get_core/src/get_main.dart';
 import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:tinodeflutter/Constants/ImageUtils.dart';
+import 'package:tinodeflutter/InAppPurchase/purchaseScreen.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/setting/setting_account_screen.dart';
+import 'package:tinodeflutter/tinode/tinode.dart';
 import '../../../Constants/ColorConstants.dart';
 import '../../../Constants/FontConstants.dart';
 import '../../../Constants/ImageConstants.dart';
@@ -24,8 +27,9 @@ import '../../../Constants/utils.dart';
 
 
 class SettingListScreen extends StatefulWidget {
-  SettingListScreen({super.key, required this.onChangedUser });
+  SettingListScreen({super.key, required this.tinode, required this.onChangedUser });
   Function(User) onChangedUser;
+  Tinode tinode;
 
   @override
   State<SettingListScreen> createState() => _SettingListScreen();
@@ -33,13 +37,19 @@ class SettingListScreen extends StatefulWidget {
 
 class _SettingListScreen extends State<SettingListScreen> {
 
-
+  late Tinode tinode;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    tinode = widget.tinode;
+  }
 
   @override
   Widget build(BuildContext context) {
 
     return Scaffold(
-        backgroundColor: ColorConstants.colorBg1,
+        backgroundColor: Colors.grey,
         resizeToAvoidBottomInset: true,
         body: Column(
           children: [
@@ -77,36 +87,36 @@ class _SettingListScreen extends State<SettingListScreen> {
                   padding: EdgeInsets.only(left: 20,right: 20),
                   child: Column(
                       children: [
-                        // GestureDetector(
-                        //   onTap: (){
-                        //     Get.to(SettingAccountScreen(onChangedUser: (user){
-                        //       widget.onChangedUser(user);
-                        //     },));
-                        //   },
-                        //   child:Container(
-                        //     height: 30,
-                        //     color: Colors.transparent,
-                        //     child: Row(
-                        //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        //       crossAxisAlignment: CrossAxisAlignment.center,
-                        //       children: [
-                        //         Row(
-                        //           crossAxisAlignment: CrossAxisAlignment.center,
-                        //           children: [
-                        //             ImageUtils.setImage(ImageConstants.settingAccount, 20, 20),
-                        //             SizedBox(width: 5,),
-                        //             AppText(
-                        //               text: "account".tr(),
-                        //               fontSize: 14,
-                        //             )
-                        //           ],
-                        //         ),
+                        GestureDetector(
+                          onTap: (){
+                            Get.to(SettingAccountScreen(tinode: tinode, onChangedUser: (user){
+                              widget.onChangedUser(user);
+                            },));
+                          },
+                          child:Container(
+                            height: 30,
+                            color: Colors.transparent,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    ImageUtils.setImage(ImageConstants.settingAccount, 20, 20),
+                                    SizedBox(width: 5,),
+                                    AppText(
+                                      text: "account".tr(),
+                                      fontSize: 14,
+                                    )
+                                  ],
+                                ),
 
-                        //         Icon(Icons.arrow_forward_ios_rounded, color: ColorConstants.white, size: 14,)
-                        //       ],
-                        //     ),
-                        //   ),
-                        // ),
+                                Icon(Icons.arrow_forward_ios_rounded, color: ColorConstants.white, size: 14,)
+                              ],
+                            ),
+                          ),
+                        ),
 
                         Container(
                           margin: EdgeInsets.only(top: 15, bottom: 25),
@@ -114,34 +124,34 @@ class _SettingListScreen extends State<SettingListScreen> {
                           color: ColorConstants.halfWhite,
                         ),
 
-                        // GestureDetector(
-                        //   onTap: (){
-                        //     Get.to(PurchaseScreen());
-                        //   },
-                        //   child: Container(
-                        //     color: Colors.transparent,
-                        //     height: 30,
-                        //     child: Row(
-                        //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        //       crossAxisAlignment: CrossAxisAlignment.center,
-                        //       children: [
-                        //         Row(
-                        //           crossAxisAlignment: CrossAxisAlignment.center,
-                        //           children: [
-                        //             ImageUtils.setImage(ImageConstants.settingSecurity, 20, 20),
-                        //             SizedBox(width: 5,),
-                        //             AppText(
-                        //               text: "purchase_service".tr(),
-                        //               fontSize: 14,
-                        //             )
-                        //           ],
-                        //         ),
+                        GestureDetector(
+                          onTap: (){
+                            Get.to(PurchaseScreen());
+                          },
+                          child: Container(
+                            color: Colors.transparent,
+                            height: 30,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    ImageUtils.setImage(ImageConstants.settingSecurity, 20, 20),
+                                    SizedBox(width: 5,),
+                                    AppText(
+                                      text: "purchase_service".tr(),
+                                      fontSize: 14,
+                                    )
+                                  ],
+                                ),
 
-                        //         Icon(Icons.arrow_forward_ios_rounded, color: ColorConstants.white, size: 14,)
-                        //       ],
-                        //     ),
-                        //   )
-                        // ),
+                                Icon(Icons.arrow_forward_ios_rounded, color: ColorConstants.white, size: 14,)
+                              ],
+                            ),
+                          )
+                        ),
 
                         // Container(
                         //   margin: EdgeInsets.only(top: 15, bottom: 25),
