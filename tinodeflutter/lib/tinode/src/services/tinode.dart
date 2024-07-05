@@ -349,7 +349,6 @@ class TinodeService {
     return _send(message.asPubPacket());
   }
 
-
   /// Request topic metadata
   Future getMeta(String topicName, GetQuery params) {
     var packet = _packetGenerator.generate(packet_types.GetType, topicName);
@@ -395,8 +394,9 @@ class TinodeService {
 
     return _send(packet);
   }
-    // jadechat만 추가 된 내용 / friend 추가.,삭제
-   Future friMeta(String topicName, String whatType) {
+
+  // jadechat만 추가 된 내용 / friend 추가.,삭제
+  Future friMeta(String topicName, String whatType) {
     var packet = _packetGenerator.generate(packet_types.Fri, topicName);
     var data = packet.data as FriPacketData;
 
@@ -406,13 +406,12 @@ class TinodeService {
     // if (what.isEmpty) {
     //     throw Exception('Invalid {set} parameters');
     //   }
-    
+
     data.what = whatType;
     packet.data = data;
 
     return _send(packet);
   }
-
 
   /// Delete some or all messages in a topic
   Future deleteMessages(String topicName, List<DelRange> ranges, bool hard) {
@@ -469,15 +468,17 @@ class TinodeService {
   }
 
   /// Notify server that a message or messages were read or received. Does NOT return promise
-  Future note(String topicName, String what, int seq) {
-    if (seq <= 0 || seq >= _configService.appSettings.localSeqId) {
-      throw Exception('Invalid message id ' + seq.toString());
+  Future note(String topicName, String what, int? seq) {
+    if (seq != null) {
+      if (seq <= 0 || seq >= _configService.appSettings.localSeqId) {
+        throw Exception('Invalid message id ' + seq.toString());
+      }
     }
 
     var packet = _packetGenerator.generate(packet_types.Note, topicName);
     var data = packet.data as NotePacketData;
     data.what = what;
-    data.seq = seq;
+    seq !=null ? data.seq = seq : null;
     packet.data = data;
     return _send(packet);
   }
