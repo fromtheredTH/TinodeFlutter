@@ -6,8 +6,8 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:get/get_core/src/get_main.dart';
 
-import '../app_text.dart';
-import 'btn_bottom_sheet_model.dart';
+import '../../app_text.dart';
+import '../../model/btn_bottom_sheet_model.dart';
 
 class BtnBottomSheetWidget extends StatelessWidget {
   BtnBottomSheetWidget(

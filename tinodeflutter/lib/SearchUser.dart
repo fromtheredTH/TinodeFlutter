@@ -71,7 +71,7 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
         for(int i = 0 ; i<msg.sub!.length ;i++)
         {
           String pictureUrl = msg.sub?[i].public['photo']?['ref'] != null ? changePathToLink(msg.sub?[i].public['photo']['ref']) : "";
-          User user = User(id: msg.sub?[i].user ?? "" , name : msg.sub?[i].public['fn'], picture : pictureUrl);
+          User user = User(id: msg.sub?[i].user ?? "" , name : msg.sub?[i].public['fn'], picture : pictureUrl, isFreind: false);
           _searchResults.add(user);
         }
         }

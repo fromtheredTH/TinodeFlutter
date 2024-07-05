@@ -15,10 +15,10 @@ import 'package:photo_gallery/photo_gallery.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:video_player/video_player.dart';
 
-import '../Constants/ColorConstants.dart';
-import '../Constants/ImageConstants.dart';
-import '../Constants/utils.dart';
-import '../app_text.dart';
+import '../../Constants/ColorConstants.dart';
+import '../../Constants/ImageConstants.dart';
+import '../../Constants/utils.dart';
+import '../../app_text.dart';
 import 'app_button.dart';
 
 

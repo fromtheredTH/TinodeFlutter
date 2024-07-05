@@ -9,22 +9,23 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:tinodeflutter/Screen/ProfileScreen.dart';
 import 'package:tinodeflutter/app_text.dart';
-import 'package:tinodeflutter/components/BtnBottomSheetWidget.dart';
-import 'package:tinodeflutter/components/btn_bottom_sheet_model.dart';
+import 'package:tinodeflutter/components/widget/BtnBottomSheetWidget.dart';
+import 'package:tinodeflutter/model/btn_bottom_sheet_model.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
 
-import '../../Constants/ColorConstants.dart';
-import '../../Constants/FontConstants.dart';
-import '../../Constants/ImageConstants.dart';
-import '../../Constants/ImageUtils.dart';
-import '../../Constants/utils.dart';
+import '../../../Constants/ColorConstants.dart';
+import '../../../Constants/FontConstants.dart';
+import '../../../Constants/ImageConstants.dart';
+import '../../../Constants/ImageUtils.dart';
+import '../../../Constants/utils.dart';
 
 
 
 class UserListItemWidget extends StatefulWidget {
-  UserListItemWidget({Key? key, required this.user, this.isGoProfile = true, this.isShowAction = true, this.isMini=false, required this.deleteUser, this.followUser, this.unFollowUser}) : super(key: key);
+  UserListItemWidget({Key? key,required this.tinode, required this.user, this.isGoProfile = true, this.isShowAction = true, this.isMini=false, required this.deleteUser, this.followUser, this.unFollowUser}) : super(key: key);
+  Tinode tinode;
   User user;
   bool isShowAction;
   bool isMini;
@@ -39,14 +40,15 @@ class UserListItemWidget extends StatefulWidget {
 }
 
 class _UserListItemWidget extends State<UserListItemWidget> {
-  late TopicSubscription userTopicSub;
+  // late TopicSubscription userTopicSub;
   late User user;
   late Tinode tinode;
 
   @override
   void initState() {
-    user = widget.user;
     super.initState();
+    user = widget.user;
+    tinode = widget.tinode;
   }
 
   @override
@@ -62,7 +64,7 @@ class _UserListItemWidget extends State<UserListItemWidget> {
               child: GestureDetector(
                 onTap: (){
                   if(widget.isGoProfile){
-                    if(userTopicSub.user != 0) {
+                    if(user.id != "") {
                       Get.to(ProfileScreen(user: user, tinode: tinode,));
                     }
                   }
@@ -77,7 +79,7 @@ class _UserListItemWidget extends State<UserListItemWidget> {
                       GestureDetector(
                         onTap: (){
                           if(widget.isGoProfile){
-                            if(userTopicSub.user != 0) {
+                            if(user.id != "") {
                               Get.to(ProfileScreen(user: user, tinode: tinode,));
                             }
                           }
@@ -90,7 +92,7 @@ class _UserListItemWidget extends State<UserListItemWidget> {
                                 shape: BoxShape.circle
                             ),
                             child: ImageUtils.ProfileImage(
-                                userTopicSub.public.picture,
+                                user.picture,
                                 widget.isMini ? 24 : 45,
                                 widget.isMini ? 24 : 45
                             ),
@@ -111,12 +113,12 @@ class _UserListItemWidget extends State<UserListItemWidget> {
                                     child: GestureDetector(
                                       onTap: (){
                                         if(widget.isGoProfile){
-                                          if(userTopicSub.user != 0) {
+                                          if(user.id!="") {
                                             Get.to(ProfileScreen(user: user, tinode: tinode,));
                                           }
                                         }
                                       },
-                                      child: AppText(text: userTopicSub.user != 0 ? userTopicSub.public['fn'] : "deleted_account".tr(),
+                                      child: AppText(text: user.id!="" ? user.name : "deleted_account".tr(),
                                           fontSize: widget.isMini ? 12 : 13,
                                           color: ColorConstants.white,
                                           textAlign: TextAlign.start,
@@ -147,12 +149,12 @@ class _UserListItemWidget extends State<UserListItemWidget> {
                                       child: GestureDetector(
                                           onTap: (){
                                             if(widget.isGoProfile){
-                                              if(userTopicSub.user != 0) {
+                                              if(user.id!="") {
                                                 Get.to(ProfileScreen(user: user, tinode: tinode,));
                                               }
                                             }
                                           },
-                                          child: AppText(text: userTopicSub.user??"",
+                                          child: AppText(text: user.name ?? "",
                                               fontSize: widget.isMini ? 12 : 13,
                                               color: ColorConstants.halfWhite,
                                               textAlign: TextAlign.start,
@@ -173,12 +175,12 @@ class _UserListItemWidget extends State<UserListItemWidget> {
               ),
             ),
 
-            if(widget.isShowAction && userTopicSub.user != Constants.user.id)
-              !userTopicSub.public.isFreind ?
+            if(widget.isShowAction && user.id != Constants.user.id)
+              !user.isFreind ?
                   GestureDetector(
                     onTap: () async {
                       setState(() {
-                        userTopicSub.public.isFreind = true;
+                        user.isFreind = true;
                       });
                     //  var response = await DioClient.postUserFollow(user.id);
                       setState(() {

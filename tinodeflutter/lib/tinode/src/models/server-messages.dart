@@ -95,6 +95,10 @@ class MetaMessage {
   /// Latest applicable 'delete' transaction
   final DeleteTransaction? del;
 
+  ///  jadechat only
+  final List<TopicSubscription>? fri;
+  final List<TopicSubscription>? blo;
+
   MetaMessage(
       {this.id,
       this.topic,
@@ -103,10 +107,14 @@ class MetaMessage {
       this.sub,
       this.tags,
       this.cred,
-      this.del});
+      this.del,
+      this.fri,
+      this.blo});
 
   static MetaMessage fromMessage(Map<String, dynamic> msg) {
     List<dynamic>? sub = msg['sub'];
+    List<dynamic>? fri = msg['fri'];
+    List<dynamic>? blo = msg['blo'];
 
     return MetaMessage(
       id: msg['id'],
@@ -127,6 +135,13 @@ class MetaMessage {
           : [],
       del:
           msg['del'] != null ? DeleteTransaction.fromMessage(msg['del']) : null,
+      //jadechat only
+      fri: fri != null && fri.length != null
+          ? fri.map((fri) => TopicSubscription.fromMessage(fri)).toList()
+          : [],
+      blo: blo != null && blo.length != null
+          ? blo.map((blo) => TopicSubscription.fromMessage(blo)).toList()
+          : [],   
     );
   }
 }

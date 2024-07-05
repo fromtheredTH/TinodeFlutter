@@ -102,7 +102,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
     var meta = await me.getMeta(getQuery);
     var userId = tinode.getCurrentUserId();
     String pictureUrl = meta.desc?.public['photo']?['ref'] != null ? changePathToLink(meta.desc?.public['photo']['ref']) : "";
-    Constants.user = User(id: userId, name: meta.desc.public['fn'], picture: pictureUrl);
+    Constants.user = User(id: userId, name: meta.desc.public['fn'], picture: pictureUrl, isFreind: false);
   }
 
 

@@ -3,9 +3,9 @@ import 'package:easy_localization/src/public_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import '../Constants/ColorConstants.dart';
-import '../app_text.dart';
-import '../global/app_colors.dart';
+import '../../Constants/ColorConstants.dart';
+import '../../app_text.dart';
+import '../../global/app_colors.dart';
 
 class AppDialog {
   static showAlertDialog(BuildContext context, Function() onConfirm, String title, String content,

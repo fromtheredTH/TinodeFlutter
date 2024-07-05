@@ -22,16 +22,16 @@ import 'package:chewie/chewie.dart';
 
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
-import '../../Constants/utils.dart';
-import '../Constants/ColorConstants.dart';
-import '../Constants/ImageConstants.dart';
-import '../app_text.dart';
-import '../model/userModel.dart';
-import '../page/base/page_layout.dart';
+import '../../../Constants/utils.dart';
+import '../../Constants/ColorConstants.dart';
+import '../../Constants/ImageConstants.dart';
+import '../../app_text.dart';
+import '../../model/userModel.dart';
+import '../../page/base/page_layout.dart';
 import 'BtnBottomSheetWidget.dart';
 import 'package:http/http.dart' as http;
 
-import 'btn_bottom_sheet_model.dart';
+import '../../model/btn_bottom_sheet_model.dart';
 import 'dialog.dart';
 
 class ImageViewer extends StatefulWidget {

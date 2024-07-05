@@ -28,7 +28,7 @@ import '../../Constants/ImageConstants.dart';
 import '../../Constants/ImageUtils.dart';
 import '../../app_text.dart';
 import '../../helpers/common_util.dart';
-import '../image_viewer.dart';
+import '../widget/image_viewer.dart';
 
 class ItemChatMsg extends StatelessWidget {
   List<UserDto> users;

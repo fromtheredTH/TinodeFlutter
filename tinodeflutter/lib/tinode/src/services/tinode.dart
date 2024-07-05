@@ -349,6 +349,7 @@ class TinodeService {
     return _send(message.asPubPacket());
   }
 
+
   /// Request topic metadata
   Future getMeta(String topicName, GetQuery params) {
     var packet = _packetGenerator.generate(packet_types.GetType, topicName);

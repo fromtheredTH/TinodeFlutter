@@ -272,6 +272,9 @@ class Topic {
     }
   }
 
+
+
+
   /// Leave the topic, optionally unsubscribe. Leaving the topic means the topic will stop
   /// receiving updates from the server. Unsubscribing will terminate user's relationship with the topic.
   ///

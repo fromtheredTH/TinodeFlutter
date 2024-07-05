@@ -56,7 +56,7 @@ class _LoginState extends State<Login> {
     await tinode.connect();
     print('Is Connected:' + tinode.isConnected.toString());
 
-    try {
+  try {
       var result = await tinode.loginBasic(id, pw, null);
       print('User Id: ' + result.params['user'].toString());
       token = result.params['token'];

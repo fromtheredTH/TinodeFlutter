@@ -3,8 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 
-import '../Constants/ColorConstants.dart';
-import '../FontConstants.dart';
+import '../../Constants/ColorConstants.dart';
+import '../../FontConstants.dart';
 
 // 앱 고유 텍스트
 class AppButton extends StatelessWidget {

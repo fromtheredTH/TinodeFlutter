@@ -16,11 +16,11 @@ import 'package:tinodeflutter/Constants/ImageUtils.dart';
 import 'package:tinodeflutter/Constants/utils.dart';
 import 'package:tinodeflutter/Screen/setting_list_screen.dart';
 import 'package:tinodeflutter/app_text.dart';
-import 'package:tinodeflutter/components/BottomProfileWidget.dart';
-import 'package:tinodeflutter/components/BtnBottomSheetWidget.dart';
-import 'package:tinodeflutter/components/GalleryBottomSheet.dart';
+import 'package:tinodeflutter/components/widget/BottomProfileWidget.dart';
+import 'package:tinodeflutter/components/widget/BtnBottomSheetWidget.dart';
+import 'package:tinodeflutter/components/widget/GalleryBottomSheet.dart';
 import 'package:tinodeflutter/components/MyAssetPicker.dart';
-import 'package:tinodeflutter/components/btn_bottom_sheet_model.dart';
+import 'package:tinodeflutter/model/btn_bottom_sheet_model.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
@@ -205,7 +205,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Color.fromARGB(255, 24, 197, 160),
+        backgroundColor: Colors.grey,
         resizeToAvoidBottomInset: true,
         body: Column(children: [
           SizedBox(height: Get.height * 0.07),

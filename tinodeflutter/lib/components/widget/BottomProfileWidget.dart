@@ -9,11 +9,11 @@ import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/tinode/src/models/topic-subscription.dart';
 
-import '../../Constants/ColorConstants.dart';
-import '../../Constants/FontConstants.dart';
-import '../../Constants/ImageConstants.dart';
-import '../../Constants/ImageUtils.dart';
-import '../../Constants/utils.dart';
+import '../../../Constants/ColorConstants.dart';
+import '../../../Constants/FontConstants.dart';
+import '../../../Constants/ImageConstants.dart';
+import '../../../Constants/ImageUtils.dart';
+import '../../../Constants/utils.dart';
 
 class BottomProfileWidget extends StatefulWidget{
   BottomProfileWidget({Key? key, required this.user, required this.setting, required this.logout}) : super(key: key);

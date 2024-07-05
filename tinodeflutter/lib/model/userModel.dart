@@ -5,7 +5,7 @@ class User {
    String picture;
    bool isFreind=false;
 
-  User({required this.id, required this.name, required this.picture, });
+  User({required this.id, required this.name, required this.picture, required this.isFreind});
 
 
    User.fromJson(Map<String, dynamic> json)
