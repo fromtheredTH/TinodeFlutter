@@ -6,7 +6,7 @@ import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:tinodeflutter/Screen/FriendListScreen.dart';
 import 'package:tinodeflutter/Screen/ProfileScreen.dart';
 
-import 'package:tinodeflutter/SearchUser.dart';
+import 'package:tinodeflutter/Screen/SearchUser.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:http/http.dart';
 import 'package:tinodeflutter/helpers/common_util.dart';

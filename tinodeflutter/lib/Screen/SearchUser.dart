@@ -3,23 +3,23 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:tinodeflutter/Screen/ProfileScreen.dart';
-import 'Screen/messageRoomScreen.dart';
-import 'tinode/tinode.dart';
-import 'tinode/src/models/message.dart';
+import 'messageRoomScreen.dart';
+import '../tinode/tinode.dart';
+import '../tinode/src/models/message.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:http/http.dart';
 import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:get/get_core/src/get_main.dart';
 
-import '../components/item/PositionRetainedScrollPhysics.dart';
+import '../../components/item/PositionRetainedScrollPhysics.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_it/get_it.dart';
 
-import 'model/userModel.dart';
+import '../model/userModel.dart';
 
 class SerachUserScreen extends StatefulWidget {
   Tinode tinode;

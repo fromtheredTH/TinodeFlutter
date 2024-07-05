@@ -24,7 +24,7 @@ import 'package:tinodeflutter/model/btn_bottom_sheet_model.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
-import 'package:tinodeflutter/login.dart';
+import 'package:tinodeflutter/Screen/login.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class ProfileScreen extends StatefulWidget {

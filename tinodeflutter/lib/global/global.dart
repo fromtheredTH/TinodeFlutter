@@ -16,12 +16,17 @@ const hostAddres = "54.180.163.159:6060";
 String token ="";
 String url_encoded_token ="";
 
+bool isLoading=true;
+
+
 enum eChatType {
   NONE,
   TEXT,
   IMAGE,
   VIDEO,
   AUDIO,
+  VOICE_CALL,
+  VIDEO_CALL,
   HTML,
   SYSTEM,
 }

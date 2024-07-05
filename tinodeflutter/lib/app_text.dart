@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
+import 'package:tinodeflutter/Constants/FontConstants.dart';
 
-import 'FontConstants.dart';
 
 // 앱 고유 텍스트
 class AppText extends StatelessWidget {

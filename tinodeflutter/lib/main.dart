@@ -23,7 +23,8 @@ import 'package:tinodeflutter/Constants/ColorConstants.dart';
 import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:tinodeflutter/firebase/firebase_options.dart';
 import 'package:tinodeflutter/firebase/push_notification.dart';
-import 'package:tinodeflutter/login.dart';
+import 'package:tinodeflutter/Screen/login.dart';
+import 'package:tinodeflutter/services/social_service.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:intl/intl_standalone.dart';
 import 'Constants/utils.dart';
@@ -45,7 +46,7 @@ Future<void> main() async {
   // );
   await EasyLocalization.ensureInitialized();
   await FlutterDownloader.initialize(debug: true, ignoreSsl: true);
-  // GetIt.I.registerSingleton<SocialService>(SocialService());
+  GetIt.I.registerSingleton<SocialService>(SocialService());
   setupLocator();
   await Permission.notification.request(); // 유저 승인 요청 후 initFcm()
 

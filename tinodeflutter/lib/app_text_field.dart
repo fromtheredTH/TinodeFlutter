@@ -1,6 +1,6 @@
-import 'FontConstants.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
+import 'package:tinodeflutter/Constants/FontConstants.dart';
 class AppTextField extends StatelessWidget {
   final TextEditingController? textController;
   final TextInputAction? textInputAction;
