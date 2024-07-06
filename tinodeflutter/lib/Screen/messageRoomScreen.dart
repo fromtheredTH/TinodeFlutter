@@ -354,7 +354,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
                     dataMessage.content['ent'][0]['data']['duration']),
                 textAlign: TextAlign.end,
                 color: Colors.white,
-                fontSize: 20,
+                fontSize: 12,
               )
               // if (info.fileProgress != null &&
               //     info.totalProgress != null &&
@@ -1064,7 +1064,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
                       ),
                       AppText(
                         text: '사진/동영상 선택',
-                        fontSize: 20,
+                        fontSize: 12,
                       ),
                     ],
                   ),

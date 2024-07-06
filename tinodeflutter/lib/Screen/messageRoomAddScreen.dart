@@ -26,7 +26,8 @@ import '../tinode/tinode.dart';
 import 'messageRoomScreen.dart';
 
 class MessageRoomAddScreen extends StatefulWidget {
-  MessageRoomAddScreen({super.key, required this.tinode, this.roomTopic, this.existUserList});
+  MessageRoomAddScreen(
+      {super.key, required this.tinode, this.roomTopic, this.existUserList});
   Tinode tinode;
   Topic? roomTopic;
   late TopicFnd _fndTopic;
@@ -60,7 +61,6 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
   bool hasNextPage = false;
 
   late FocusNode _focusNode;
-
 
   late Topic _groupTopic;
   late Topic _1to1Topic;
@@ -118,30 +118,44 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
     }
   }
 
-  void _initializeFndTopic() async{
+  void _initializeFndTopic() async {
     _fndTopic = tinode.getTopic('fnd') as TopicFnd;
     _fndTopic.onMeta.listen((value) {
       _handleMetaMessage(value);
     });
-    if(!_fndTopic.isSubscribed) await _fndTopic.subscribe(MetaGetBuilder(_fndTopic).withData(null, null, null).build(), null);
+    if (!_fndTopic.isSubscribed)
+      await _fndTopic.subscribe(
+          MetaGetBuilder(_fndTopic).withData(null, null, null).build(), null);
   }
 
   void _handleMetaMessage(MetaMessage msg) {
     if (msg.sub != null) {
       setState(() {
-        try{
-        print("search list :");
-        for(int i = 0 ; i<msg.sub!.length ;i++)
-        {
-          String pictureUrl = msg.sub?[i].public['photo']?['ref'] != null ? changePathToLink(msg.sub?[i].public['photo']['ref']) : "";
-          User user = User(id: msg.sub?[i].user ?? "" , name : msg.sub?[i].public['fn'], picture : pictureUrl, isFreind: msg.sub?[i].isFriend ?? false);
-          searchUserList.add(user);
-        }
-        }
-        catch(err)
-        {
+        try {
+          print("search list :");
+          for (int i = 0; i < msg.sub!.length; i++) {
+            String pictureUrl = msg.sub?[i].public['photo']?['ref'] != null
+                ? changePathToLink(msg.sub?[i].public['photo']['ref'])
+                : "";
+            User user = User(
+                id: msg.sub?[i].user ?? "",
+                name: msg.sub?[i].public['fn'],
+                picture: pictureUrl,
+                isFreind: msg.sub?[i].isFriend ?? false);
+            searchUserList.add(user);
+          }
+          
+            isLoading = false;
+            isSearchingLoading = false;
+          
+        } catch (err) {
           print("err : $err");
         }
+      });
+    } else {
+      setState(() {
+        isLoading = false;
+        isSearchingLoading = false;
       });
     }
   }
@@ -157,32 +171,26 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
       // fnd 토픽에 메타데이터 설정 요청 보내기
       var ctrl = await _fndTopic.setMeta(setParams);
 
-   // GetQuery 객체를 생성하여 검색 결과 요청
-    GetQuery getQuery = GetQuery(
-      topic : _fndTopic.name,
-      what: 'sub',
-      //sub: GetOptsType(user: query), // 적절한 GetOptsType 설정
-    );
-    // fnd 토픽에 메타데이터 요청 보내기
-    var meta = await _fndTopic.getMeta(getQuery);
-    isSearchingLoading = false;
-
-    // 메타데이터 응답 처리
-    if (meta != null && meta.sub != null) {
-      setState(() {
-        // _searchResults = meta.sub!.map((sub) {
-        //   return User(
-        //     id: sub.user ?? 'Unknown ID',
-        //     name: sub.public?['fn'] ?? 'Unknown',
-        //     email: sub.public?['email'] ?? 'No Email',
-        //     picture: "",
-        //     nickname: '',
-        //   );
-        // }).toList();
-      });
+      // GetQuery 객체를 생성하여 검색 결과 요청
+      GetQuery getQuery = GetQuery(
+        topic: _fndTopic.name,
+        what: 'sub',
+        //sub: GetOptsType(user: query), // 적절한 GetOptsType 설정
+      );
+      // fnd 토픽에 메타데이터 요청 보내기
+      var meta = await _fndTopic.getMeta(getQuery);
+      if (meta?.text == "no content") {
+        setState(() {
+          isLoading = false;
+          isSearchingLoading = false;
+        });
       }
     } catch (err) {
       print("err search : $err");
+      setState(() {
+        isLoading = false;
+        isSearchingLoading = false;
+      });
     }
   }
 
@@ -194,8 +202,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
     tinode.getFndTopic();
   }
 
-   Future<void> _getFriendList() async {
-    
+  Future<void> _getFriendList() async {
     GetQuery getQuery = GetQuery(
       what: 'fri',
     );
@@ -212,10 +219,11 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
           User user = User(
               id: data.fri[i].user,
               name: data.fri[i].public['fn'],
-              picture: pictureUrl, isFreind: true);
+              picture: pictureUrl,
+              isFreind: true);
           //friendList.add(user);
           setState(() {
-          friendList.add(user);
+            friendList.add(user);
           });
         }
       }
@@ -224,13 +232,15 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
     }
   }
 
-  void _1to1Room() {    
-    Get.off(() => MessageRoomScreen(tinode: tinode, clickTopic: selectList[0].id));
+  void _1to1Room() {
+    Get.off(
+        () => MessageRoomScreen(tinode: tinode, clickTopic: selectList[0].id));
   }
 
   Future<void> onClickMakeRoom() async {
-    if(selectList.isEmpty) return;
-    if (widget.existUserList != null && (roomTopic?.name?[0] ?? "") == 'g') { // 안 들어오면 방에서 초대한게 아니라 새로운 채팅방 만들고 있는것
+    if (selectList.isEmpty) return;
+    if (widget.existUserList != null && (roomTopic?.name?[0] ?? "") == 'g') {
+      // 안 들어오면 방에서 초대한게 아니라 새로운 채팅방 만들고 있는것
       await inviteUserToGroup();
       return;
     }
@@ -240,7 +250,6 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
     // 한명일때는 p2P로
     is1to1 ? _1to1Room() : makeGroupRoom();
   }
-  
 
   void createGroupChat() async {
     // 새로운 그룹 토픽을 생성
@@ -321,7 +330,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
         await _groupTopic.invite(selectList[i].id, 'JRWPAS');
       }
       _groupTopic.leave(true);
-      Get.to(() => MessageRoomScreen(
+      Get.off(() => MessageRoomScreen(
           tinode: tinode, clickTopic: _groupTopic.name ?? ""));
       print('User  invited to group chat');
     } catch (e) {
@@ -538,10 +547,10 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
                                             decoration: BoxDecoration(
                                                 borderRadius:
                                                     BorderRadius.circular(30),
-                                                color:
-                                                    selectList[index].selected
-                                                        ? Colors.black
-                                                        : ColorConstants.colorMain),
+                                                color: selectList[index]
+                                                        .selected
+                                                    ? Colors.black
+                                                    : ColorConstants.colorMain),
                                             child: Row(
                                               children: [
                                                 AppText(
@@ -580,90 +589,43 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
                               controller: mainScrollController,
                               child: Column(
                                 children: [
-                                  //추천 탭
-                                  // Container(
-                                  //   padding: const EdgeInsets.symmetric(vertical: 10),
-                                  //   child: Row(
-                                  //     mainAxisAlignment: MainAxisAlignment.center,
-                                  //     crossAxisAlignment: CrossAxisAlignment.center,
-                                  //     children: [
-                                  //       Expanded(child: Container(height: 0.5, color: ColorConstants.colorMain)),
-                                  //       const SizedBox(width: 20),
-                                  //       AppText(
-                                  //         text: 'add_chat_recommand'.tr(),
-                                  //         fontSize: 10,
-                                  //         color: ColorConstants.colorMain,
-                                  //       ),
-                                  //       const SizedBox(width: 20),
-                                  //       Expanded(child: Container(height:0.51, color: ColorConstants.colorMain)),
-                                  //     ],
-                                  //   ),
-                                  // ),
-
-                                  // ListView.builder(
-                                  //     shrinkWrap: true,
-                                  //     physics: const NeverScrollableScrollPhysics(),
-                                  //     itemBuilder: (BuildContext context, int index) {
-                                  //       return ItemUser(
-                                  //         info: recommanUserList[index],
-                                  //         selected: selectList.map((item) => item.id).contains(recommanUserList[index].id),
-                                  //         isDisabled: widget.existUserList?.map((item) => item.id).contains(recommanUserList[index].id) ?? false,
-                                  //         onClick: () {
-                                  //           setState(() {
-                                  //             if (selectList.map((user) => user.id).contains(recommanUserList[index].id)) {
-                                  //               for(int i=0;i<selectList.length;i++){
-                                  //                 if(selectList[i].id == recommanUserList[index].id){
-                                  //                   selectList.removeAt(i);
-                                  //                   break;
-                                  //                 }
-                                  //               }
-                                  //             } else {
-                                  //               selectList.add(recommanUserList[index]);
-                                  //             }
-                                  //           });
-                                  //         },
-                                  //       );
-                                  //     },
-                                  //     itemCount: recommanUserList.length),
-
-                                  // if(friendList.isNotEmpty)
-                                  Column(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 10),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Expanded(
-                                                child: Container(
-                                                    height: 0.5,
-                                                    color: ColorConstants
-                                                        .colorMain)),
-                                            const SizedBox(width: 20),
-                                            AppText(
-                                              text: searchTextController
-                                                      .text.isEmpty
-                                                  ? '친구목록'
-                                                  : "add_chat_search",
-                                              fontSize: 10,
-                                              color: ColorConstants.colorMain,
-                                            ),
-                                            const SizedBox(width: 20),
-                                            Expanded(
-                                                child: Container(
-                                                    height: 0.51,
-                                                    color: ColorConstants
-                                                        .colorMain)),
-                                          ],
+                                  if (friendList.isNotEmpty)
+                                    Column(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 10),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              Expanded(
+                                                  child: Container(
+                                                      height: 0.5,
+                                                      color: ColorConstants
+                                                          .colorMain)),
+                                              const SizedBox(width: 20),
+                                              AppText(
+                                                text: searchTextController
+                                                        .text.isEmpty
+                                                    ? '친구목록'
+                                                    : "add_chat_search",
+                                                fontSize: 10,
+                                                color: ColorConstants.colorMain,
+                                              ),
+                                              const SizedBox(width: 20),
+                                              Expanded(
+                                                  child: Container(
+                                                      height: 0.51,
+                                                      color: ColorConstants
+                                                          .colorMain)),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-
+                                      ],
+                                    ),
                                   friendList.isEmpty
                                       ? Container(
                                           width: double.maxFinite,
@@ -758,13 +720,15 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
                                           .contains(searchUserList[index].id),
                                       isDisabled: widget.existUserList
                                               ?.map((item) => item.id)
-                                              .contains(searchUserList[index].id) ??
+                                              .contains(
+                                                  searchUserList[index].id) ??
                                           false,
                                       onClick: () {
                                         setState(() {
                                           if (selectList
                                               .map((user) => user.id)
-                                              .contains(searchUserList[index].id)) {
+                                              .contains(
+                                                  searchUserList[index].id)) {
                                             for (int i = 0;
                                                 i < selectList.length;
                                                 i++) {
@@ -775,7 +739,8 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
                                               }
                                             }
                                           } else {
-                                            selectList.add(searchUserList[index]);
+                                            selectList
+                                                .add(searchUserList[index]);
                                           }
                                         });
                                       },
@@ -790,6 +755,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
                                       text: "add_chat_search_empty".tr(),
                                       fontWeight: FontWeight.w400,
                                       fontSize: 16,
+                                      color: Colors.white,
                                     ),
                                   ),
                                 ),
@@ -808,11 +774,12 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
                         color: ColorConstants.colorMain),
                     child: Center(
                       child: AppText(
-                         text: widget.existUserList != null ? "add_chat_user".tr(args: ["${selectList.length}"])
+                        text: widget.existUserList != null
+                            ? "add_chat_user".tr(args: ["${selectList.length}"])
                             : selectList.length == 1
-                            ? 'new_chat'.tr(args: ["${selectList[0].id}"])
-                            : 'new_group_chat'.tr(
-                            args: ["${selectList.length}"]),
+                                ? 'new_chat'.tr(args: ["${selectList[0].id}"])
+                                : 'new_group_chat'
+                                    .tr(args: ["${selectList.length}"]),
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
                       ),

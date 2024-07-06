@@ -279,7 +279,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
                                   child: Row(children: [
                                     AppText(
                                       text: roomList[index].public !=null ? roomList[index].public['fn'] : "혼자인 방",
-                                      fontSize: 30,
+                                      fontSize: 12,
                                       color: Colors.black,
                                     ),
                                     SizedBox(
@@ -290,7 +290,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
                                         text: (roomList[index]
                                             .updated
                                             .toString()),
-                                        fontSize: 30,
+                                        fontSize: 12,
                                         color: Colors.black,
                                       ),
                                     SizedBox(
@@ -299,7 +299,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
                                      if (roomList[index].unread != null && roomList[index].unread != 0) ...[
                                     AppText(
                                       text: roomList[index].unread.toString(),
-                                      fontSize: 30,
+                                      fontSize: 12,
                                       color: Colors.red,
                                     ),]
                                   ]),

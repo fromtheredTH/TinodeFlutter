@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:tinodeflutter/Screen/ProfileScreen.dart';
+import 'package:tinodeflutter/global/global.dart';
 import 'messageRoomScreen.dart';
 import '../tinode/tinode.dart';
 import '../tinode/src/models/message.dart';
@@ -102,23 +103,25 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
     );
     // fnd 토픽에 메타데이터 요청 보내기
     var meta = await _fndTopic.getMeta(getQuery);
-
+    if(meta?.text=="no content")
+      showToast("해당 유저없음");
     // 메타데이터 응답 처리
-    if (meta != null && meta.sub != null) {
-      setState(() {
-        // _searchResults = meta.sub!.map((sub) {
-        //   return User(
-        //     id: sub.user ?? 'Unknown ID',
-        //     name: sub.public?['fn'] ?? 'Unknown',
-        //     email: sub.public?['email'] ?? 'No Email',
-        //     picture: "",
-        //     nickname: '',
-        //   );
-        // }).toList();
-      });
-      }
+    // if (meta != null && meta.sub != null) {
+    //   setState(() {
+    //     // _searchResults = meta.sub!.map((sub) {
+    //     //   return User(
+    //     //     id: sub.user ?? 'Unknown ID',
+    //     //     name: sub.public?['fn'] ?? 'Unknown',
+    //     //     email: sub.public?['email'] ?? 'No Email',
+    //     //     picture: "",
+    //     //     nickname: '',
+    //     //   );
+    //     // }).toList();
+    //   });
+    //   }
     } catch (err) {
       print("err search : $err");
+      isLoading=false;
     }
   }
 
