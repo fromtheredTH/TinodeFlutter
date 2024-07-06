@@ -7,6 +7,21 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 version: 1.0.0+1
 
+flutter_native_splash:
+  color: "#1a1c29"
+  color_android: "#1a1c29"
+  icon_background_color: "#1a1c29"
+  fullscreen: true
+  image: assets/image/background.png
+  android_12:
+    color: "#1a1c29"
+    icon_background_color: "#1a1c29"
+    image: assets/image/background.png
+  android: true
+  android_gravity: center
+  color_dark: "#1a1c29"
+  ios: true
+
 environment:
   sdk: '>=3.2.4 <4.0.0'
 

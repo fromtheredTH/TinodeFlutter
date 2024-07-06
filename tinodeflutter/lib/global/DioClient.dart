@@ -377,7 +377,7 @@ class DioClient {
     return getInstance(communityBaseUrl).post("/fcm", data: formData);
   }
 
-  static Future<Response> deleteFCM(String token) async {
+static Future<Response> deleteFCM(String token) async {
     Map<String, dynamic> queryData = {
       "token": token
     };

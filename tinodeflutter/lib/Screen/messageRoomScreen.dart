@@ -17,6 +17,7 @@ import 'package:tinodeflutter/components/widget/image_viewer.dart';
 import 'package:tinodeflutter/dto/file_dto.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
 import 'package:tinodeflutter/global/global.dart';
+import 'package:tinodeflutter/setting/setting_chat_expiration_screen.dart';
 import 'package:tinodeflutter/tinode/src/models/del-range.dart';
 import 'package:tinodeflutter/tinode/src/models/message.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
@@ -93,6 +94,9 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
             print('DataMessage: ' + data.content);
           else
             print("첨부파일 입니다.");
+          
+          if(msgList.length!=0 &&  msgList[0].seq == data.seq) return;
+
           msgList.insert(0, data);
           setState(() {
             if (data.ts != null) msgList.sort((a, b) => b.ts!.compareTo(a.ts!));
@@ -1064,6 +1068,17 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
                       ),
                     ],
                   ),
+                  SizedBox(
+                        // SizedBox 대신 Container를 사용 가능
+                        width: 200,
+                        height: 30,
+                        child: FilledButton(
+                          onPressed: () {
+                            Get.to(SettingChatExpirationeScreen(tinode: tinode, roomTopic: roomTopic));
+                          },
+                          child: Text('자동삭제조정 설정'),
+                        ),
+                      ),
                 ],
               )),
           Expanded(

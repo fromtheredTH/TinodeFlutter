@@ -7,6 +7,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tinodeflutter/helpers/common_util.dart';
+import 'package:tinodeflutter/model/userModel.dart';
 
 import 'global.dart';
 
@@ -17,9 +18,9 @@ class LocalService {
   static String PREF_RECENT_KEYWORD = "PREF_RECENT_KEYWORD";
   static String PREF_LANG = "PREF_LANG";
 
-  static void setUser(UserDto userDto) async {
+  static void setUser(User user) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString(PREF_USER, json.encode(userDto.toJson()));
+    prefs.setString(PREF_USER, json.encode(user.toJson()));
   }
 
   static void removeUser() async {
@@ -27,13 +28,13 @@ class LocalService {
     prefs.remove(PREF_USER);
   }
 
-  static Future<UserDto?> getUser() async {
+  static Future<User?> getUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? user = prefs.getString(PREF_USER);
     if (user == null || user.isEmpty) {
       return null;
     }
-    return UserDto.fromJson(json.decode(user));
+    return User.fromJson(json.decode(user));
   }
 
   static void setToken(String value) async {

@@ -60,6 +60,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       var data = await tinode.friMeta(userid, 'add');
       print("ddd");
+      if(data.code==200)
+        {
+          setState(() {
+            user.isFreind=true;
+          });
+        }
     } catch (err) {
       print("add freind : $err");
     }
@@ -402,6 +408,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     textAlign: TextAlign.center,
                   )),
             )
+            else
+              AppText(
+                    text: "친구입니다",
+                    textAlign: TextAlign.center,),
         ]));
   }
 }

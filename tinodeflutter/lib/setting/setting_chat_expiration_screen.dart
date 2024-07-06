@@ -95,9 +95,10 @@ class _SettingChatExpirationeScreen
 
 
   initTimerData() {
-    print("min : ${roomTopic.chat_expire_minute}");
+    print("min : ${roomTopic.public['msgexpiremin'] ?? 60000000 }");
+    int chat_expire_minute = roomTopic.public['msgexpiremin'] ?? 60000000;
     // showToast("${roomDto.chat_expire_minute}");
-    switch (roomTopic.chat_expire_minute) {
+    switch (chat_expire_minute) {
       case 60000000:
         selectedIndex = 0;
       case 60:

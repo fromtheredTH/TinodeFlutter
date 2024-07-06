@@ -4,8 +4,10 @@ class User {
    String? email;
    String picture;
    bool isFreind=false;
+   dynamic? membership;
+   bool selected=false;
 
-  User({required this.id, required this.name, required this.picture, required this.isFreind});
+  User({required this.id, required this.name, required this.picture, required this.isFreind , this.membership, this.selected=false});
 
 
    User.fromJson(Map<String, dynamic> json)

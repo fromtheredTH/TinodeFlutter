@@ -96,7 +96,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
   {
     //내 data 받아오기
     GetQuery getQuery = GetQuery(
-      what: 'sub desc tags cred',
+      what: 'sub desc tags cred membership',
     );
     // fnd 토픽에 메타데이터 요청 보내기
     var meta = await me.getMeta(getQuery);

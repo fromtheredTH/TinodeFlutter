@@ -98,6 +98,7 @@ class MetaMessage {
   ///  jadechat only
   final List<TopicSubscription>? fri;
   final List<TopicSubscription>? blo;
+  final dynamic? membership;
 
   MetaMessage(
       {this.id,
@@ -109,7 +110,8 @@ class MetaMessage {
       this.cred,
       this.del,
       this.fri,
-      this.blo});
+      this.blo,
+      this.membership});
 
   static MetaMessage fromMessage(Map<String, dynamic> msg) {
     List<dynamic>? sub = msg['sub'];
@@ -141,7 +143,8 @@ class MetaMessage {
           : [],
       blo: blo != null && blo.length != null
           ? blo.map((blo) => TopicSubscription.fromMessage(blo)).toList()
-          : [],   
+          : [],
+      membership: msg['membership'],   
     );
   }
 }
