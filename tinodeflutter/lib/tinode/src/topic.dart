@@ -565,15 +565,15 @@ class Topic {
   }
 
   /// Send a 'recv' receipt. Wrapper for Tinode.noteRecv
-  void noteReceive(int seq) {
-    _note('recv', seq);
+  void noteReceive(int seq, String? event) {
+    _note('recv', seq, event);
   }
 
   /// Send a 'read' receipt. Wrapper for Tinode.noteRead
-  void noteRead(int? seq) {
+  void noteRead(int? seq, String? event) {
     this.seq = seq ?? _maxSeq;
     if (this.seq! > 0) {
-      _note('read', this.seq!);
+      _note('read', this.seq!, event);
     }
   }
 
