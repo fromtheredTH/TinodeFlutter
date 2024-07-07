@@ -13,6 +13,7 @@ import 'package:tinodeflutter/call/CallService.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
 import 'package:tinodeflutter/global/app_get_it.dart';
 import 'package:tinodeflutter/global/global.dart';
+import 'package:tinodeflutter/model/userModel.dart';
 
 import 'firebase_options.dart';
 
@@ -231,9 +232,12 @@ class PushNotificationService {
 
 
       if (fcmType == 10) {
-        final callService = CallService();
-        callService.showIncomingCall(callerName : title,callerNumber: '010-3333-3333', callerAvatar: "");
-
+        if(tinode_global.isConnected){ 
+          await reConnectTinode();
+          List<User> joinUserList = [];
+          final callService = CallService(joinUserList: joinUserList , roomTopicName: "");
+          callService.showIncomingCall(callerName : title ,callerNumber: '', callerAvatar: "");
+      }
         //dm
         // SendPort? send1 = IsolateNameServer.lookupPortByName('firbase_port1');
         // send1?.send([jsonEncode(meta['chat']), jsonEncode(meta['room'])]);

@@ -39,23 +39,35 @@ class _LoginState extends State<Login> {
   String versionApp = '1.0.0';
   String deviceLocale = 'en-US';
 
-  void loginProcesss() async {
-    var key = apiKey;
-    // var host = 'sandbox.tinode.co';
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    connectWsTinode();
+  }
+
+  void connectWsTinode() async{
+   var key = apiKey;
     var host = hostAddres;
-    id = idController.value.text == "" ? "test3" : idController.value.text;
-    pw = pwController.value.text == "" ? "qwer123!" : pwController.value.text;
     var loggerEnabled = true;
     tinode = Tinode(
-      'TinodeFlutter',
+      'JadeChat',
       ConnectionOptions(host, key, secure: false),
       loggerEnabled,
       versionApp: versionApp,
       deviceLocale: deviceLocale,
     );
     await tinode.connect();
+    tinode_global = tinode;
     print('Is Connected:' + tinode.isConnected.toString());
 
+  }
+
+  void loginProcesss() async {
+
+    id = idController.value.text == "" ? "test3" : idController.value.text;
+    pw = pwController.value.text == "" ? "qwer123!" : pwController.value.text;
+ 
   try {
       var result = await tinode.loginBasic(id, pw, null);
       print('User Id: ' + result.params['user'].toString());

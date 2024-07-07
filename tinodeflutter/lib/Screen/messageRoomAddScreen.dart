@@ -239,7 +239,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
 
   Future<void> onClickMakeRoom() async {
     if (selectList.isEmpty) return;
-    if (widget.existUserList != null && (roomTopic?.name?[0] ?? "") == 'g') {
+    if (widget.existUserList != null && roomTopic!=null && roomTopic!.isGroup()) {
       // 안 들어오면 방에서 초대한게 아니라 새로운 채팅방 만들고 있는것
       await inviteUserToGroup();
       return;

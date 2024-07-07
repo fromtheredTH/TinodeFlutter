@@ -1,12 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/tinode/tinode.dart';
 
 import 'CallController.dart';
 
-class CallScreen extends StatelessWidget {
-  final CallController controller = Get.put(CallController());
+class CallScreen extends StatefulWidget {
+  CallScreen( {super.key, required this.tinode,  this.roomTopic, required this.joinUserList});
+  Tinode tinode;
+  Topic? roomTopic;
+  List<User> joinUserList;
+  @override
+  State<CallScreen> createState() => _CallScreenState();
+}
 
+
+class _CallScreenState extends State<CallScreen>  {
+  late Tinode tinode;
+  Topic? roomTopic;
+  final CallController controller = Get.put(CallController());
+  late List<User> joinUserList;
+
+  @override
+  void initState() {
+    super.initState();
+    tinode = widget.tinode;
+    roomTopic = widget.roomTopic;
+    joinUserList = widget.joinUserList;
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,13 +44,13 @@ class CallScreen extends StatelessWidget {
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: NetworkImage('https://via.placeholder.com/150'),
-                  ),
-                  SizedBox(height: 20),
+                  // CircleAvatar(
+                  //   radius: 50,
+                  //   backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+                  // ),
+                  // SizedBox(height: 20),
                   Text(
-                    'John Doe',
+                    '${joinUserList[0].name}',
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 10),
@@ -99,6 +121,7 @@ class CallButton extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         FloatingActionButton(
+          heroTag: text,
           onPressed: onPressed,
           child: Icon(icon),
           backgroundColor: color,

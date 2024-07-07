@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 
@@ -201,4 +202,27 @@ String pad2(int i) {
   {
     String link = "http://$hostAddres/$path?apikey=$apiKey&auth=token&secret=$url_encoded_token";
     return link;
+  }
+
+
+
+  void startTimer() {
+    late Timer _timer;
+    int _seconds = 0;
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      _seconds++;
+      print(_formatTime(_seconds));
+    });
+  }
+
+  String _formatTime(int totalSeconds) {
+    int hours = totalSeconds ~/ 3600;
+    int minutes = (totalSeconds % 3600) ~/ 60;
+    int seconds = totalSeconds % 60;
+
+    String hoursStr = hours.toString().padLeft(2, '0');
+    String minutesStr = minutes.toString().padLeft(2, '0');
+    String secondsStr = seconds.toString().padLeft(2, '0');
+
+    return '$hoursStr:$minutesStr:$secondsStr';
   }

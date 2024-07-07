@@ -228,8 +228,9 @@ class NotePacketData extends PacketData {
   String? topic;
   String? what;
   dynamic seq;
+  String? event;
 
-  NotePacketData({this.topic, this.what, this.seq});
+  NotePacketData({this.topic, this.what, this.seq, this.event});
 
   @override
   Map<String, dynamic> toMap() {
@@ -237,6 +238,7 @@ class NotePacketData extends PacketData {
       'topic': topic,
       'what': what,
       'seq': seq,
+      'event':event,
     };
   }
 }

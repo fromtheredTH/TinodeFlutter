@@ -6,9 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_gallery/photo_gallery.dart';
+import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:tinodeflutter/Constants/ImageConstants.dart';
 import 'package:tinodeflutter/Constants/ImageUtils.dart';
 import 'package:tinodeflutter/Constants/utils.dart';
+import 'package:tinodeflutter/call/CallScreen.dart';
+import 'package:tinodeflutter/call/CallService.dart';
 import 'package:tinodeflutter/components/widget/BtnBottomSheetWidget.dart';
 import 'package:tinodeflutter/components/widget/GalleryBottomSheet.dart';
 import 'package:tinodeflutter/components/MyAssetPicker.dart';
@@ -17,6 +20,7 @@ import 'package:tinodeflutter/components/widget/image_viewer.dart';
 import 'package:tinodeflutter/dto/file_dto.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
 import 'package:tinodeflutter/global/global.dart';
+import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/setting/setting_chat_expiration_screen.dart';
 import 'package:tinodeflutter/tinode/src/models/del-range.dart';
 import 'package:tinodeflutter/tinode/src/models/message.dart';
@@ -63,7 +67,9 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
   TextEditingController inputController = TextEditingController();
   PositionRetainedScrollPhysics physics = PositionRetainedScrollPhysics();
   final ImagePicker _picker = ImagePicker();
-
+  List<User> joinUserList= [];
+  late TopicSubscription roomMetaSubData;
+  late Topic roomTopicData;
   @override
   void initState() {
     super.initState();
@@ -80,24 +86,19 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
 
   Future<void> getMsgList() async {
     roomTopic = tinode.getTopic(clickTopic);
-    try {
-      if (!roomTopic.isSubscribed)
-        await roomTopic.subscribe(
-            MetaGetBuilder(roomTopic).withData(null, null, null).build(), null);
-    } catch (err) {
-      print("err roomTopic getMsgList : $err");
-    }
+   
     roomTopic.onData.listen((data) {
       try {
         if (data != null) {
           if(data.content is String)
             print('DataMessage: ' + data.content);
           else
-            print("첨부파일 입니다.");
+            print("텍스트가 아닙니다.");
           
           if(msgList.length!=0 &&  msgList[0].seq == data.seq) return;
 
-          msgList.insert(0, data);
+          //msgList.insert(0, data);
+          msgList.add(data);
           setState(() {
             if (data.ts != null) msgList.sort((a, b) => b.ts!.compareTo(a.ts!));
           });
@@ -106,6 +107,52 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
         print("err roomTopic getMsgList : $err");
       }
     });
+ 
+     roomTopic.onMetaDesc.listen((onMetaDesc){
+      try{
+        roomTopicData = onMetaDesc;
+        for(int i = 0 ; i<onMetaDesc.subscribers.length;i++)
+        {
+         String pictureUrl = roomTopicData.subscribers[i]?.public['photo']['ref'] != null ? changePathToLink(roomTopicData.subscribers[i]?.public['photo']['ref']) : "";
+         User user =  User(id: roomTopicData.subscribers[i]?.user ?? "", name:roomTopicData.subscribers[i]?.public['fn'] ?? "" , picture: pictureUrl, isFreind: roomTopicData.subscribers[i]?.isFriend ?? false);
+         joinUserList.add(user);
+        }
+        setState(() {
+          print("list length : ${joinUserList.length}");
+        });
+      }
+      catch(err)
+      {
+        print("meta err : $err");
+      }
+    });
+    //  roomTopic.onMeta.listen((data){
+    //   try{
+    //     print("$data");
+    //     print("meta data ");
+    //   }
+    //   catch(err)
+    //   {
+    //     print("meta err : $err");
+    //   }
+    // });
+    // roomTopic.onMetaSub.listen((metaSubData){
+    //   try{
+    //     roomMetaSubData=metaSubData;
+    //     print("meta data ");
+    //   }
+    //   catch(err)
+    //   {
+    //     print("meta err : $err");
+    //   }
+    // });
+     try {
+      if (!roomTopic.isSubscribed)
+        await roomTopic.subscribe(
+            MetaGetBuilder(roomTopic).withData(null, null, null).withSub(null, null, null).withDesc(null).build(), null);
+    } catch (err) {
+      print("err roomTopic getMsgList : $err");
+    }
   }
 
   eChatType checkMsgType(DataMessage dataMessage) {
@@ -118,6 +165,10 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
         case 'VD':
           print("video");
           return eChatType.VIDEO;
+        case 'VC':
+          print("call");
+          if(dataMessage.content['ent'][0]['data']?['aonly']!=null) return eChatType.VOICE_CALL;
+          else return eChatType.VIDEO_CALL;
       }
       return eChatType.NONE;
     } else {
@@ -136,9 +187,69 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
             context,
             dataMessage,
             index);
+      case eChatType.VOICE_CALL:
+      case eChatType.VIDEO_CALL:
+        //Get.to(CallScreen(tinode: tinode, roomTopic: roomTopic, joinUserList: joinUserList,));
+        if(!(msgList[0].head?['webrtc']=='missed') && !(msgList[0].head?['webrtc']=='finished') && !(msgList[0].head?['webrtc']=='accepted') && !(msgList[0].head?['webrtc']=='declined')) checkCallState(dataMessage);
+        return callTile(index,dataMessage);
+
       default:
         return Container();
     }
+  }
+
+  void checkCallState(DataMessage dataMessage)
+  {
+    if(dataMessage.from == Constants.user.id) return;  // 내가 걸었던 메시지니깐 따로 처리안함
+    if(dataMessage.head?['webrtc']!=null)
+    {
+     switch(dataMessage.head?['webrtc'])
+     {
+        case 'started':
+          final callService = CallService(joinUserList: joinUserList, roomTopicName: roomTopic.name ?? "");
+          callService.showIncomingCall(callerName : joinUserList[0].name ,callerNumber: '', callerAvatar: "");
+        break;
+        case 'accepted':
+        case 'declined':
+        break;
+        case 'finished':
+        case 'missed':
+        return;
+        default:
+        break;
+     }
+
+    }
+  }
+
+  Widget callTile(int index, DataMessage dataMessage)
+  {
+    return GestureDetector(
+        onLongPress: () => {deleteMsgForAllPerson(msgList[index].seq ?? -1)},
+        child: Stack(
+          children: [
+            Container(
+              height: 30,
+              child: Row(children: [
+                Container(
+                  height: 25,
+                  color: Colors.grey,
+                  child:AppText(
+                  text: '통화 ${dataMessage.head?['webrtc']}',
+                  color: Colors.black,
+                ), 
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                AppText(
+                  text: msgList[index].ts.toString(),
+                  color: Colors.grey,
+                ),
+              ]),
+            )
+          ],
+        )); 
   }
 
   void fullView(BuildContext context, int index, String imageUrl) {
@@ -863,6 +974,36 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
 
   }
 
+  Future<void> requestVoiceCall() async
+  {
+
+    Map<String,dynamic> data =  {
+            "txt": " ",
+            "ent": [
+              {
+                "tp": "VC",
+                "data": {"aonly":true}
+              }
+            ]
+          };
+
+       Map<String,dynamic> head = {
+        "aonly":true,
+        "mime": "text/x-drafty",
+        "webrtc" :"started",
+       };
+    var voiceMsg = roomTopic.createMessage(data, false, head: head);
+    try{
+      await roomTopic.publishMessage(voiceMsg);
+      Get.to(CallScreen(tinode: tinode, joinUserList: joinUserList));
+      
+    }
+    catch(err)
+    {
+      print("voice call request err : $err");
+    }
+  }
+
   Future<bool> _promptPermissionSetting() async {
     if (Platform.isIOS) {
       if (await Permission.photos.request().isGranted ||
@@ -1079,6 +1220,36 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
                           child: Text('자동삭제조정 설정'),
                         ),
                       ),
+               
+                      SizedBox(height: 10,),
+                      if(roomTopic.isP2P())
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [ 
+                           SizedBox(
+                        // SizedBox 대신 Container를 사용 가능
+                        width: 100,
+                        height: 30,
+                        child: FilledButton(
+                          onPressed: () {
+                            requestVoiceCall();
+                          },
+                          child: Text('음성통화'),
+                        ),
+                      ),
+                         SizedBox(
+                        // SizedBox 대신 Container를 사용 가능
+                        width: 100,
+                        height: 30,
+                        child: FilledButton(
+                          onPressed: () {
+                            requestVoiceCall();
+                          },
+                          child: Text('영상통화'),
+                        ),
+                      ),
+                      ],),
+                 
                 ],
               )),
           Expanded(

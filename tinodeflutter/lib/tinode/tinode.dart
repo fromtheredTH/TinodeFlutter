@@ -537,8 +537,8 @@ class Tinode {
   }
 
   /// Notify server that a message or messages were read or received. Does NOT return promise
-  void note(String topicName, String what, int seq) {
-    _tinodeService.note(topicName, what, seq);
+  void note(String topicName, String what, int seq, String? event) {
+    _tinodeService.note(topicName, what, seq, event);
   }
 
   /// Broadcast a key-press notification to topic subscribers. Used to show

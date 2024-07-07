@@ -240,8 +240,8 @@ class Topic {
   }
 
   /// Create a draft of a message without sending it to the server
-  Message createMessage(dynamic data, bool echo) {
-    return _tinodeService.createMessage(name ?? '', data, echo);
+  Message createMessage(dynamic data, bool echo,  {Map<String, dynamic>? head}) {
+    return _tinodeService.createMessage(name ?? '', data, echo, head: head);
   }
 
   /// Publish message created by Topic.createMessage.
