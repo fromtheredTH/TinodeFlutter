@@ -527,7 +527,7 @@ class Topic {
   }
 
   /// Send a read/recv notification
-  void _note(String what, int seq) {
+  void _note(String what, int seq, String? event) {
     if (!isSubscribed) {
       // Cannot sending {note} on an inactive topic".
       return;
@@ -556,7 +556,7 @@ class Topic {
     }
 
     if (update) {
-      _tinodeService.note(name ?? '', what, seq);
+      _tinodeService.note(name ?? '', what, seq, event);
     }
 
     if (me != null) {
