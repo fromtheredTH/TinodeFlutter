@@ -235,8 +235,10 @@ class PushNotificationService {
         if(tinode_global.isConnected){ 
           await reConnectTinode();
           List<User> joinUserList = [];
-          final callService = CallService(joinUserList: joinUserList , roomTopicName: "");
-          callService.showIncomingCall(callerName : title ,callerNumber: '', callerAvatar: "");
+          CallService.instance.joinUserList = joinUserList;
+          CallService.instance.roomTopicName = "";
+          CallService.instance.initCallService();
+          CallService.instance.showIncomingCall(callerName : title ,callerNumber: '', callerAvatar: "");
       }
         //dm
         // SendPort? send1 = IsolateNameServer.lookupPortByName('firbase_port1');

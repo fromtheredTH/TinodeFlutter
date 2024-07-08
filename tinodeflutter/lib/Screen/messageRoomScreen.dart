@@ -70,6 +70,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
   List<User> joinUserList= [];
   late TopicSubscription roomMetaSubData;
   late Topic roomTopicData;
+
   @override
   void initState() {
     super.initState();
@@ -113,8 +114,8 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
         roomTopicData = onMetaDesc;
         for(int i = 0 ; i<onMetaDesc.subscribers.length;i++)
         {
-         String pictureUrl = roomTopicData.subscribers[i]?.public['photo']['ref'] != null ? changePathToLink(roomTopicData.subscribers[i]?.public['photo']['ref']) : "";
-         User user =  User(id: roomTopicData.subscribers[i]?.user ?? "", name:roomTopicData.subscribers[i]?.public['fn'] ?? "" , picture: pictureUrl, isFreind: roomTopicData.subscribers[i]?.isFriend ?? false);
+         String pictureUrl = onMetaDesc.subscribers[i]?.public['photo']['ref'] != null ? changePathToLink(onMetaDesc.subscribers[i]?.public['photo']['ref']) : "";
+         User user =  User(id: onMetaDesc.subscribers[i]?.user ?? "", name:onMetaDesc.subscribers[i]?.public['fn'] ?? "" , picture: pictureUrl, isFreind: onMetaDesc.subscribers[i]?.isFriend ?? false);
          joinUserList.add(user);
         }
         setState(() {
@@ -190,7 +191,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
       case eChatType.VOICE_CALL:
       case eChatType.VIDEO_CALL:
         //Get.to(CallScreen(tinode: tinode, roomTopic: roomTopic, joinUserList: joinUserList,));
-        if(!(msgList[0].head?['webrtc']=='missed') && !(msgList[0].head?['webrtc']=='finished') && !(msgList[0].head?['webrtc']=='accepted') && !(msgList[0].head?['webrtc']=='declined')) checkCallState(dataMessage);
+        if(isDifferenceDateTimeLessOneMinute(DateTime.now(),dataMessage.ts)) checkCallState(dataMessage);
         return callTile(index,dataMessage);
 
       default:
@@ -206,8 +207,10 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
      switch(dataMessage.head?['webrtc'])
      {
         case 'started':
-          final callService = CallService(joinUserList: joinUserList, roomTopicName: roomTopic.name ?? "");
-          callService.showIncomingCall(callerName : joinUserList[0].name ,callerNumber: '', callerAvatar: "");
+          CallService.instance.joinUserList = joinUserList;
+          CallService.instance.roomTopicName = roomTopic.name ?? "";
+          CallService.instance.initCallService();
+          CallService.instance.showIncomingCall(callerName : joinUserList[0].name ,callerNumber: '', callerAvatar: "");
         break;
         case 'accepted':
         case 'declined':
@@ -221,6 +224,14 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
 
     }
   }
+  bool isDifferenceDateTimeLessOneMinute(DateTime dateTime1, DateTime? dateTime2) {
+  // 두 DateTime 객체의 차이를 Duration 객체로 변환
+  if(dateTime2==null) return false;
+  Duration difference = dateTime1.difference(dateTime2).abs();
+
+  // 차이가 60초 이내인지 확인
+  return difference.inSeconds <= 60;
+}
 
   Widget callTile(int index, DataMessage dataMessage)
   {
