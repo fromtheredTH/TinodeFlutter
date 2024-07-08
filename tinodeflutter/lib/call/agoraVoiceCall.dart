@@ -8,7 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 // import 'package:agora_rtc_engine_example/components/log_sink.dart';
 
-const String appId = "be4acf111fda4662ae1b853f23d50e98";
+const String appId = "895be24bd60746d381158b444eb4902c";
 
 /// JoinChannelAudio Example
 class JoinChannelAudio extends StatefulWidget {

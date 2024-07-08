@@ -60,12 +60,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       var data = await tinode.friMeta(userid, 'add');
       print("ddd");
-      if(data.code==200)
-        {
-          setState(() {
-            user.isFreind=true;
-          });
-        }
+      if (data.code == 200) {
+        setState(() {
+          user.isFreind = true;
+        });
+      }
     } catch (err) {
       print("add freind : $err");
     }
@@ -116,95 +115,93 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget QrWidget() {
     return GestureDetector(
       onTap: () async {
-          double currentBright = await ScreenBrightness().current;
-          await ScreenBrightness().setScreenBrightness(1.0);
-          // ignore: use_build_context_synchronously
-          showDialog(
-            context: context,
-            barrierDismissible: true,
-            //바깥 영역 터치시 닫을지 여부 결정
-            builder: ((context) {
-              return Dialog(
-                backgroundColor: Colors.grey[300],
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                child: Container(
-                  width: Get.width * 0.6,
-                  height: Get.width * 0.4 + 180,
-                  padding: EdgeInsets.only(left: 15, right: 15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        height: 15,
+        double currentBright = await ScreenBrightness().current;
+        await ScreenBrightness().setScreenBrightness(1.0);
+        // ignore: use_build_context_synchronously
+        showDialog(
+          context: context,
+          barrierDismissible: true,
+          //바깥 영역 터치시 닫을지 여부 결정
+          builder: ((context) {
+            return Dialog(
+              backgroundColor: Colors.grey[300],
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
+              child: Container(
+                width: Get.width * 0.6,
+                height: Get.width * 0.4 + 180,
+                padding: EdgeInsets.only(left: 15, right: 15),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: 15,
+                    ),
+                    AppText(
+                      text: "my_qr_code",
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Container(
+                      width: double.maxFinite,
+                      height: 0.5,
+                      color: ColorConstants.halfWhite,
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    SvgPicture.asset(
+                      ImageConstants.appLogo,
+                      height: 20,
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    // Image.memory(
+                    //   Constants.userQrCode!,
+                    //   width: Get.width * 0.4,
+                    //   height: Get.width * 0.4,
+                    // ),
+                    QrImageView(
+                      data: 'https://jade-chat.com/${user.name}',
+                      version: QrVersions.auto,
+                      size: Get.width * 0.4,
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(
+                            text: "https://jade-chat.com/${user.name}"));
+                        Utils.showToast("qr_copy_complete");
+                      },
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ImageUtils.setImage(ImageConstants.copyIcon, 18, 18),
+                          AppText(
+                            text: "qr_copy",
+                            fontSize: 14,
+                          )
+                        ],
                       ),
-                      AppText(
-                        text: "my_qr_code",
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Container(
-                        width: double.maxFinite,
-                        height: 0.5,
-                        color: ColorConstants.halfWhite,
-                      ),
-                      SizedBox(
-                        height: 15,
-                      ),
-                      SvgPicture.asset(
-                        ImageConstants.appLogo,
-                        height: 20,
-                      ),
-                      SizedBox(
-                        height: 15,
-                      ),
-                      // Image.memory(
-                      //   Constants.userQrCode!,
-                      //   width: Get.width * 0.4,
-                      //   height: Get.width * 0.4,
-                      // ),
-                      QrImageView(
-                        data: 'https://jade-chat.com/${user.name}',
-                        version: QrVersions.auto,
-                        size: Get.width * 0.4,
-                      ),
-                      SizedBox(
-                        height: 15,
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Clipboard.setData(ClipboardData(
-                              text: "https://jade-chat.com/${user.name}"));
-                          Utils.showToast("qr_copy_complete");
-                        },
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ImageUtils.setImage(
-                                ImageConstants.copyIcon, 18, 18),
-                            AppText(
-                              text: "qr_copy",
-                              fontSize: 14,
-                            )
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      )
-                    ],
-                  ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    )
+                  ],
                 ),
-              );
-            }),
-          ).then((value) async {
-            await ScreenBrightness().setScreenBrightness(currentBright);
-          });
-        
+              ),
+            );
+          }),
+        ).then((value) async {
+          await ScreenBrightness().setScreenBrightness(currentBright);
+        });
       },
       child: ImageUtils.setImage(ImageConstants.qr, 25, 25),
     );
@@ -244,7 +241,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     )
                   ],
                 ),
-                user.id == Constants.user.id 
+                user.id == Constants.user.id
                     ? Row(
                         children: [
                           GestureDetector(
@@ -408,10 +405,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     textAlign: TextAlign.center,
                   )),
             )
-            else
-              AppText(
-                    text: "친구입니다",
-                    textAlign: TextAlign.center,),
+          else if(user.isFreind)
+            AppText(
+              text: "친구입니다",
+              textAlign: TextAlign.center,
+            ),
+          if (user.id == Constants.user.id)
+            Container(
+              alignment: Alignment.center,
+              child: Column(children: [
+                
+                AppText(text: "멤버십 정보", fontSize: 25,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    AppText(text: 'level :'),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    AppText(text: Constants.user.membership['level'].toString()),
+                  ],
+                ),
+                 Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    AppText(text: 'end at :'),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    AppText(text: Constants.user.membership['endat'].toString()),
+                  ],
+                )
+              ]),
+            )
         ]));
   }
 }

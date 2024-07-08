@@ -15,7 +15,11 @@ int gCurrentId = 0;
 bool gPushClick = false;
 
 const apiKey = "AQAAAAABAAC5Ym2pu9wKC_cbu2omxbD6";
-const hostAddres = "54.180.163.159:6060";
+const hostAddres = "3.37.226.251:6060";
+
+// const apiKey = "AQAAAAABAADON7Kp-RdTKZPIsJU9CoWc"; // 영락님 로컬 서버
+// const hostAddres = "192.168.0.26:6060";  // 영락님 로컬 서버
+
 String token ="";
 String url_encoded_token ="";
 

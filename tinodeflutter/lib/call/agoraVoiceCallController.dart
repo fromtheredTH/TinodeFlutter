@@ -6,7 +6,7 @@ import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import '../helpers/common_util.dart';
 
 
-const String appId = "be4acf111fda4662ae1b853f23d50e98";
+const String appId = "895be24bd60746d381158b444eb4902c";
 
 
 class VoiceCallController extends StatefulWidget {

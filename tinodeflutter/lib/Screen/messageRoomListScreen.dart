@@ -98,11 +98,17 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
     GetQuery getQuery = GetQuery(
       what: 'sub desc tags cred membership',
     );
+    GetQuery getMembershipQuery = GetQuery(
+      what: 'membership',
+    );
     // fnd 토픽에 메타데이터 요청 보내기
     var meta = await me.getMeta(getQuery);
+    var membershipMeta = await me.getMeta(getMembershipQuery);
+
     var userId = tinode.getCurrentUserId();
     String pictureUrl = meta.desc?.public['photo']?['ref'] != null ? changePathToLink(meta.desc?.public['photo']['ref']) : "";
-    Constants.user = User(id: userId, name: meta.desc.public['fn'], picture: pictureUrl, isFreind: false);
+    Constants.user = User(id: userId, name: meta.desc.public['fn'], membership: membershipMeta.membership, picture: pictureUrl, isFreind: false);
+
   }
 
 
