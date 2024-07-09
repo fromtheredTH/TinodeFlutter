@@ -12,6 +12,7 @@ import 'package:tinodeflutter/Constants/ImageUtils.dart';
 import 'package:tinodeflutter/Constants/utils.dart';
 import 'package:tinodeflutter/call/CallScreen.dart';
 import 'package:tinodeflutter/call/CallService.dart';
+import 'package:tinodeflutter/call/agoraVoiceCallController.dart';
 import 'package:tinodeflutter/components/widget/BtnBottomSheetWidget.dart';
 import 'package:tinodeflutter/components/widget/GalleryBottomSheet.dart';
 import 'package:tinodeflutter/components/MyAssetPicker.dart';
@@ -209,14 +210,16 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
         case 'started':
           CallService.instance.joinUserList = joinUserList;
           CallService.instance.roomTopicName = roomTopic.name ?? "";
-          // CallService.instance.initCallService();
-          // CallService.instance.showIncomingCall(callerName : joinUserList[0].name ,callerNumber: '', callerAvatar: "");
-           WidgetsBinding.instance.addPostFrameCallback((_) async {
-            Get.to(()=>CallScreen(tinode: tinode,joinUserList: joinUserList,));
-    });
+          CallService.instance.initCallService();
+          CallService.instance.showIncomingCall(callerName : joinUserList[0].name ,callerNumber: '', callerAvatar: "");
+    //        WidgetsBinding.instance.addPostFrameCallback((_) async {
+    //         Get.to(()=>CallScreen(tinode: tinode, roomTopic: roomTopic,joinUserList: joinUserList,));
+    //        //Get.to(AgoraVoiceCallController(channelName: roomTopic?.name ?? ""));
+    // });
         break;
         case 'accepted':
         case 'declined':
+        case 'disconnected':
         break;
         case 'finished':
         case 'missed':
@@ -1009,8 +1012,9 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     var voiceMsg = roomTopic.createMessage(data, false, head: head);
     try{
       await roomTopic.publishMessage(voiceMsg);
-      Get.to(CallScreen(tinode: tinode, joinUserList: joinUserList));
-      
+     Get.to(CallScreen(tinode: tinode, roomTopic: roomTopic, joinUserList: joinUserList));
+      // Get.to(AgoraVoiceCallController(channelName: roomTopic?.name ?? ""));
+
     }
     catch(err)
     {

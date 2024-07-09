@@ -226,3 +226,12 @@ String pad2(int i) {
 
     return '$hoursStr:$minutesStr:$secondsStr';
   }
+
+  String sortAndCombineStrings(String a, String b) {
+  // 두 문자열을 소문자로 변환하여 비교
+  if (a.compareTo(b) <= 0) {
+    return a + b;
+  } else {
+    return b + a;
+  }
+}

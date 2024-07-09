@@ -33,10 +33,12 @@ class _CallScreenState extends State<CallScreen>  {
   
 
   //agora variable
-   int uid = 5; // uid of the local user
+   int uid = 0; // uid of the local user
     int? _remoteUid; // uid of the remote user
     bool _isJoined = false; // Indicates if the local user has joined the channel
     late RtcEngine agoraEngine; // Agora engine instance
+    late final RtcEngineEventHandler _rtcEngineEventHandler;
+
     final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey
         = GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
     String channelName = "";
@@ -64,8 +66,16 @@ class _CallScreenState extends State<CallScreen>  {
 @override
 void dispose()  {
      //await agoraEngine.leaveChannel();
-    agoraEngine.leaveChannel();
-    agoraEngine.release();
+     try{
+      agoraEngine.unregisterEventHandler(_rtcEngineEventHandler);
+      agoraEngine.leaveChannel();
+      agoraEngine.release();
+     }
+     catch(err)
+     {
+      print("dispose err $err");
+     }
+    
 
     super.dispose();
 }
@@ -82,12 +92,13 @@ Future <void> initAgora() async
   try{
     setupVoiceSDKEngine();
     //get agora token
-    channelName = "test1"; //roomTopic?.name??"";
-    //var response =await DioClient.getAgoraToken(channelName, token);
-    //agoraToken = response.data?['ctrl']?['params']?['token'];
-    agoraToken ="007eJxTYEhSt1O7Kaj9ul+coWB3rEi408tVX9WSb8ptfyD8L+vbQxkFBgtL06RUI5OkFDMDcxOzFGMLQ0NTiyQTE5PUJBNLA6Nke+2etIZARobi5lMMjFAI4rMylKQWlxgyMAAA5GgeBQ==";
-    join();
-    _switchMicrophone();
+    channelName = sortAndCombineStrings(roomTopic?.name??"", tinode.userId ); //roomTopic?.name??"";
+    var response =await DioClient.getAgoraToken(channelName, token);
+    agoraToken = response.data?['ctrl']?['params']?['token'];
+    uid = response.data?['ctrl']?['params']?['useridx'];
+    print("ag token : $agoraToken");
+    print("uid $uid");
+    //agoraToken ="007eJxTYPjQ4zl5hS+brlZtactRf/WKj3vPsciIL5vuLCUuZ7XAZL4Cg4WlaVKqkUlSipmBuYlZirGFoaGpRZKJiUlqkomlgVGyzbyetIZARgbH+fNYGBkgEMRnYShJLS5hYAAAZyIcMg==";
   }
   catch(err)
   {
@@ -101,13 +112,23 @@ Future<void> setupVoiceSDKEngine() async {
 
     //create an instance of the Agora engine
     agoraEngine = createAgoraRtcEngine();
-    await agoraEngine.initialize(const RtcEngineContext(
-        appId: agoraAppId
-    ));
+
+
+    if (roomTopic?.isP2P() ?? true) {
+      await agoraEngine.initialize(const RtcEngineContext(
+        appId: agoraAppId,
+        channelProfile: ChannelProfileType.channelProfileCommunication1v1,
+      ));
+    } else {
+      await agoraEngine.initialize(const RtcEngineContext(
+        appId: agoraAppId,
+        channelProfile: ChannelProfileType.channelProfileCommunication,
+      ));
+
+    }
 
     // Register the event handler
-    agoraEngine.registerEventHandler(
-    RtcEngineEventHandler(
+    _rtcEngineEventHandler =RtcEngineEventHandler(
         onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
         showToast("Local user uid:${connection.localUid} joined the channel");
         setState(() {
@@ -120,6 +141,11 @@ Future<void> setupVoiceSDKEngine() async {
             _remoteUid = remoteUid;
         });
         },
+        onRemoteAudioStateChanged: (RtcConnection connection, int remoteUid,
+          RemoteAudioState state, RemoteAudioStateReason reason, int elapsed) {
+            print(
+            '[onRemoteAudioStateChanged] connection: ${connection.toJson()} remoteUid: $remoteUid state: $state reason: $reason elapsed: $elapsed');
+      },
         onUserOffline: (RtcConnection connection, int remoteUid,
             UserOfflineReasonType reason) {
         showToast("Remote user uid:$remoteUid left the channel");
@@ -127,13 +153,33 @@ Future<void> setupVoiceSDKEngine() async {
             _remoteUid = null;
         });
         },
-    ),
+        onError: (ErrorCodeType err, String msg) {
+        print('[onError] err: $err, msg: $msg');
+      },
     );
+    agoraEngine.registerEventHandler(_rtcEngineEventHandler);
+    await agoraEngine.enableAudio();
+   // await agoraEngine.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
+   if(roomTopic?.isP2P() ?? true)
+   {
+      await agoraEngine.setAudioProfile(
+      profile: AudioProfileType.audioProfileDefault,
+      scenario: AudioScenarioType.audioScenarioDefault,
+    ); 
+   }else{
+      await agoraEngine.setAudioProfile(
+      profile: AudioProfileType.audioProfileDefault,
+      scenario: AudioScenarioType.audioScenarioChatroom,
+    ); 
+   }
+    _joinChannel();
+
 }
 
-void  join() async {
+void  _joinChannel() async {
 
-    // Set channel options including the client role and channel profile
+try{
+ // Set channel options including the client role and channel profile
     ChannelMediaOptions options = const ChannelMediaOptions(
         clientRoleType: ClientRoleType.clientRoleBroadcaster,
         channelProfile: ChannelProfileType.channelProfileCommunication,
@@ -147,8 +193,14 @@ void  join() async {
     );
     showToast('join channel');
 }
+catch(err)
+{
+  print("join channel $err");
+}
+   
+}
 
-  void leave() {
+  void _leaveChannel() {
     setState(() {
         _isJoined = false;
         _remoteUid = null;
@@ -163,6 +215,22 @@ void  join() async {
     setState(() {
       openMicrophone = !openMicrophone;
     });
+  }
+    void noteCallState(String callState) {
+    Map<String, dynamic> note = {
+      "event": callState,
+      "seq": 1,
+      "topic": roomTopic?.name,
+      "what": "call",
+    };
+    try{
+      tinode_global.note(roomTopic?.name ?? "", "call", 1, callState);
+
+    }
+    catch(err)
+    {
+      print("note err");
+    }
   }
 
 
@@ -186,11 +254,32 @@ void  join() async {
     return false;
   }
 
+Widget _status(){
+    String statusText;
+
+    if (!_isJoined){
+        statusText = 'Join a channel';
+        showToast("join channel");
+        }
+    else if (_remoteUid == null)
+        {statusText = 'Waiting for a remote user to join...';
+        showToast("waiting user");}
+    else
+        {statusText = 'Connected to remote user, uid:$_remoteUid';
+        showToast("connect user : $_remoteUid");
+        }
+
+    return Text(
+    statusText,
+    );
+}
 
   @override
   Widget build(BuildContext context) {
    
-    return Scaffold(
+    return MaterialApp(
+          scaffoldMessengerKey: scaffoldMessengerKey,
+    home: Scaffold(
       appBar: AppBar(
         title: Text('In Call'),
         automaticallyImplyLeading: false,
@@ -199,6 +288,12 @@ void  join() async {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+               Container(
+                height: 40,
+                child:Center(
+                    child:_status()
+                )
+            ),
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
@@ -228,12 +323,17 @@ void  join() async {
                   CallButton(
                     icon: Icons.mic,
                     text: 'Mute',
-                    onPressed: (){join();} //controller.toggleMute,
+                    onPressed: (){
+                        } //controller.toggleMute,
                   ),
                   CallButton(
                     icon: Icons.dialpad,
-                    text: 'Keypad',
-                    onPressed: controller.showKeypad,
+                    text: '채널입장',
+                    onPressed: (){
+                      if(!_isJoined)_joinChannel();
+                      else showToast('이미 조인중입니다.');
+                        //_switchMicrophone();
+                        } //controller.showKeypad,
                   ),
                   CallButton(
                     icon: Icons.volume_up,
@@ -246,7 +346,14 @@ void  join() async {
                     color: Colors.red,
                     onPressed: () {
                       controller.endCall();
-                      leave();
+                      try{
+                        noteCallState('hang-up');
+                      }
+                      catch(err)
+                      {
+                        print("err leave : $err");
+                      }
+                      //_leaveChannel();
                       Get.back();
                     },
                   ),
@@ -256,7 +363,9 @@ void  join() async {
           ],
         ),
       ),
+    )
     );
+   
   }
 }
 

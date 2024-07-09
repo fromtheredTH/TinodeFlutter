@@ -101,13 +101,13 @@ class CallService {
             break;
           case Event.actionCallAccept:
             // 전화 수락 처리
-            print("Call accepted");
-            // 방에대해 구독을 하고 accepted 를 날려줘야함.
+            print("Call accept");
+            // 방에대해 구독을 하고 accept 를 날려줘야함.
             try {
-              noteCallState('accepted');
-              nowCallState = eCallState.ACCEPTED;
+            noteCallState('accept');
+            nowCallState = eCallState.ACCEPTED;
             WidgetsBinding.instance.addPostFrameCallback((_) async {
-            Get.to(()=>CallScreen(tinode: tinode_global,joinUserList: joinUserList,));
+            Get.to(()=>CallScreen(tinode: tinode_global, roomTopic: roomTopic ,joinUserList: joinUserList,));
             });
                 print("eee");
             } catch (err) {
@@ -118,7 +118,7 @@ class CallService {
           case Event.actionCallDecline:
             // 전화 거절 처리
             nowCallState = eCallState.DECLINED;
-            noteCallState('declined');
+            noteCallState('hang-up');
             print("Call declined");
             break;
           default:
@@ -138,7 +138,14 @@ class CallService {
       "topic": roomTopic.name,
       "what": "call",
     };
-    tinode_global.note(roomTopic.name ?? "", "call", 1, callState);
+    try{
+      tinode_global.note(roomTopic.name ?? "", "call", 1, callState);
+
+    }
+    catch(err)
+    {
+      print("note err");
+    }
   }
 
   Future<void> showIncomingCall({

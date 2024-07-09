@@ -214,7 +214,7 @@ class MyApp extends StatelessWidget {
       locale: context.locale,
       title: 'jade-chat',
       // home:SplashPage(),
-      home:Login(title: "Tinode",),
+      home:Login(title: "JadeChat",),
       //navigatorObservers: <NavigatorObserver>[observer],
       themeMode: Platform.isIOS ? ThemeMode.dark : ThemeMode.light,
       darkTheme: ThemeData(brightness: Platform.isIOS ? Brightness.dark : Brightness.light),

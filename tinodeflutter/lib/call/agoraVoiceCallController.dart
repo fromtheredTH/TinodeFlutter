@@ -4,6 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
+import 'package:tinodeflutter/global/global.dart';
 import '../helpers/common_util.dart';
 
 
@@ -11,9 +12,8 @@ const String appId = "895be24bd60746d381158b444eb4902c";
 
 
 class AgoraVoiceCallController extends StatefulWidget {
- AgoraVoiceCallController({Key? key, required this.agoraToken, required this.channelName }) : super(key: key);
+ AgoraVoiceCallController({Key? key, required this.channelName }) : super(key: key);
 
-  String agoraToken;
   String channelName;
  
 
@@ -25,7 +25,7 @@ class _AgoraVoiceCallControllerState extends State<AgoraVoiceCallController> {
     String channelName = "";
     String agoraToken = "";
     
-    int uid = 0; // uid of the local user
+    int uid = 2; // uid of the local user
 
     int? _remoteUid; // uid of the remote user
     bool _isJoined = false; // Indicates if the local user has joined the channel
@@ -40,7 +40,6 @@ void initState() {
     super.initState();
     // Set up an instance of Agora engine
     setupVoiceSDKEngine();
-    agoraToken = widget.agoraToken;
     channelName = widget.channelName;
 }
 
@@ -52,7 +51,7 @@ Future<void> setupVoiceSDKEngine() async {
     //create an instance of the Agora engine
     agoraEngine = createAgoraRtcEngine();
     await agoraEngine.initialize(const RtcEngineContext(
-        appId: appId
+        appId: agoraAppId
     ));
 
     // Register the event handler
