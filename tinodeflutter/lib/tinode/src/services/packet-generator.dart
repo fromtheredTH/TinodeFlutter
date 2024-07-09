@@ -15,6 +15,7 @@ class PacketGenerator {
 
   Packet generate(String type, String? topicName) {
     PacketData packetData;
+    bool skipId = false;
     switch (type) {
       case packet_types.Hi:
         packetData = HiPacketData(
@@ -117,12 +118,19 @@ class PacketGenerator {
           topic: topicName,
           seq: null,
           what: null,
+          event: null,
         );
+        skipId = true;
         break;
       default:
         packetData = null as dynamic;
     }
 
-    return Packet(type, packetData, Tools.getNextUniqueId());
+    if(skipId) {
+      return Packet(type, packetData, null);
+    }
+    else {
+      return Packet(type, packetData, Tools.getNextUniqueId());
+    }
   }
 }
