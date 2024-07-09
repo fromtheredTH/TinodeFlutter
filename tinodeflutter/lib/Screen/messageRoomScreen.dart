@@ -209,8 +209,11 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
         case 'started':
           CallService.instance.joinUserList = joinUserList;
           CallService.instance.roomTopicName = roomTopic.name ?? "";
-          CallService.instance.initCallService();
-          CallService.instance.showIncomingCall(callerName : joinUserList[0].name ,callerNumber: '', callerAvatar: "");
+          // CallService.instance.initCallService();
+          // CallService.instance.showIncomingCall(callerName : joinUserList[0].name ,callerNumber: '', callerAvatar: "");
+           WidgetsBinding.instance.addPostFrameCallback((_) async {
+            Get.to(()=>CallScreen(tinode: tinode,joinUserList: joinUserList,));
+    });
         break;
         case 'accepted':
         case 'declined':

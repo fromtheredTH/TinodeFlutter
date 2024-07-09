@@ -17,6 +17,8 @@ bool gPushClick = false;
 const apiKey = "AQAAAAABAAC5Ym2pu9wKC_cbu2omxbD6";
 const hostAddres = "3.37.226.251:6060";
 
+const String agoraAppId = "895be24bd60746d381158b444eb4902c";
+
 // const apiKey = "AQAAAAABAADON7Kp-RdTKZPIsJU9CoWc"; // 영락님 로컬 서버
 // const hostAddres = "192.168.0.26:6060";  // 영락님 로컬 서버
 

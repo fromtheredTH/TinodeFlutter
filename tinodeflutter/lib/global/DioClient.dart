@@ -468,6 +468,17 @@ static Future<Response> postDeleteAccount(String reason) {
     return getInstance(communityBaseUrl).post("/post", data: formData);
   }
  
+static Future<Response> getAgoraToken(String channelName, String token ) {
+
+    Map<String, dynamic> queryData = {
+      // "id":1,
+      "channel": channelName, 
+      "auth":"auth",
+      "secret" :token,
+      "role" :1
+    };
+    return getInstance(tinodeUrl).get("/v0/agora/token", queryParameters : queryData);
+  }
 
 
 

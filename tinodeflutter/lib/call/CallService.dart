@@ -34,23 +34,25 @@ class CallService {
   final Uuid _uuid = Uuid();
   late Topic roomTopic;
 
-  bool isInit= false;
+  bool isInit = false;
 
   void initCallService() {
-
-    if (!tinode_global.isConnected) {
-      reConnectTinode(
-          afterConnectFunc: ()  {
-                setRoomTopic();
-                _initializeCallKit();}
-              );
-    } else {
+    try {
+      if (!tinode_global.isConnected) {
+        reConnectTinode(afterConnectFunc: () {
+          setRoomTopic();
+          _initializeCallKit();
+        });
+      } else {
         setRoomTopic();
-       if(!isInit) {
-        _initializeCallKit();
+        if (!isInit) {
+          _initializeCallKit();
+        }
       }
+      isInit = true;
+    } catch (err) {
+      print(" callservice init call service err : $err");
     }
-    isInit=true;
   }
 
   // @override
@@ -92,25 +94,26 @@ class CallService {
             // 수신 전화 처리
             nowCallState = eCallState.START;
             print("call start");
-            Get.to(() =>
-                CallScreen(tinode: tinode_global, joinUserList: joinUserList));
+            if (Get.currentRoute != '/CallScreen') {
+                  Get.to(() => CallScreen(
+                      tinode: tinode_global, joinUserList: joinUserList));
+                }
             break;
           case Event.actionCallAccept:
             // 전화 수락 처리
             print("Call accepted");
             // 방에대해 구독을 하고 accepted 를 날려줘야함.
-            try{ 
+            try {
               noteCallState('accepted');
               nowCallState = eCallState.ACCEPTED;
-              Get.to(() =>
-                CallScreen(tinode: tinode_global, joinUserList: joinUserList));
-
-            }
-            catch(err)
-            {
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+            Get.to(()=>CallScreen(tinode: tinode_global,joinUserList: joinUserList,));
+            });
+                print("eee");
+            } catch (err) {
               print("accepted err $err");
             }
-           
+
             break;
           case Event.actionCallDecline:
             // 전화 거절 처리
@@ -150,7 +153,7 @@ class CallService {
       appName: 'JadeChat',
       avatar: callerAvatar,
       handle: callerNumber,
-      type: 0,
+      type: 0, // 0 : 오디오 1: 비디오
       duration: 150000,
       textAccept: 'Accept',
       textDecline: 'Decline',
