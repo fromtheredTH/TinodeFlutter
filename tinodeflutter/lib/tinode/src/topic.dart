@@ -283,14 +283,21 @@ class Topic {
     if (!isSubscribed && !unsubscribe) {
       return Future.error(Exception('Cannot publish on inactive topic'));
     }
-
+    try{
     var ctrl = await _tinodeService.leave(name ?? '', unsubscribe);
-    resetSubscription();
+     resetSubscription();
     if (unsubscribe) {
       _cacheManager.delete('topic', name ?? '');
       _gone();
     }
     return ctrl;
+    }
+    catch(err)
+    {
+      print("tinodeservice leave err : $err");
+      return CtrlMessage();
+    }
+   
   }
 
   /// Request topic metadata from the serve
