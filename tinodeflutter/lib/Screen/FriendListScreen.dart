@@ -45,6 +45,7 @@ class _FriendListScreenState extends State<FriendListScreen> {
   // _FriendListScreen(HomeController discoverController){
   //   discoverController.initHome = initHome;
   // }
+  late TopicFnd _fndTopic;
 
   void initHome() {
     setState(() {
@@ -73,31 +74,6 @@ class _FriendListScreenState extends State<FriendListScreen> {
   List<UserModel> friendList = <UserModel>[];
   List<TopicSubscription> userTopicSubList = <TopicSubscription>[];
 
-  Future<void> getSearch(String query) async {
-    DioClient.searchTotal(query, 5, 0).then((response) {
-      if (query == searchController.text) {
-        List<UserModel> userResults = response.data["users"] == null
-            ? []
-            : response.data["users"]
-                .map((json) => UserModel.fromJson(json))
-                .toList()
-                .cast<UserModel>();
-        // List<GameModel> gameResults = response.data["games"] == null ? [] : response
-        //     .data["games"].map((json) => GameModel.fromJson(json)).toList().cast<
-        //     GameModel>();
-        // List<CommunityModel> communityResults = response.data["community"] == null ? [] : response
-        //     .data["community"].map((json) => CommunityModel.fromJson(json)).toList().cast<
-        //     CommunityModel>();
-        setState(() {
-          userList = userResults;
-          // games = gameResults;
-          // communities = communityResults;
-          isSearchLoading = false;
-        });
-      }
-    });
-  }
-
   @override
   void initState() {
     // hashTag = widget.hashTag;
@@ -105,32 +81,68 @@ class _FriendListScreenState extends State<FriendListScreen> {
     tinode = widget.tinode;
     me = tinode.getMeTopic();
     _getFriendList();
-    //  scrollController.addListener(getNextPost);
-    // if(hashTag != null){
-    //   WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-    //     widget.changePage(RouteString.disvoerSearch, hashTag!);
-    //   });
-    // }
+    _initializeFndTopic();
 
-    // ReceivePort _port = ReceivePort();
-    // IsolateNameServer.registerPortWithName(_port.sendPort, 'firbase_port_discover');
-    // _port.listen((dynamic data) async {
-    //   if (mounted) {
-    //     await Constants.fetchChatRooms();
-    //     setState(() {
 
-    //     });
-    //   }
-    // });
+  }
 
-    // event.on<ChatReceivedEvent>().listen((event) async {
-    //   if (mounted) {
-    //     await Constants.fetchChatRooms();
-    //     setState(() {
+   void _initializeFndTopic() async{
+    _fndTopic = tinode.getTopic('fnd') as TopicFnd;
+    _fndTopic.onMeta.listen((value) {
+      _handleMetaMessage(value);
+    });
+    if(!_fndTopic.isSubscribed) await _fndTopic.subscribe(MetaGetBuilder(_fndTopic).withData(null, null, null).build(), null);
+  }
 
-    //     });
-    //   }
-    // });
+  void _handleMetaMessage(MetaMessage msg) {
+    if (msg.sub != null) {
+      setState(() {
+        try{
+        print("search list :");
+        for(int i = 0 ; i<msg.sub!.length ;i++)
+        {
+          String pictureUrl = msg.sub?[i].public['photo']?['ref'] != null ? changePathToLink(msg.sub?[i].public['photo']['ref']) : "";
+          UserModel user = UserModel(id: msg.sub?[i].user ?? "" , name : msg.sub?[i].public['fn'], picture : pictureUrl, isFreind: msg.sub?[i].isFriend ?? false);
+          friendList.add(user);
+        }
+        setState(() {
+          isSearchLoading = false;
+        });
+        }
+        catch(err)
+        {
+          print("err : $err");
+        }
+      });
+    }
+  }
+
+  Future<void> _searchFriend(String query) async {
+    try {
+      searchController.text="";
+      // SetParams 객체를 생성하여 검색 쿼리 설정
+      String friendQuery = "friend:$query";
+      SetParams setParams = SetParams(
+        desc: TopicDescription(
+          public: friendQuery, // 유저 이름을 검색 키워드로 설정
+        ),
+      );
+      // fnd 토픽에 메타데이터 설정 요청 보내기
+      var ctrl = await _fndTopic.setMeta(setParams);
+
+   // GetQuery 객체를 생성하여 검색 결과 요청
+    GetQuery getQuery = GetQuery(
+      topic : _fndTopic.name,
+      what: 'sub',
+    );
+    // fnd 토픽에 메타데이터 요청 보내기
+    friendList = [];
+    var meta = await _fndTopic.getMeta(getQuery);
+
+    } catch (err) {
+      print("err search : $err");
+      isLoading=false;
+    }
   }
 
   Future<void> _getFriendList() async {
@@ -222,7 +234,7 @@ class _FriendListScreenState extends State<FriendListScreen> {
                                       setState(() {
                                         isSearchMode = true;
                                       });
-                                      getSearch(text);
+                                      _searchFriend(text);
                                       isExistSearchText.value = true;
                                     } else if (previousSearchText.isNotEmpty &&
                                         text.isEmpty) {
@@ -233,7 +245,7 @@ class _FriendListScreenState extends State<FriendListScreen> {
                                       print("검색");
                                       print(text);
                                       print(searchController.text);
-                                      getSearch(text);
+                                      _searchFriend(text);
                                       isExistSearchText.value = true;
                                     }
                                     previousSearchText = text;
@@ -374,6 +386,14 @@ class _FriendListScreenState extends State<FriendListScreen> {
                                                                         index],
                                                                 isShowAction:
                                                                     true,
+                                                                    unFollowUser: (){
+                                                                      _delFriend(friendList[index].id);
+                                                                       setState(() {
+                                                                    friendList
+                                                                        .removeAt(
+                                                                            index);
+                                                                  });
+                                                                    },
                                                                 deleteUser: () {
                                                                   setState(() {
                                                                     friendList
@@ -475,6 +495,14 @@ class _FriendListScreenState extends State<FriendListScreen> {
                                                                     index],
                                                                 isShowAction:
                                                                     true,
+                                                                unFollowUser:(){
+                                                                  _delFriend(friendList[index].id);
+                                                                   setState(() {
+                                                                    friendList
+                                                                        .removeAt(
+                                                                            index);
+                                                                  });
+                                                                },
                                                                 deleteUser: () {
                                                                   setState(() {
                                                                     friendList

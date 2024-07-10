@@ -86,6 +86,7 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
 
   Future<void> _searchUsers(String query) async {
     try {
+      inputController.text="";
       // SetParams 객체를 생성하여 검색 쿼리 설정
       SetParams setParams = SetParams(
         desc: TopicDescription(
