@@ -235,7 +235,8 @@ class PushNotificationService {
 
         if(message.data['webrtc'] !=null)
         {
-            if(stringToBool(message.data['aonly'])) chatType= eChatType.VOICE_CALL;
+            // if(stringToBool(message.data['aonly'])) chatType= eChatType.VOICE_CALL;
+            if(message.data['aonly']!=null)chatType= eChatType.VOICE_CALL;
             else chatType= eChatType.VIDEO_CALL;
         }
       
@@ -454,15 +455,23 @@ class PushNotificationService {
         if(message.data['webrtc'] !=null)
         {
             print("call");
-            if(stringToBool(message.data['aonly'])) chatType= eChatType.VOICE_CALL;
+            //if(stringToBool(message.data['aonly'])) chatType= eChatType.VOICE_CALL;
+            if(message.data['aonly']!=null)chatType= eChatType.VOICE_CALL;
             else chatType= eChatType.VIDEO_CALL;
 
         }
         
         if(chatType==eChatType.VOICE_CALL || chatType==eChatType.VIDEO_CALL)
         {
+
+          
           if(isTinodeConnect)
           {
+            if(chatType ==eChatType.VOICE_CALL)
+            CallService.instance.chatType = eChatType.VOICE_CALL;
+            else
+            CallService.instance.chatType = eChatType.VIDEO_CALL;
+
             List<UserModel> joinUserList = [];
             CallService.instance.joinUserList = joinUserList;
             CallService.instance.roomTopicName = topic;
