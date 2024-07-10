@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
@@ -29,7 +28,6 @@ import '../../../Constants/utils.dart';
 
 import '../../components/MyAssetPicker.dart';
 
-
 enum eExpirationState {
   IFINITY,
   ONE_HOUR,
@@ -38,12 +36,12 @@ enum eExpirationState {
   ONE_MONTH,
 }
 
-
 class SettingChatExpirationeScreen extends StatefulWidget {
   Topic roomTopic;
   Tinode tinode;
-  
-  SettingChatExpirationeScreen({super.key, required this.tinode, required this.roomTopic });
+
+  SettingChatExpirationeScreen(
+      {super.key, required this.tinode, required this.roomTopic});
 
   @override
   State<SettingChatExpirationeScreen> createState() =>
@@ -57,45 +55,51 @@ class _SettingChatExpirationeScreen
 
   late Topic roomTopic;
   late Tinode tinode;
-  String toastMsg ="";
+  String toastMsg = "";
   Future<void> setChatRemoveTimer(int range) async {
     setState(() {
       selectedIndex = range - 1;
     });
-    try{
-     //var response = DioClient.postUpdateChatExpire(roomDto.id, selectedIndex);
-    //var response =await DioClient.postUpdateChatExpire(roomDto.id, 101); // test
-    switch(selectedIndex)
-    {
-      case 0:
-            toastMsg = "비활성으로 변경되었습니다.";
-      break;
-      case 1:
-            toastMsg = "1시간으로 변경되었습니다.";
-      break;
-      case 2:
-            toastMsg = "1일로 변경되었습니다.";
-      break;
-      case 3:
-            toastMsg = "7일로 변경되었습니다.";
-      break;
-      case 4:
-            toastMsg = "30일로로 변경되었습니다.";
-      break;
-      default:        
-      break;
-    }
-    showToast("$toastMsg");
-    }
-    catch(err){
-        showToast('Fail to change remove timer');
+    try {
+      int min = 0;
+      switch (selectedIndex) {
+        case 0:
+          min = 60000000;
+          toastMsg = "비활성으로 변경되었습니다.";
+          break;
+        case 1:
+          min = 60;
+          toastMsg = "1시간으로 변경되었습니다.";
+          break;
+        case 2:
+          min = 60 * 24;
+          toastMsg = "1일로 변경되었습니다.";
+          break;
+        case 3:
+          min = 60 * 24 * 7;
+          toastMsg = "7일로 변경되었습니다.";
+          break;
+        case 4:
+          min = 60 * 24 * 30;
+          toastMsg = "30일로로 변경되었습니다.";
+          break;
+        default:
+          break;
+      }
+      tinode
+          .setMeta(roomTopic.name ?? "",
+              SetParams(desc: TopicDescription(public: {"msgexpiremin": min})))
+          .then((value) {
+        showToast("$toastMsg");
+      });
+    } catch (err) {
+      showToast('Fail to change remove timer');
     }
     // showToast('caht timer response : ${response}');
   }
 
-
   initTimerData() {
-    print("min : ${roomTopic.public['msgexpiremin'] ?? 60000000 }");
+    print("min : ${roomTopic.public['msgexpiremin'] ?? 60000000}");
     int chat_expire_minute = roomTopic.public['msgexpiremin'] ?? 60000000;
     // showToast("${roomDto.chat_expire_minute}");
     switch (chat_expire_minute) {
