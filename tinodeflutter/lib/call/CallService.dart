@@ -36,23 +36,28 @@ class CallService {
 
   bool isInit = false;
 
-  void initCallService() {
+  Future<bool> initCallService() async{
     try {
       if (!tinode_global.isConnected) {
-        reConnectTinode(afterConnectFunc: () {
-          setRoomTopic();
-          _initializeCallKit();
-        });
+        bool isResult=false;
+        await reConnectTinode(afterConnectFunc: () async {
+          }   
+        );
+           isResult = await setRoomTopic();
+            //_initializeCallKit();
+            return isResult;
       } else {
-        setRoomTopic();
+        return await setRoomTopic();
         if (!isInit) {
-          _initializeCallKit();
+         // _initializeCallKit();
         }
       }
       isInit = true;
     } catch (err) {
       print(" callservice init call service err : $err");
+      return false;
     }
+    return false;
   }
 
   // @override
@@ -61,8 +66,8 @@ class CallService {
 
   // }
 
-  Future<void> setRoomTopic() async {
-    roomTopic = await tinode_global.getTopic(roomTopicName);
+  Future<bool> setRoomTopic() async {
+    roomTopic = tinode_global.getTopic(roomTopicName);
     try {
       if (!roomTopic.isSubscribed) {
         await roomTopic.subscribe(
@@ -73,9 +78,14 @@ class CallService {
                 .build(),
             null);
         _initializeCallKit();
+        return true;
+      }else {
+        _initializeCallKit();
+        return true;
       }
     } catch (err) {
       print("err roomTopic set Callservice : $err");
+      return false;
     }
   }
 

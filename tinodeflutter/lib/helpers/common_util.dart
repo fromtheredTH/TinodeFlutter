@@ -148,18 +148,18 @@ String chatTime3(String chatAt) {
   return result;
 }
 
-// String chatContent(String contents, int type) {
-//   if (type == eChatType.TEXT.index) {
-//     return contents;
-//   } else if (type == eChatType.IMAGE.index) {
-//     return "image".tr();
-//   } else if (type == eChatType.VIDEO.index) {
-//     return "video".tr();
-//   } else if (type == eChatType.AUDIO.index) {
-//     return "audio".tr();
-//   }
-//   return '';
-// }
+String chatContent(String contents, eChatType type) {
+  if (type == eChatType.TEXT) {
+    return contents;
+  } else if (type == eChatType.IMAGE) {
+    return "image".tr();
+  } else if (type == eChatType.VIDEO) {
+    return "video".tr();
+  } else if (type == eChatType.AUDIO) {
+    return "audio".tr();
+  }
+  return '';
+}
 
 String pad2(int i) {
   return i.toString().padLeft(2, '0');
@@ -234,4 +234,18 @@ String pad2(int i) {
   } else {
     return b + a;
   }
+}
+
+int stringToAsciiSum(String input) {
+  int asciiSum = 0;
+  
+  for (int i = 0; i < input.length; i++) {
+    asciiSum += input.codeUnitAt(i);
+  }
+  
+  return asciiSum;
+}
+
+bool stringToBool(String value) {
+  return value.toLowerCase() == 'true';
 }

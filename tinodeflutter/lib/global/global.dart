@@ -37,7 +37,7 @@ late Tinode tinode_global;
   String versionApp = '1.0.0';
   String deviceLocale = 'en-US';
 
-  Future<void> reConnectTinode({Function? afterConnectFunc}) async {
+  Future<bool> reConnectTinode({Function? afterConnectFunc}) async {
     var key = apiKey;
     // var host = 'sandbox.tinode.co';
     var host = hostAddres;
@@ -63,10 +63,12 @@ late Tinode tinode_global;
       print("token : $token");
       print("url token : $url_encoded_token");
       showToast("reconnect 완료");
-    
+  
       if(afterConnectFunc !=null) afterConnectFunc();
+      return true;
     } catch (err) {
       showToast("reconnect err : $err");
+      return false;
     }
   }
 

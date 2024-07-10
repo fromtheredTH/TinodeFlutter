@@ -9,10 +9,12 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:tinodeflutter/call/CallService.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
 import 'package:tinodeflutter/global/app_get_it.dart';
 import 'package:tinodeflutter/global/global.dart';
+import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 
 import 'firebase_options.dart';
@@ -145,33 +147,13 @@ class PushNotificationService {
   @pragma('vm:entry-point')
   static Future firebaseMessagingBackgroundHandler(RemoteMessage? message) async {
      
-        await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform,);
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform,);
       
-     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       print('onMessageOpenedApp data: ${message.data}');
       onClick(message.data);
     });
 
-    
- if (message != null) {
-    final meta = jsonDecode(message!.data['meta'] ?? {});
-    int fcmType = meta['fcmType'];
-    String title = message.data['title'];
-   if(fcmType==0 ) // fcmtype 이 0 일때와 아닐 때의 데이터가 달라서 한번 걸러 줘야함
-    {
-      
-    }
-     else if (meta["chat"]["type"] == 5) {
-        return;
-    }
-    else if ((title ?? "") == "my_chat" || (title ?? "") == "Leave") {
-      return;
-    }
-  }
-    // if ((message?.notification?.title ?? "") == "my_chat" ||
-    //     (message?.notification?.title ?? "") == "Leave") {
-    //   return;
-    // }
 
     print('Handling a background message ${message?.messageId}');
     AndroidNotificationChannel channel = AndroidNotificationChannel(
@@ -210,81 +192,67 @@ class PushNotificationService {
     });
 
     try {
-      RemoteNotification? notification = message!.notification;
-      // String body = notification?.body ?? '';
-      String contentBody="" ;
-      final meta = jsonDecode(message!.data['meta']);
-      int fcmType = meta['fcmType'];
-      String title = (message.data['title']) ?? "";
-        
-      if(fcmType==0 && title=='expire-chat')
+      //bool isTinodeConnect = false;
+
+      if(message ==null) return;
+      //if(tinode_global==null) isTinodeConnect = await reConnectTinode();
+     // if(message.data['xfrom'] == Constants.user.id) return;  // 내 메시지
+
+      String _fcmType =  message.data['what'];
+      int seq =  int.parse(message.data['seq']);
+      String topic = message.data['topic'];
+      String ts = message.data['ts'];
+      dynamic rc = jsonDecode(message.data['rc']);
+      eChatType chatType = eChatType.NONE;
+
+      if(rc['txt']=="")
+      {
+        switch(rc['ent']['tp'])
         {
-          final dataBody = jsonDecode(message.data['body']) ?? "";
-          if( dataBody['first_chat_id'] ==-1) {
-            //flutterLocalNotificationsPlugin.cancelAll();
-            flutterLocalNotificationsPlugin.cancel(dataBody['room_id'],); // 플러그인의 함수에서 만약 없는 푸시를 삭제한다고 해도 예외처리가 되어있음을 확인했음
-          }
-          return;
-        } else
-        {
-        contentBody =  (message.data['body']) ?? "";
+         case 'IM':
+          print("image");
+          chatType= eChatType.IMAGE;
+          break;
+        case 'VD':
+          print("video");
+          chatType= eChatType.VIDEO;
+          break;
+        case 'AU':
+          print("audio");
+          chatType= eChatType.AUDIO;
+          break;
+        default:
+          chatType = eChatType.NONE;
+          break;
         }
+      }
+      else
+      {
+        chatType= eChatType.TEXT;
+      }
 
-
-      if (fcmType == 10) {
-        if(tinode_global.isConnected){ 
-          await reConnectTinode();
+        if(message.data['webrtc'] !=null)
+        {
+            if(stringToBool(message.data['aonly'])) chatType= eChatType.VOICE_CALL;
+            else chatType= eChatType.VIDEO_CALL;
+        }
+      
+      if(chatType==eChatType.VOICE_CALL || chatType==eChatType.VIDEO_CALL)
+      {
           List<User> joinUserList = [];
           CallService.instance.joinUserList = joinUserList;
-          CallService.instance.roomTopicName = "";
-          CallService.instance.initCallService();
-          CallService.instance.showIncomingCall(callerName : title ,callerNumber: '', callerAvatar: "");
+          CallService.instance.roomTopicName = topic;
+          // CallService.instance.initCallService();
+          CallService.instance.showIncomingCall(callerName : topic ,callerNumber: '', callerAvatar: "");
+          return;
       }
-        //dm
-        // SendPort? send1 = IsolateNameServer.lookupPortByName('firbase_port1');
-        // send1?.send([jsonEncode(meta['chat']), jsonEncode(meta['room'])]);
-        SendPort? send2 = IsolateNameServer.lookupPortByName('firbase_port2');
-        send2?.send([jsonEncode(meta['chat']), jsonEncode(meta['room'])]);
-
-        SendPort? sendHome =
-            IsolateNameServer.lookupPortByName('firbase_port_home');
-        sendHome?.send([jsonEncode(meta['chat']), jsonEncode(meta['room'])]);
-
-        SendPort? sendDiscover =
-            IsolateNameServer.lookupPortByName('firbase_port_discover');
-        sendDiscover
-            ?.send([jsonEncode(meta['chat']), jsonEncode(meta['room'])]);
-
-        SendPort? sendCommunity =
-            IsolateNameServer.lookupPortByName('firbase_port_community');
-        sendCommunity
-            ?.send([jsonEncode(meta['chat']), jsonEncode(meta['room'])]);
-
-        SendPort? sendNotification =
-            IsolateNameServer.lookupPortByName('firbase_port_notification');
-        sendNotification
-            ?.send([jsonEncode(meta['chat']), jsonEncode(meta['room'])]);
-
-        // if (meta["chat"]["chat_idx"] == -1) {
-        //   return;
-        // } else {
-        //   contentBody = chatContent(meta['chat']['contents'], meta['chat']['type']);
-        //   int userId = Constants.user.id;
-        //   int gChat = gChatRoomUid;
-        //   if (meta["chat"]["sender_id"] == Constants.user.id ||
-        //       (title ?? "") == "my_chat" ||
-        //       meta["chat"]["type"] == 5 || (title ?? "") == "Leave") {
-        //     return;
-        //   }
-        // }
-      }
-
-       if (message.data != null) {
-        if (meta['fcmType'] != 10) { //채팅이 아닐때
-          flutterLocalNotificationsPlugin.show(
-              message.hashCode,
-              title,
-              contentBody,
+      try{
+      String body = chatContent(chatType==eChatType.TEXT ? rc['txt'] :"", chatType);
+      int notiId = stringToAsciiSum(topic);
+      flutterLocalNotificationsPlugin.show(
+              notiId,
+              topic,
+              body,
               NotificationDetails(
                   android: AndroidNotificationDetails(
                     channel.id,
@@ -292,6 +260,7 @@ class PushNotificationService {
                     priority: Priority.high,
                     importance: Importance.high,
                     channelDescription: channel.description,
+                  //  tag: (meta['room']['id']).toString(),
                     // icons: message.notification?.android?.smallIcon,
                     playSound: true,
                   ),
@@ -300,29 +269,34 @@ class PushNotificationService {
                       presentBadge: true,
                       presentSound: true)),
               payload: jsonEncode(message.data));
-        } else { // 채팅일 때
-          flutterLocalNotificationsPlugin.show(
-              meta['room']['id'],
-              title,
-              contentBody,
-              NotificationDetails(
-                  android: AndroidNotificationDetails(
-                    channel.id,
-                    channel.name,
-                    priority: Priority.high,
-                    importance: Importance.high,
-                    channelDescription: channel.description,
-               //     tag:(message.data['meta']['room_id']).toString(),
-                    // icons: message.notification?.android?.smallIcon,
-                    playSound: true,
-                  ),
-                  iOS: DarwinNotificationDetails(
-                      presentAlert: true,
-                      presentBadge: true,
-                      presentSound: true)),
-              payload: jsonEncode(message.data));
-        }
       }
+      catch(err){
+        print("err : $err");
+      }
+
+      // RemoteNotification? notification = message!.notification;
+      // // String body = notification?.body ?? '';
+      // String contentBody="" ;
+      // final meta = jsonDecode(message!.data['meta']);
+      // int fcmType = meta['fcmType'];
+      // String title = (message.data['title']) ?? "";
+        
+      // if(fcmType==0 && title=='expire-chat')
+      //   {
+      //     final dataBody = jsonDecode(message.data['body']) ?? "";
+      //     if( dataBody['first_chat_id'] ==-1) {
+      //       //flutterLocalNotificationsPlugin.cancelAll();
+      //       flutterLocalNotificationsPlugin.cancel(dataBody['room_id'],); // 플러그인의 함수에서 만약 없는 푸시를 삭제한다고 해도 예외처리가 되어있음을 확인했음
+      //     }
+      //     return;
+      //   } else
+      //   {
+      //   contentBody =  (message.data['body']) ?? "";
+      //   }
+
+
+        
+      
     } catch (e) {
       print(e);
     }
@@ -373,38 +347,6 @@ class PushNotificationService {
     //     return;
     //   }
 
-    //   DioClient.getChatRoom(chatRoomId).then((response) {
-    //     ChatRoomDto room = ChatRoomDto.fromJson(response.data);
-    //     Get.to(ChatDetailPage(
-    //       roomDto: room,
-    //       roomRefresh: (room) {},
-    //       changeRoom: (room) {},
-    //       onDeleteRoom: (room) {},
-    //     ));
-    //   });
-    // } else if (fcmType == 4) {
-    //   // 내 포스트에 댓글 및 대댓글
-    //   // link += "?commentId=${data['value']}";
-    //   print("푸쉬 링크 ${link}");
-    //   Utils.urlLaunch(link);
-    // } else if (fcmType == 3) {
-    //   // 포스팅 좋아요
-    //   String postId = data['value'];
-    //   DioClient.getPost(postId).then((response) {
-    //     Get.to(PostDetailScreen(post: PostModel.fromJson(response.data)));
-    //   });
-    // } else if (fcmType == 5) {
-    //   //포스팅 댓글 좋아요
-    //   link += "?commentId=${data['value']}";
-    //   print("푸쉬 링크 ${link}");
-    //   Utils.urlLaunch(link);
-    // } else if (fcmType == 8) {
-    //   // 유저 팔로우
-    //   Utils.urlLaunch(link);
-    // } else if (fcmType == 16) {
-    //   // 게임 팔로우
-    //   Utils.urlLaunch(link);
-    // }
   }
 
 
@@ -442,50 +384,132 @@ class PushNotificationService {
     onDidReceiveBackgroundNotificationResponse: onDidReceiveBackgroundNotificationResponse
     );
 // onMessage is called when the app is in foreground and a notification is received
-    FirebaseMessaging.onMessage.listen((RemoteMessage? message) {
+    FirebaseMessaging.onMessage.listen((RemoteMessage? message) async{
       // WriteLog.write("fcm come time:  ${DateTime.now()}\n message : ${message} \n  ",fileName: 'fcmCome.txt');
 
       //RemoteNotification? notification = message!.notification;
    
       //String body = notification?.body ?? '';
-      if(message ==null)
-      {
-        return;
-      }
-
-      String contentBody="" ;
-      final meta = jsonDecode(message.data['meta']) ?? "";
-      String title = (message.data['title']) ?? ""; // data 의 title
-       int fcmType = meta['fcmType'];
-        
-        if(fcmType==0 && title=='expire-chat')
+        bool isTinodeConnect = false;
+        if(message ==null)
         {
-          final dataBody = jsonDecode(message.data['body']) ?? "";
-          if(dataBody['first_chat_id'] ==-1) {
-            //flutterLocalNotificationsPlugin.cancelAll();
-            flutterLocalNotificationsPlugin.cancel(dataBody['room_id'],); // 플러그인의 함수에서 만약 없는 푸시를 삭제한다고 해도 예외처리가 되어있음을 확인했음
-          }
           return;
+        }
+        if(!tinode_global.isConnected)
+        {
+        isTinodeConnect = await reConnectTinode();
+        }else isTinodeConnect=true;
+
+        if(isTinodeConnect && message.data['xfrom'] == tinode_global.userId) return;  // 내 메시지
+
+        String _fcmType =  message.data['what'];
+        int seq =  int.parse(message.data['seq']);
+        String topic = message.data['topic'];
+        String ts = message.data['ts'];
+        dynamic rc = jsonDecode(message.data['rc']);
+        eChatType chatType = eChatType.NONE;
+
+        if(rc['txt']=="")
+        {
+          switch(rc['ent']['tp'])
+          {
+          case 'IM':
+            print("image");
+            chatType= eChatType.IMAGE;
+            break;
+          case 'VD':
+            print("video");
+            chatType= eChatType.VIDEO;
+            break;
+          case 'AU':
+            print("audio");
+            chatType= eChatType.AUDIO;
+            break;
+          default:
+            chatType = eChatType.NONE;
+            break;
+          }
         }
         else
         {
-        contentBody =  (message.data['body']) ?? "";
+          chatType= eChatType.TEXT;
         }
-      // Map<String, dynamic> notification;      
-      // notification={
-      //     "title": title,
-      //     "body": contentBody,
-      // };
-      // RemoteMessage notificationRm = RemoteMessage.fromMap(notification);
+        try{
+        if(message.data['webrtc'] !=null)
+        {
+            print("call");
+            if(stringToBool(message.data['aonly'])) chatType= eChatType.VOICE_CALL;
+            else chatType= eChatType.VIDEO_CALL;
 
-      // Map<String,dynamic> fcmData;
-      // fcmData={
-      //   "notification" : notificationRm,
-      //   "data" : message.data
-      // };
-      // RemoteMessage msg = RemoteMessage.fromMap(fcmData);
+        }
+        
+        if(chatType==eChatType.VOICE_CALL || chatType==eChatType.VIDEO_CALL)
+        {
+          if(isTinodeConnect)
+          {
+            List<User> joinUserList = [];
+            CallService.instance.joinUserList = joinUserList;
+            CallService.instance.roomTopicName = topic;
+            CallService.instance.initCallService();
+            CallService.instance.showIncomingCall(callerName : topic ,callerNumber: '', callerAvatar: "");
+            
+          }
+        }
+        }
+        catch(err)
+        {
+          print("err");
+        }
+        
+        try{
+        String body = chatContent(chatType==eChatType.TEXT ? rc['txt'] :"", chatType);
+        int notiId = stringToAsciiSum(topic);
+        flutterLocalNotificationsPlugin.show(
+                notiId,
+                topic,
+                body,
+                NotificationDetails(
+                    android: AndroidNotificationDetails(
+                      channel.id,
+                      channel.name,
+                      priority: Priority.high,
+                      importance: Importance.high,
+                      channelDescription: channel.description,
+                    //  tag: (meta['room']['id']).toString(),
+                      // icons: message.notification?.android?.smallIcon,
+                      playSound: true,
+                    ),
+                    iOS: DarwinNotificationDetails(
+                        presentAlert: true,
+                        presentBadge: true,
+                        presentSound: true)),
+                payload: jsonEncode(message.data));
+        }
+        catch(err){
+          print("err : $err");
+        }
+    
 
-      
+      // String contentBody="" ;
+      // final meta = jsonDecode(message.data['meta']) ?? "";
+      // String title = (message.data['title']) ?? ""; // data 의 title
+      // int fcmType = meta['fcmType'];
+        
+      //   if(fcmType==0 && title=='expire-chat')
+      //   {
+      //     final dataBody = jsonDecode(message.data['body']) ?? "";
+      //     if(dataBody['first_chat_id'] ==-1) {
+      //       //flutterLocalNotificationsPlugin.cancelAll();
+      //       flutterLocalNotificationsPlugin.cancel(dataBody['room_id'],); // 플러그인의 함수에서 만약 없는 푸시를 삭제한다고 해도 예외처리가 되어있음을 확인했음
+      //     }
+      //     return;
+      //   }
+      //   else
+      //   {
+      //   contentBody =  (message.data['body']) ?? "";
+      //   }
+
+  
       try {    
         // if (fcmType == 10) {
         //   if (meta["chat"]["chat_idx"] == -1) {
@@ -528,50 +552,6 @@ class PushNotificationService {
       } catch (e) {
         print(e);
         return;
-      }
-      if (message.data != null) {
-        if (jsonDecode(message.data['meta'])['fcmType'] != 10) { //채팅이 아닐때
-          flutterLocalNotificationsPlugin.show(
-              message.hashCode,
-              title,
-              contentBody,
-              NotificationDetails(
-                  android: AndroidNotificationDetails(
-                    channel.id,
-                    channel.name,
-                    priority: Priority.high,
-                    importance: Importance.high,
-                    channelDescription: channel.description,                    
-                    // icons: message.notification?.android?.smallIcon,
-                    playSound: true,
-                  ),
-                  iOS: DarwinNotificationDetails(
-                      presentAlert: true,
-                      presentBadge: true,
-                      presentSound: true)),
-              payload: jsonEncode(message.data));
-        } else { // 채팅일 때
-          flutterLocalNotificationsPlugin.show(
-              meta['room']['id'],
-              title,
-              contentBody,
-              NotificationDetails(
-                  android: AndroidNotificationDetails(
-                    channel.id,
-                    channel.name,
-                    priority: Priority.high,
-                    importance: Importance.high,
-                    channelDescription: channel.description,
-                  //  tag: (meta['room']['id']).toString(),
-                    // icons: message.notification?.android?.smallIcon,
-                    playSound: true,
-                  ),
-                  iOS: DarwinNotificationDetails(
-                      presentAlert: true,
-                      presentBadge: true,
-                      presentSound: true)),
-              payload: jsonEncode(message.data));
-        }
       }
     });
   }

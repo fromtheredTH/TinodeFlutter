@@ -304,7 +304,7 @@ Widget _status(){
                   // ),
                   // SizedBox(height: 20),
                   Text(
-                    '${joinUserList[0].name}',
+                    '${"joinUserList?[0].name ?? """}',
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 10),

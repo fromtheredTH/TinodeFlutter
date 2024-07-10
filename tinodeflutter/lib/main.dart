@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 
+import 'package:flutter_callkit_incoming/entities/call_event.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 import 'package:app_links/app_links.dart';
@@ -125,9 +127,32 @@ Future<void> main() async {
 Future<void> initFcm() async {
   await PushNotificationService().setupInteractedMessage();
   FirebaseMessaging.onBackgroundMessage(PushNotificationService.firebaseMessagingBackgroundHandler);
+    // flutter_callkit_incoming 이벤트 리스너 설정
+    try{
+    FlutterCallkitIncoming.onEvent.listen((event) async {
+    if (event?.event == Event.actionCallAccept) {
+      // 앱이 백그라운드에서 시작될 때 호출
+      print("111");
+      // roomtopic name 설정이 안되어있음
+      bool isSetDone = await CallService.instance.initCallService();
+      if(isSetDone) CallService.instance.showIncomingCall(callerName : CallService.instance.joinUserList[0].name ,callerNumber: '', callerAvatar: "");
+      // CallScreen으로 네비게이트
+      // Get.to(() => CallScreen(
+      //   tinode: tinode_global,
+      //   roomTopic: CallService.instance.roomTopic,
+      //   joinUserList: CallService.instance.joinUserList,
+      // ));
+    }
+  });
+    }
+    catch(err)
+    {
+      print("dd");
+    }
+ 
 
   FirebaseMessaging.instance.getToken().then((token) {
-    print('token:' + (token ?? ''));
+    print('fcm token:' + (token ?? ''));
     //LocalService.setToken((token ?? ''));
     gPushKey = (token ?? '');
   });

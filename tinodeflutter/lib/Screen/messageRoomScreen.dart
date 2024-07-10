@@ -158,8 +158,9 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
   }
 
   eChatType checkMsgType(DataMessage dataMessage) {
+  // dynamic data = jsonDecode(dataMessage.content);
+
     if (dataMessage.content is Map) {
-      print("map content!");
       switch (dataMessage.content['ent'][0]['tp']) {
         case 'IM':
           print("image");
@@ -167,6 +168,9 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
         case 'VD':
           print("video");
           return eChatType.VIDEO;
+        case 'AU':
+          print("audio");
+          return eChatType.AUDIO;
         case 'VC':
           print("call");
           if(dataMessage.content['ent'][0]['data']?['aonly']!=null) return eChatType.VOICE_CALL;
@@ -200,7 +204,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     }
   }
 
-  void checkCallState(DataMessage dataMessage)
+  Future<void> checkCallState(DataMessage dataMessage)async
   {
     if(dataMessage.from == Constants.user.id) return;  // 내가 걸었던 메시지니깐 따로 처리안함
     if(dataMessage.head?['webrtc']!=null)
@@ -210,8 +214,8 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
         case 'started':
           CallService.instance.joinUserList = joinUserList;
           CallService.instance.roomTopicName = roomTopic.name ?? "";
-          CallService.instance.initCallService();
-          CallService.instance.showIncomingCall(callerName : joinUserList[0].name ,callerNumber: '', callerAvatar: "");
+          bool isSettingDone = await CallService.instance.initCallService();
+          isSettingDone? CallService.instance.showIncomingCall(callerName : joinUserList[0].name ,callerNumber: '', callerAvatar: "") : showToast("fail to call");
     //        WidgetsBinding.instance.addPostFrameCallback((_) async {
     //         Get.to(()=>CallScreen(tinode: tinode, roomTopic: roomTopic,joinUserList: joinUserList,));
     //        //Get.to(AgoraVoiceCallController(channelName: roomTopic?.name ?? ""));

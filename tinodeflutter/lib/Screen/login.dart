@@ -76,6 +76,7 @@ class _LoginState extends State<Login> {
       print("token : $token");
       print("url token : $url_encoded_token");
       showToast("login 완료");
+      tinode.setDeviceToken(gPushKey); //fcm push token 던지기
       Get.offAll(MessageRoomListScreen(
         tinode: tinode,
       ));
@@ -83,6 +84,8 @@ class _LoginState extends State<Login> {
       showToast("잘못 입력했습니다");
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
