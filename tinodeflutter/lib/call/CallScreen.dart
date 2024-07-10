@@ -16,9 +16,10 @@ import 'package:tinodeflutter/tinode/tinode.dart';
 import 'CallController.dart';
 
 class CallScreen extends StatefulWidget {
-  CallScreen( {super.key, required this.tinode,  this.roomTopic, required this.joinUserList});
+  CallScreen( {super.key, required this.tinode, this.roomTopicName,  this.roomTopic, required this.joinUserList});
   Tinode tinode;
   Topic? roomTopic;
+  String? roomTopicName;
   List<User> joinUserList;
   @override
   State<CallScreen> createState() => _CallScreenState();
@@ -28,6 +29,8 @@ class CallScreen extends StatefulWidget {
 class _CallScreenState extends State<CallScreen>  {
   late Tinode tinode;
   Topic? roomTopic;
+  String? roomTopicName;
+
   final CallController controller = Get.put(CallController());
   late List<User> joinUserList;
   
@@ -58,6 +61,7 @@ class _CallScreenState extends State<CallScreen>  {
     super.initState();
     tinode = widget.tinode;
     roomTopic = widget.roomTopic;
+    roomTopicName = widget.roomTopicName;
     joinUserList = widget.joinUserList;
     initAgora();
   }
@@ -84,10 +88,21 @@ void dispose()  {
   // 채널 네임은 1:1 통화를 건 사람이  상대방 topic 으로 설정함
   // 그룹채팅은 그룹 채팅방을 channel name으로 하면 됨
 
+Future<bool> initTopic()async{
+  if(roomTopic==null)
+  {
+    roomTopic = tinode.getTopic(roomTopicName??"");
+    return true;
+  }
+  else{ return true;}
+}
 
 //agora related function
 Future <void> initAgora() async
 { 
+  bool haveTopic = await initTopic();
+  if(!haveTopic) return;
+
   // 1:1 이면 상대방 uid로 채널열기
   try{
     setupVoiceSDKEngine();
@@ -149,9 +164,12 @@ Future<void> setupVoiceSDKEngine() async {
         onUserOffline: (RtcConnection connection, int remoteUid,
             UserOfflineReasonType reason) {
         showToast("Remote user uid:$remoteUid left the channel");
-        setState(() {
-            _remoteUid = null;
-        });
+        _leaveChannel();
+         Get.back();
+
+        // setState(() {
+        //     _remoteUid = null;
+        // });
         },
         onError: (ErrorCodeType err, String msg) {
         print('[onError] err: $err, msg: $msg');
@@ -201,6 +219,7 @@ catch(err)
 }
 
   void _leaveChannel() {
+    noteCallState('hang-up');
     setState(() {
         _isJoined = false;
         _remoteUid = null;
@@ -431,6 +450,7 @@ class CallController extends GetxController {
 void handlePushNotification(Map<String, dynamic> message) {
   if (message['type'] == 'incoming_call') {
     Get.find<CallService>().showIncomingCall(
+      roomTopicId: 'test',
       callerName: message['caller_name'],
       callerNumber: message['caller_number'],
       callerAvatar: message['caller_avatar'],

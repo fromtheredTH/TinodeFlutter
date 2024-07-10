@@ -215,7 +215,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
           CallService.instance.joinUserList = joinUserList;
           CallService.instance.roomTopicName = roomTopic.name ?? "";
           bool isSettingDone = await CallService.instance.initCallService();
-          isSettingDone? CallService.instance.showIncomingCall(callerName : joinUserList[0].name ,callerNumber: '', callerAvatar: "") : showToast("fail to call");
+          isSettingDone? CallService.instance.showIncomingCall(roomTopicId: roomTopic.name??"", callerName : joinUserList[0].name ,callerNumber: '', callerAvatar: "") : showToast("fail to call");
     //        WidgetsBinding.instance.addPostFrameCallback((_) async {
     //         Get.to(()=>CallScreen(tinode: tinode, roomTopic: roomTopic,joinUserList: joinUserList,));
     //        //Get.to(AgoraVoiceCallController(channelName: roomTopic?.name ?? ""));

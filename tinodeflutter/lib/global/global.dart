@@ -29,7 +29,7 @@ bool isLoading=false;
 
 late Tinode tinode_global;
 
-
+String gBackgroundFcmTopic="";
 
   String id = "";
   String pw = "";

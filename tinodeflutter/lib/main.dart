@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 
@@ -132,16 +133,18 @@ Future<void> initFcm() async {
     FlutterCallkitIncoming.onEvent.listen((event) async {
     if (event?.event == Event.actionCallAccept) {
       // 앱이 백그라운드에서 시작될 때 호출
+      String roomTopicId = event?.body['id'];
+     // dynamic data = jsonDecode(event?.body); 
       print("111");
       // roomtopic name 설정이 안되어있음
+      CallService.instance.roomTopicName = roomTopicId;
       bool isSetDone = await CallService.instance.initCallService();
-      if(isSetDone) CallService.instance.showIncomingCall(callerName : CallService.instance.joinUserList[0].name ,callerNumber: '', callerAvatar: "");
       // CallScreen으로 네비게이트
-      // Get.to(() => CallScreen(
-      //   tinode: tinode_global,
-      //   roomTopic: CallService.instance.roomTopic,
-      //   joinUserList: CallService.instance.joinUserList,
-      // ));
+      Get.to(() => CallScreen(
+        tinode: tinode_global,
+        roomTopicName: roomTopicId,
+        joinUserList: [],
+      ));
     }
   });
     }

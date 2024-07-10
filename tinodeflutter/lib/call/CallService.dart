@@ -159,13 +159,14 @@ class CallService {
   }
 
   Future<void> showIncomingCall({
+    required String roomTopicId,
     required String callerName,
     String? callerNumber,
     String? callerAvatar,
   }) async {
     final String callId = _uuid.v4();
     final params = CallKitParams(
-      id: callId,
+      id: roomTopicId,
       nameCaller: callerName,
       appName: 'JadeChat',
       avatar: callerAvatar,
@@ -197,6 +198,7 @@ class HomeScreen extends StatelessWidget {
           child: Text('Simulate Incoming Call'),
           onPressed: () {
             Get.find<CallService>().showIncomingCall(
+              roomTopicId: "1",
               callerName: 'John Doe',
               callerNumber: '',
             );

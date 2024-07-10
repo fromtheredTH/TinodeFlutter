@@ -201,6 +201,7 @@ class PushNotificationService {
       String _fcmType =  message.data['what'];
       int seq =  int.parse(message.data['seq']);
       String topic = message.data['topic'];
+      gBackgroundFcmTopic= topic;
       String ts = message.data['ts'];
       dynamic rc = jsonDecode(message.data['rc']);
       eChatType chatType = eChatType.NONE;
@@ -239,11 +240,7 @@ class PushNotificationService {
       
       if(chatType==eChatType.VOICE_CALL || chatType==eChatType.VIDEO_CALL)
       {
-          List<User> joinUserList = [];
-          CallService.instance.joinUserList = joinUserList;
-          CallService.instance.roomTopicName = topic;
-          // CallService.instance.initCallService();
-          CallService.instance.showIncomingCall(callerName : topic ,callerNumber: '', callerAvatar: "");
+          CallService.instance.showIncomingCall(roomTopicId: topic, callerName : topic ,callerNumber: '', callerAvatar: "");
           return;
       }
       try{
@@ -451,7 +448,7 @@ class PushNotificationService {
             CallService.instance.joinUserList = joinUserList;
             CallService.instance.roomTopicName = topic;
             CallService.instance.initCallService();
-            CallService.instance.showIncomingCall(callerName : topic ,callerNumber: '', callerAvatar: "");
+            CallService.instance.showIncomingCall(roomTopicId: topic, callerName : topic ,callerNumber: '', callerAvatar: "");
             
           }
         }
