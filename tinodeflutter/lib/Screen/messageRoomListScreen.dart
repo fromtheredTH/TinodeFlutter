@@ -262,7 +262,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
               alignment: Alignment.center,
               width: double.maxFinite,
               height: double.maxFinite,
-              child: AppText(text: "채팅방이 없습니다."),))
+              child: AppText(text: "채팅방이 없습니다.", fontSize: 25,),))
           else
           Expanded(
             child: ListView.builder(

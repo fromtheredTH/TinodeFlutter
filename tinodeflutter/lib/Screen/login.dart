@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:tinodeflutter/Screen/SignupScreen.dart';
 import 'package:tinodeflutter/global/global.dart';
 import 'messageRoomListScreen.dart';
 import '../tinode/tinode.dart';
@@ -190,6 +191,18 @@ class _LoginState extends State<Login> {
                 FocusManager.instance.primaryFocus?.unfocus();
               },
               child: Text('login'),
+            ),
+          ),
+          SizedBox(height: 30,),
+          SizedBox(
+            // SizedBox 대신 Container를 사용 가능
+            width: 100,
+            height: 40,
+            child: FilledButton(
+              onPressed: () {
+                Get.to(SignUpScreen());
+              },
+              child: Text('회원가입'),
             ),
           ),
         ]),
