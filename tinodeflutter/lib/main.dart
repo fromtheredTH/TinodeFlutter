@@ -7,6 +7,7 @@ import 'package:flutter_callkit_incoming/entities/call_event.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app_links/app_links.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -58,6 +59,7 @@ Future<void> main() async {
       statusBarBrightness: Platform.isIOS ? Brightness.dark : Brightness.light,
       statusBarIconBrightness: Platform.isIOS ? Brightness.dark : Brightness.light
   ));
+  
 
   //fcm
   await initFcm();
@@ -134,8 +136,10 @@ Future<void> initFcm() async {
     if (event?.event == Event.actionCallAccept) {
       // 앱이 백그라운드에서 시작될 때 호출
       String roomTopicId = event?.body['id'];
-     // dynamic data = jsonDecode(event?.body); 
-      print("111");
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? jsonString = prefs.getString(roomTopicId);
+      Map<String, dynamic> _data = jsonDecode(jsonString ?? "");
+
       // roomtopic name 설정이 안되어있음
       CallService.instance.roomTopicName = roomTopicId;
       bool isSetDone = await CallService.instance.initCallService();
@@ -144,6 +148,7 @@ Future<void> initFcm() async {
         tinode: tinode_global,
         roomTopicName: roomTopicId,
         joinUserList: [],
+        chatType: eChatType.values[_data['callType']],
       ));
     }
   });

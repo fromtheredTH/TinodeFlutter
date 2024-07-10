@@ -13,7 +13,7 @@ import '../../../Constants/ImageConstants.dart';
 import '../../Constants/ColorConstants.dart';
 
 class ItemUser extends StatelessWidget {
-  User user;
+  UserModel user;
   bool selected;
   bool isDisabled;
   final onClick;

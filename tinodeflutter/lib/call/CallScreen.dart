@@ -16,11 +16,12 @@ import 'package:tinodeflutter/tinode/tinode.dart';
 import 'CallController.dart';
 
 class CallScreen extends StatefulWidget {
-  CallScreen( {super.key, required this.tinode, this.roomTopicName,  this.roomTopic, required this.joinUserList});
+  CallScreen( {super.key, required this.tinode, this.roomTopicName,  this.roomTopic,  required this.chatType, required this.joinUserList});
   Tinode tinode;
   Topic? roomTopic;
   String? roomTopicName;
-  List<User> joinUserList;
+  List<UserModel> joinUserList;
+  eChatType chatType;
   @override
   State<CallScreen> createState() => _CallScreenState();
 }
@@ -32,8 +33,9 @@ class _CallScreenState extends State<CallScreen>  {
   String? roomTopicName;
 
   final CallController controller = Get.put(CallController());
-  late List<User> joinUserList;
+  late List<UserModel> joinUserList;
   
+  eChatType _chatType = eChatType.NONE;
 
   //agora variable
    int uid = 0; // uid of the local user
@@ -48,8 +50,10 @@ class _CallScreenState extends State<CallScreen>  {
     String agoraToken = "";
 
      bool isJoined = false,
+      isVideo=false,
+      _isScreenShared = false,
       openMicrophone = true,
-      muteMicrophone = false,
+      _isMuted = false,
       muteAllRemoteAudio = false,
       enableSpeakerphone = true,
       playEffect = false;
@@ -63,6 +67,9 @@ class _CallScreenState extends State<CallScreen>  {
     roomTopic = widget.roomTopic;
     roomTopicName = widget.roomTopicName;
     joinUserList = widget.joinUserList;
+    _chatType = widget.chatType;
+    if(_chatType==eChatType.VOICE_CALL) isVideo=false;
+    if(_chatType==eChatType.VIDEO_CALL) isVideo=true;
     initAgora();
   }
 
@@ -105,7 +112,6 @@ Future <void> initAgora() async
 
   // 1:1 이면 상대방 uid로 채널열기
   try{
-    setupVoiceSDKEngine();
     //get agora token
     channelName = sortAndCombineStrings(roomTopic?.name??"", tinode.userId ); //roomTopic?.name??"";
     var response =await DioClient.getAgoraToken(channelName, token);
@@ -113,6 +119,7 @@ Future <void> initAgora() async
     uid = response.data?['ctrl']?['params']?['useridx'];
     print("ag token : $agoraToken");
     print("uid $uid");
+    setupVoiceSDKEngine();
     //agoraToken ="007eJxTYPjQ4zl5hS+brlZtactRf/WKj3vPsciIL5vuLCUuZ7XAZL4Cg4WlaVKqkUlSipmBuYlZirGFoaGpRZKJiUlqkomlgVGyzbyetIZARgbH+fNYGBkgEMRnYShJLS5hYAAAZyIcMg==";
   }
   catch(err)
@@ -128,6 +135,7 @@ Future<void> setupVoiceSDKEngine() async {
     //create an instance of the Agora engine
     agoraEngine = createAgoraRtcEngine();
 
+    if(isVideo) await agoraEngine.enableVideo();
 
     if (roomTopic?.isP2P() ?? true) {
       await agoraEngine.initialize(const RtcEngineContext(
@@ -139,8 +147,8 @@ Future<void> setupVoiceSDKEngine() async {
         appId: agoraAppId,
         channelProfile: ChannelProfileType.channelProfileCommunication,
       ));
-
     }
+
 
     // Register the event handler
     _rtcEngineEventHandler =RtcEngineEventHandler(
@@ -196,6 +204,7 @@ Future<void> setupVoiceSDKEngine() async {
 
 void  _joinChannel() async {
 
+if(isVideo)  await agoraEngine.startPreview();
 try{
  // Set channel options including the client role and channel profile
     ChannelMediaOptions options = const ChannelMediaOptions(
@@ -252,11 +261,18 @@ catch(err)
     }
   }
 
+   onMuteChecked(bool value) {
+    setState(() {
+      _isMuted = value;
+      agoraEngine.muteAllRemoteAudioStreams(_isMuted);
+    });
+  }
+
 
   Future<bool> _promptPermissionSetting() async {
     if (Platform.isIOS) {
       if (await Permission.microphone.request().isGranted &&
-          await Permission.videos.request().isGranted) {
+          await Permission.camera.request().isGranted) {
         return true;
       } else {
         await [Permission.microphone].request();
@@ -264,7 +280,7 @@ catch(err)
     }
     if (Platform.isAndroid) {
       if (await Permission.microphone.request().isGranted &&
-          await Permission.videos.request().isGranted) {
+          await Permission.camera.request().isGranted) {
         return true;
       } else {
         await [Permission.microphone].request();
@@ -273,25 +289,72 @@ catch(err)
     return false;
   }
 
-Widget _status(){
-    String statusText;
+  Widget _status(){
+      String statusText;
 
-    if (!_isJoined){
-        statusText = 'Join a channel';
-        showToast("join channel");
-        }
-    else if (_remoteUid == null)
-        {statusText = 'Waiting for a remote user to join...';
-        showToast("waiting user");}
-    else
-        {statusText = 'Connected to remote user, uid:$_remoteUid';
-        showToast("connect user : $_remoteUid");
-        }
+      if (!_isJoined){
+          statusText = 'Join a channel';
+          showToast("join channel");
+          }
+      else if (_remoteUid == null)
+          {statusText = 'Waiting for a remote user to join...';
+          showToast("waiting user");}
+      else
+          {statusText = 'Connected to remote user, uid:$_remoteUid';
+          showToast("connect user : $_remoteUid");
+          }
 
-    return Text(
-    statusText,
-    );
-}
+      return Text(
+      statusText,
+      );
+  }
+   Widget _localPreview() {
+    // Display local video or screen sharing preview
+
+    if (_isJoined) {
+      if (!_isScreenShared) {
+        return AgoraVideoView(
+          controller: VideoViewController(
+            rtcEngine: agoraEngine,
+            canvas:  VideoCanvas(uid: uid),
+          ),
+        );
+      } else {
+        return AgoraVideoView(
+            controller: VideoViewController(
+          rtcEngine: agoraEngine,
+          canvas:  VideoCanvas(
+            uid: uid,
+            sourceType: VideoSourceType.videoSourceScreen,
+          ),
+        ));
+      }
+    } else {
+      return const Text(
+        'Join a channel',
+        textAlign: TextAlign.center,
+      );
+    }
+  }
+
+  Widget _remoteVideo() {
+    if (_remoteUid != null) {
+      return AgoraVideoView(
+        controller: VideoViewController.remote(
+          rtcEngine: agoraEngine,
+          canvas: VideoCanvas(uid: _remoteUid),
+          connection: RtcConnection(channelId: channelName),
+        ),
+      );
+    } else {
+      String msg = '';
+      if (_isJoined) msg = 'Waiting for a remote user to join';
+      return Text(
+        msg,
+        textAlign: TextAlign.center,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -299,10 +362,7 @@ Widget _status(){
     return MaterialApp(
           scaffoldMessengerKey: scaffoldMessengerKey,
     home: Scaffold(
-      appBar: AppBar(
-        title: Text('In Call'),
-        automaticallyImplyLeading: false,
-      ),
+      
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -334,6 +394,18 @@ Widget _status(){
                 ],
               ),
             ),
+          if(isVideo && _isJoined)
+              Container(
+                    height: 240,
+                    decoration: BoxDecoration(border: Border.all()),
+                    child: Center(child: _localPreview()),
+                    ),
+          if(isVideo)
+            Container(
+                    height: 240,
+                    decoration: BoxDecoration(border: Border.all()),
+                    child: Center(child: _remoteVideo()),
+                    ),           
             Padding(
               padding: const EdgeInsets.only(bottom: 50.0),
               child: Row(
@@ -343,6 +415,7 @@ Widget _status(){
                     icon: Icons.mic,
                     text: 'Mute',
                     onPressed: (){
+                        onMuteChecked(!_isMuted);
                         } //controller.toggleMute,
                   ),
                   CallButton(
@@ -354,6 +427,7 @@ Widget _status(){
                         //_switchMicrophone();
                         } //controller.showKeypad,
                   ),
+              
                   CallButton(
                     icon: Icons.volume_up,
                     text: 'Speaker',

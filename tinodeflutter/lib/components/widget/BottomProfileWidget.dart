@@ -18,7 +18,7 @@ import '../../../Constants/utils.dart';
 
 class BottomProfileWidget extends StatefulWidget{
   BottomProfileWidget({Key? key, required this.user, required this.setting, required this.logout}) : super(key: key);
-  User user;
+  UserModel user;
   Function() setting;
   Function() logout;
 

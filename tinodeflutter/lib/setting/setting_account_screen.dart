@@ -25,7 +25,7 @@ import '../../components/MyAssetPicker.dart';
 class SettingAccountScreen extends StatefulWidget {
   SettingAccountScreen(
       {super.key, required this.tinode, required this.onChangedUser});
-  Function(User) onChangedUser;
+  Function(UserModel) onChangedUser;
   Tinode tinode;
 
   @override

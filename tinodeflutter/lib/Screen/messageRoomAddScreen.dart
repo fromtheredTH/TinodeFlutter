@@ -32,7 +32,7 @@ class MessageRoomAddScreen extends StatefulWidget {
   Topic? roomTopic;
   late TopicFnd _fndTopic;
 
-  List<User>? existUserList;
+  List<UserModel>? existUserList;
 
   @override
   State<MessageRoomAddScreen> createState() => _MessageRoomAddScreenState();
@@ -44,9 +44,9 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
   late Topic me;
   late TopicFnd _fndTopic;
 
-  List<User> friendList = [];
-  List<User> selectList = [];
-  List<User> searchUserList = [];
+  List<UserModel> friendList = [];
+  List<UserModel> selectList = [];
+  List<UserModel> searchUserList = [];
 
   bool isInit = false;
   bool isSearchingLoading = false;
@@ -137,7 +137,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
             String pictureUrl = msg.sub?[i].public['photo']?['ref'] != null
                 ? changePathToLink(msg.sub?[i].public['photo']['ref'])
                 : "";
-            User user = User(
+            UserModel user = UserModel(
                 id: msg.sub?[i].user ?? "",
                 name: msg.sub?[i].public['fn'],
                 picture: pictureUrl,
@@ -216,7 +216,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
           String pictureUrl = data.fri?[i].public['photo']?['ref'] != null
               ? changePathToLink(data.fri[i].public['photo']['ref'])
               : "";
-          User user = User(
+          UserModel user = UserModel(
               id: data.fri[i].user,
               name: data.fri[i].public['fn'],
               picture: pictureUrl,

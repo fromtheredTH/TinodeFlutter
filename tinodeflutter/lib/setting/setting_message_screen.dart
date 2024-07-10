@@ -38,7 +38,7 @@ class SettingMessageScreen extends StatefulWidget {
 }
 
 class _SettingMessageScreen extends State<SettingMessageScreen> {
-  User user = Constants.user;
+  UserModel user = Constants.user;
   int selectedIndex = 0;
 
   Future<void> setDMRange(int range) async {

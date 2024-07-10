@@ -37,7 +37,7 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
   AutoScrollController mainController = AutoScrollController();
   TextEditingController inputController = TextEditingController();
   PositionRetainedScrollPhysics physics = PositionRetainedScrollPhysics();
-  List<User> _searchResults = [];
+  List<UserModel> _searchResults = [];
   late TopicFnd _fndTopic;
 
   @override
@@ -72,7 +72,7 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
         for(int i = 0 ; i<msg.sub!.length ;i++)
         {
           String pictureUrl = msg.sub?[i].public['photo']?['ref'] != null ? changePathToLink(msg.sub?[i].public['photo']['ref']) : "";
-          User user = User(id: msg.sub?[i].user ?? "" , name : msg.sub?[i].public['fn'], picture : pictureUrl, isFreind: msg.sub?[i].isFriend ?? false);
+          UserModel user = UserModel(id: msg.sub?[i].user ?? "" , name : msg.sub?[i].public['fn'], picture : pictureUrl, isFreind: msg.sub?[i].isFriend ?? false);
           _searchResults.add(user);
         }
         }

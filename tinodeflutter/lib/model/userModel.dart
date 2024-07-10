@@ -1,4 +1,4 @@
-class User {
+class UserModel {
    String id;
    String name;
    String? email;
@@ -7,10 +7,10 @@ class User {
    dynamic? membership;
    bool selected=false;
 
-  User({required this.id, required this.name, required this.picture, required this.isFreind , this.membership, this.selected=false});
+  UserModel({required this.id, required this.name, required this.picture, required this.isFreind , this.membership, this.selected=false});
 
 
-   User.fromJson(Map<String, dynamic> json)
+   UserModel.fromJson(Map<String, dynamic> json)
       : id = json['id'] ?? -1,
         // uid = json['uid'] ?? "",
         name = json['public']['fn'] ?? "",

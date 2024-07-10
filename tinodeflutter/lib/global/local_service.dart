@@ -18,7 +18,7 @@ class LocalService {
   static String PREF_RECENT_KEYWORD = "PREF_RECENT_KEYWORD";
   static String PREF_LANG = "PREF_LANG";
 
-  static void setUser(User user) async {
+  static void setUser(UserModel user) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString(PREF_USER, json.encode(user.toJson()));
   }
@@ -28,13 +28,13 @@ class LocalService {
     prefs.remove(PREF_USER);
   }
 
-  static Future<User?> getUser() async {
+  static Future<UserModel?> getUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? user = prefs.getString(PREF_USER);
     if (user == null || user.isEmpty) {
       return null;
     }
-    return User.fromJson(json.decode(user));
+    return UserModel.fromJson(json.decode(user));
   }
 
   static void setToken(String value) async {

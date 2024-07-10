@@ -26,7 +26,7 @@ import '../../../Constants/utils.dart';
 class UserListItemWidget extends StatefulWidget {
   UserListItemWidget({Key? key,required this.tinode, required this.user, this.isGoProfile = true, this.isShowAction = true, this.isMini=false, required this.deleteUser, this.followUser, this.unFollowUser}) : super(key: key);
   Tinode tinode;
-  User user;
+  UserModel user;
   bool isShowAction;
   bool isMini;
   bool isGoProfile;
@@ -41,7 +41,7 @@ class UserListItemWidget extends StatefulWidget {
 
 class _UserListItemWidget extends State<UserListItemWidget> {
   // late TopicSubscription userTopicSub;
-  late User user;
+  late UserModel user;
   late Tinode tinode;
 
   @override

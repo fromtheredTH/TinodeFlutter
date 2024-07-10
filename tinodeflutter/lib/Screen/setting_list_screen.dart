@@ -28,7 +28,7 @@ import '../../../Constants/utils.dart';
 
 class SettingListScreen extends StatefulWidget {
   SettingListScreen({super.key, required this.tinode, required this.onChangedUser });
-  Function(User) onChangedUser;
+  Function(UserModel) onChangedUser;
   Tinode tinode;
 
   @override

@@ -68,7 +68,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
   TextEditingController inputController = TextEditingController();
   PositionRetainedScrollPhysics physics = PositionRetainedScrollPhysics();
   final ImagePicker _picker = ImagePicker();
-  List<User> joinUserList= [];
+  List<UserModel> joinUserList= [];
   late TopicSubscription roomMetaSubData;
   late Topic roomTopicData;
 
@@ -116,7 +116,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
         for(int i = 0 ; i<onMetaDesc.subscribers.length;i++)
         {
          String pictureUrl = onMetaDesc.subscribers[i]?.public['photo']['ref'] != null ? changePathToLink(onMetaDesc.subscribers[i]?.public['photo']['ref']) : "";
-         User user =  User(id: onMetaDesc.subscribers[i]?.user ?? "", name:onMetaDesc.subscribers[i]?.public['fn'] ?? "" , picture: pictureUrl, isFreind: onMetaDesc.subscribers[i]?.isFriend ?? false);
+         UserModel user =  UserModel(id: onMetaDesc.subscribers[i]?.user ?? "", name:onMetaDesc.subscribers[i]?.public['fn'] ?? "" , picture: pictureUrl, isFreind: onMetaDesc.subscribers[i]?.isFriend ?? false);
          joinUserList.add(user);
         }
         setState(() {
@@ -209,6 +209,8 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     if(dataMessage.from == Constants.user.id) return;  // 내가 걸었던 메시지니깐 따로 처리안함
     if(dataMessage.head?['webrtc']!=null)
     {
+      if(dataMessage.content['ent'][0]['data']?['aonly']!=null){CallService.instance.chatType = eChatType.VOICE_CALL;}
+      else {CallService.instance.chatType = eChatType.VIDEO_CALL;}
      switch(dataMessage.head?['webrtc'])
      {
         case 'started':
@@ -1016,7 +1018,37 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     var voiceMsg = roomTopic.createMessage(data, false, head: head);
     try{
       await roomTopic.publishMessage(voiceMsg);
-     Get.to(CallScreen(tinode: tinode, roomTopic: roomTopic, joinUserList: joinUserList));
+     Get.to(CallScreen(tinode: tinode, roomTopic: roomTopic, joinUserList: joinUserList, chatType: eChatType.VOICE_CALL,));
+      // Get.to(AgoraVoiceCallController(channelName: roomTopic?.name ?? ""));
+
+    }
+    catch(err)
+    {
+      print("voice call request err : $err");
+    }
+  }
+  Future<void> requestVideoCall() async
+  {
+
+    Map<String,dynamic> data =  {
+            "txt": " ",
+            "ent": [
+              {
+                "tp": "VC",
+               // "data": {"aonly":false}
+              }
+            ]
+          };
+
+       Map<String,dynamic> head = {
+        //"aonly":false,
+        "mime": "text/x-drafty",
+        "webrtc" :"started",
+       };
+    var videoCallMsg = roomTopic.createMessage(data, false, head: head);
+    try{
+      await roomTopic.publishMessage(videoCallMsg);
+     Get.to(CallScreen(tinode: tinode, roomTopic: roomTopic, joinUserList: joinUserList, chatType: eChatType.VIDEO_CALL,));
       // Get.to(AgoraVoiceCallController(channelName: roomTopic?.name ?? ""));
 
     }
@@ -1265,7 +1297,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
                         height: 30,
                         child: FilledButton(
                           onPressed: () {
-                            requestVoiceCall();
+                            requestVideoCall();
                           },
                           child: Text('영상통화'),
                         ),

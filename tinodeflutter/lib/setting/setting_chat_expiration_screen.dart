@@ -52,7 +52,7 @@ class SettingChatExpirationeScreen extends StatefulWidget {
 
 class _SettingChatExpirationeScreen
     extends State<SettingChatExpirationeScreen> {
-  User user = Constants.user;
+  UserModel user = Constants.user;
   int selectedIndex = 0;
 
   late Topic roomTopic;

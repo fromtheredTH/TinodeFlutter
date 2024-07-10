@@ -15,21 +15,21 @@ import 'CallScreen.dart';
 
 class CallService {
   CallService(
-      {Key? key, required this.joinUserList, required this.roomTopicName});
+      {Key? key, required this.joinUserList, required this.roomTopicName , required this.chatType});
 
   static CallService? _instance;
-
   static CallService get instance => _getOrCreateInstance();
   static CallService _getOrCreateInstance() {
     if (_instance != null) {
       return _instance!;
     }
-    _instance = CallService(joinUserList: [], roomTopicName: "");
+    _instance = CallService(joinUserList: [], roomTopicName: "", chatType: eChatType.NONE);
     return _instance!;
   }
 
-  List<User> joinUserList;
+  List<UserModel> joinUserList;
   String roomTopicName;
+  eChatType chatType;
   final FlutterCallkitIncoming _callKit = FlutterCallkitIncoming();
   final Uuid _uuid = Uuid();
   late Topic roomTopic;
@@ -106,7 +106,7 @@ class CallService {
             print("call start");
             if (Get.currentRoute != '/CallScreen') {
                   Get.to(() => CallScreen(
-                      tinode: tinode_global, joinUserList: joinUserList));
+                      tinode: tinode_global, joinUserList: joinUserList, chatType: chatType,));
                 }
             break;
           case Event.actionCallAccept:
@@ -117,7 +117,7 @@ class CallService {
             noteCallState('accept');
             nowCallState = eCallState.ACCEPTED;
             WidgetsBinding.instance.addPostFrameCallback((_) async {
-            Get.to(()=>CallScreen(tinode: tinode_global, roomTopic: roomTopic ,joinUserList: joinUserList,));
+            Get.to(()=>CallScreen(tinode: tinode_global, roomTopic: roomTopic ,joinUserList: joinUserList,chatType: chatType,));
             });
                 print("eee");
             } catch (err) {
@@ -172,7 +172,7 @@ class CallService {
       avatar: callerAvatar,
       handle: callerNumber,
       type: 0, // 0 : 오디오 1: 비디오
-      duration: 150000,
+      duration: 15000,
       textAccept: 'Accept',
       textDecline: 'Decline',
       missedCallNotification: NotificationParams(
@@ -185,6 +185,7 @@ class CallService {
     );
 
     await FlutterCallkitIncoming.showCallkitIncoming(params);
+
   }
 }
 

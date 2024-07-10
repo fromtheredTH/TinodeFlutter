@@ -107,7 +107,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
 
     var userId = tinode.getCurrentUserId();
     String pictureUrl = meta.desc?.public['photo']?['ref'] != null ? changePathToLink(meta.desc?.public['photo']['ref']) : "";
-    Constants.user = User(id: userId, name: meta.desc.public['fn'], membership: membershipMeta.membership, picture: pictureUrl, isFreind: false);
+    Constants.user = UserModel(id: userId, name: meta.desc.public['fn'], membership: membershipMeta.membership, picture: pictureUrl, isFreind: false);
 
   }
 

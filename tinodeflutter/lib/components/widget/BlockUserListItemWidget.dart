@@ -22,7 +22,7 @@ import 'loading_widget.dart';
 
 class BlockUserListItemWidget extends StatefulWidget {
   BlockUserListItemWidget({Key? key,required this.tinode, required this.user, required this.deleteUser}) : super(key: key);
-  User user;
+  UserModel user;
   Tinode tinode;
   Function() deleteUser;
 
@@ -31,21 +31,21 @@ class BlockUserListItemWidget extends StatefulWidget {
 }
 
 class _BlockUserListItemWidget extends State<BlockUserListItemWidget> {
-  late User user;
+  late UserModel user;
   late Tinode tinode;
 
-  late List<User> users;
+  late List<UserModel> users;
   late Future userFuture;
   int userPage = 0;
   bool hasUserNextPage = false;
   bool isLoading = false;
   ScrollController userScrollController = ScrollController();
 
-  Future<List<User>> initUsers() async{
+  Future<List<UserModel>> initUsers() async{
     var response = await DioClient.getBlockUsers(20, 0);
-    List<User> userResults = response.data["result"] == null ? [] : response
-        .data["result"].map((json) => User.fromJson(json)).toList().cast<
-        User>();
+    List<UserModel> userResults = response.data["result"] == null ? [] : response
+        .data["result"].map((json) => UserModel.fromJson(json)).toList().cast<
+        UserModel>();
     userPage = 1;
     hasUserNextPage = response.data["pageInfo"]?["hasNextPage"] ?? false;
     users = userResults;
@@ -56,9 +56,9 @@ class _BlockUserListItemWidget extends State<BlockUserListItemWidget> {
   Future<void> getUserNextPage() async {
     if (!isLoading && userScrollController.position.extentAfter < 200 && hasUserNextPage) {
       var response = await DioClient.getBlockUsers(20, userPage);
-      List<User> userResults = response.data["result"] == null ? [] : response
-          .data["result"].map((json) => User.fromJson(json)).toList().cast<
-          User>();
+      List<UserModel> userResults = response.data["result"] == null ? [] : response
+          .data["result"].map((json) => UserModel.fromJson(json)).toList().cast<
+          UserModel>();
       userPage += 1;
       hasUserNextPage = response.data["pageInfo"]?["hasNextPage"] ?? false;
       setState(() {

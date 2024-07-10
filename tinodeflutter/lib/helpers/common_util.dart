@@ -1,7 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sprintf/sprintf.dart';
@@ -249,3 +250,9 @@ int stringToAsciiSum(String input) {
 bool stringToBool(String value) {
   return value.toLowerCase() == 'true';
 }
+
+Future<void> saveData(String key, Map<String, dynamic> data) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString(key, json.encode(data));
+  }
+  

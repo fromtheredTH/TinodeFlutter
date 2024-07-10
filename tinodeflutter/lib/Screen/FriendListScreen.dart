@@ -69,19 +69,19 @@ class _FriendListScreenState extends State<FriendListScreen> {
 
   String? hashTag;
 
-  List<User> userList = <User>[];
-  List<User> friendList = <User>[];
+  List<UserModel> userList = <UserModel>[];
+  List<UserModel> friendList = <UserModel>[];
   List<TopicSubscription> userTopicSubList = <TopicSubscription>[];
 
   Future<void> getSearch(String query) async {
     DioClient.searchTotal(query, 5, 0).then((response) {
       if (query == searchController.text) {
-        List<User> userResults = response.data["users"] == null
+        List<UserModel> userResults = response.data["users"] == null
             ? []
             : response.data["users"]
-                .map((json) => User.fromJson(json))
+                .map((json) => UserModel.fromJson(json))
                 .toList()
-                .cast<User>();
+                .cast<UserModel>();
         // List<GameModel> gameResults = response.data["games"] == null ? [] : response
         //     .data["games"].map((json) => GameModel.fromJson(json)).toList().cast<
         //     GameModel>();
@@ -144,7 +144,7 @@ class _FriendListScreenState extends State<FriendListScreen> {
           String pictureUrl = data.fri?[i].public['photo']?['ref'] != null
               ? changePathToLink(data.fri[i].public['photo']['ref'])
               : "";
-          User user = User(
+          UserModel user = UserModel(
               id: data.fri[i].user,
               name: data.fri[i].public['fn'],
               picture: pictureUrl, isFreind: true);

@@ -30,7 +30,7 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class ProfileScreen extends StatefulWidget {
   Tinode tinode;
-  User user;
+  UserModel user;
 
   ProfileScreen({super.key, required this.tinode, required this.user});
 
@@ -43,7 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late Topic roomTopic;
   late Topic me;
   //late TopicSubscription userTopicSub;
-  late User user;
+  late UserModel user;
 
   @override
   void initState() {

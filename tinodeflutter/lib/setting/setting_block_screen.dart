@@ -43,18 +43,18 @@ Tinode tinode;
 class _SettingBlockScreen extends State<SettingBlockScreen> {
   late Tinode tinode;
 
-  late List<User> users;
+  late List<UserModel> users;
   late Future userFuture;
   int userPage = 0;
   bool hasUserNextPage = false;
   bool isLoading = false;
   ScrollController userScrollController = ScrollController();
 
-  Future<List<User>> initUsers() async{
+  Future<List<UserModel>> initUsers() async{
     var response = await DioClient.getBlockUsers(20, 0);
-    List<User> userResults = response.data["result"] == null ? [] : response
-        .data["result"].map((json) => User.fromJson(json["user"])).toList().cast<
-        User>();
+    List<UserModel> userResults = response.data["result"] == null ? [] : response
+        .data["result"].map((json) => UserModel.fromJson(json["user"])).toList().cast<
+        UserModel>();
     userPage = 1;
     hasUserNextPage = false;
     users = userResults;
@@ -65,9 +65,9 @@ class _SettingBlockScreen extends State<SettingBlockScreen> {
   Future<void> getUserNextPage() async {
     if (!isLoading && userScrollController.position.extentAfter < 200 && hasUserNextPage) {
       var response = await DioClient.getBlockUsers(20, userPage);
-      List<User> userResults = response.data["result"] == null ? [] : response
-          .data["result"].map((json) => User.fromJson(json)).toList().cast<
-          User>();
+      List<UserModel> userResults = response.data["result"] == null ? [] : response
+          .data["result"].map((json) => UserModel.fromJson(json)).toList().cast<
+          UserModel>();
       userPage += 1;
       hasUserNextPage = response.data["pageInfo"]?["hasNextPage"] ?? false;
       setState(() {

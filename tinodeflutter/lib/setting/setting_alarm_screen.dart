@@ -39,7 +39,7 @@ class SettingAlarmScreen extends StatefulWidget {
 }
 
 class _SettingAlarmScreen extends State<SettingAlarmScreen> {
-  User user = Constants.user;
+  UserModel user = Constants.user;
 
   @override
   Widget build(BuildContext context) {

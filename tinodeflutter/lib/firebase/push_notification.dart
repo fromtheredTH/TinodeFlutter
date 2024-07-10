@@ -179,7 +179,7 @@ class PushNotificationService {
 
     var initSetttings =
         InitializationSettings(android: androidSettings, iOS: iOSSettings);
-    flutterLocalNotificationsPlugin.initialize(initSetttings,
+  flutterLocalNotificationsPlugin.initialize(initSetttings,
         onDidReceiveNotificationResponse: (details) async {
       // This function handles the click in the notification when the app is in foreground
       // Get.toNamed(NOTIFICATIOINS_ROUTE);
@@ -201,6 +201,7 @@ class PushNotificationService {
       String _fcmType =  message.data['what'];
       int seq =  int.parse(message.data['seq']);
       String topic = message.data['topic'];
+      String roomName = message.data['fn'];
       gBackgroundFcmTopic= topic;
       String ts = message.data['ts'];
       dynamic rc = jsonDecode(message.data['rc']);
@@ -240,7 +241,25 @@ class PushNotificationService {
       
       if(chatType==eChatType.VOICE_CALL || chatType==eChatType.VIDEO_CALL)
       {
-          CallService.instance.showIncomingCall(roomTopicId: topic, callerName : topic ,callerNumber: '', callerAvatar: "");
+        Map<String,dynamic> callData;
+        if(chatType==eChatType.VOICE_CALL )
+        {
+            callData={
+              'room_id': topic,
+              'room_name':roomName,
+              "callType" : eChatType.VOICE_CALL.index,
+            };
+        }
+        else // video call
+        {
+            callData={
+              'room_id': topic,
+              'room_name':roomName,
+              "callType" : eChatType.VIDEO_CALL.index,
+            };
+        }
+          saveData(topic,callData);
+          CallService.instance.showIncomingCall(roomTopicId: topic, callerName : roomName ,callerNumber: '', callerAvatar: "");
           return;
       }
       try{
@@ -444,7 +463,7 @@ class PushNotificationService {
         {
           if(isTinodeConnect)
           {
-            List<User> joinUserList = [];
+            List<UserModel> joinUserList = [];
             CallService.instance.joinUserList = joinUserList;
             CallService.instance.roomTopicName = topic;
             CallService.instance.initCallService();
