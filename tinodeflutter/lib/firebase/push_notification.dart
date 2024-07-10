@@ -207,26 +207,29 @@ class PushNotificationService {
       dynamic rc = jsonDecode(message.data['rc']);
       eChatType chatType = eChatType.NONE;
 
-      if(rc['txt']=="")
+      if(rc['txt']==" ")
       {
-        switch(rc['ent']['tp'])
-        {
-         case 'IM':
-          print("image");
-          chatType= eChatType.IMAGE;
-          break;
-        case 'VD':
-          print("video");
-          chatType= eChatType.VIDEO;
-          break;
-        case 'AU':
-          print("audio");
-          chatType= eChatType.AUDIO;
-          break;
-        default:
-          chatType = eChatType.NONE;
-          break;
-        }
+          if(rc['ent']!=null)
+          {
+            switch(rc['ent'][0]['tp'])
+              {
+              case 'IM':
+                print("image");
+                chatType= eChatType.IMAGE;
+                break;
+              case 'VD':
+                print("video");
+                chatType= eChatType.VIDEO;
+                break;
+              case 'AU':
+                print("audio");
+                chatType= eChatType.AUDIO;
+                break;
+              default:
+                chatType = eChatType.NONE;
+                break;
+              }
+          }
       }
       else
       {
@@ -426,26 +429,30 @@ class PushNotificationService {
         dynamic rc = jsonDecode(message.data['rc']);
         eChatType chatType = eChatType.NONE;
 
-        if(rc['txt']=="")
+        if(rc['txt']==" ")
         {
-          switch(rc['ent']['tp'])
+          if(rc['ent']!=null)
           {
-          case 'IM':
-            print("image");
-            chatType= eChatType.IMAGE;
-            break;
-          case 'VD':
-            print("video");
-            chatType= eChatType.VIDEO;
-            break;
-          case 'AU':
-            print("audio");
-            chatType= eChatType.AUDIO;
-            break;
-          default:
-            chatType = eChatType.NONE;
-            break;
+            switch(rc['ent'][0]['tp'])
+              {
+              case 'IM':
+                print("image");
+                chatType= eChatType.IMAGE;
+                break;
+              case 'VD':
+                print("video");
+                chatType= eChatType.VIDEO;
+                break;
+              case 'AU':
+                print("audio");
+                chatType= eChatType.AUDIO;
+                break;
+              default:
+                chatType = eChatType.NONE;
+                break;
+              }
           }
+          
         }
         else
         {

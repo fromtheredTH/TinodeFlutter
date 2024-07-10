@@ -800,10 +800,8 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
       catch(err)
       {
         print("upload video err : $err");
+        showToast('300MB까지 가능합니다.');
       }
-      
-      
-     
     }
 
 
@@ -921,6 +919,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
       }
     } catch (err) {
       print("image send err: $err");
+      showToast('300MB까지 가능합니다.');
     }
   }
 
