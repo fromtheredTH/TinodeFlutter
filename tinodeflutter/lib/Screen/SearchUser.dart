@@ -103,8 +103,8 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
     );
     // fnd 토픽에 메타데이터 요청 보내기
     var meta = await _fndTopic.getMeta(getQuery);
-    if(meta?.text=="no content")
-      showToast("해당 유저없음");
+    // if(meta?.text=="no content")
+    //   showToast("해당 유저없음");
     // 메타데이터 응답 처리
     // if (meta != null && meta.sub != null) {
     //   setState(() {
@@ -243,7 +243,7 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
                                 child: Row(children: [
                                   AppText(
                                     text: _searchResults[index].name.toString(),
-                                    fontSize: 30,
+                                    fontSize: 12,
                                     color: Colors.black,
                                   ),
                                   SizedBox(
@@ -251,7 +251,7 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
                                   ),
                                   AppText(
                                     text: _searchResults[index].id.toString(),
-                                    fontSize: 30,
+                                    fontSize: 12,
                                     color: Colors.red,
                                   ),
                                 ]),
