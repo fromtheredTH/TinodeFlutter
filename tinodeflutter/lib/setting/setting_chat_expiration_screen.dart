@@ -90,6 +90,7 @@ class _SettingChatExpirationeScreen
           .setMeta(roomTopic.name ?? "",
               SetParams(desc: TopicDescription(public: {"msgexpiremin": min})))
           .then((value) {
+        roomTopic.public["msgexpiremin"] = min;
         showToast("$toastMsg");
       });
     } catch (err) {
