@@ -246,6 +246,8 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
     }
     isSearchComplete = true;
 
+    is1to1 =  selectList.length > 1 ? false : true;
+
     // 여러명일때는 그룹으로
     // 한명일때는 p2P로
     is1to1 ? _1to1Room() : makeGroupRoom();
@@ -635,6 +637,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
                                               text: "친구가 없습니다.",
                                               fontWeight: FontWeight.w400,
                                               fontSize: 16,
+                                              color: Colors.white,
                                             ),
                                           ),
                                         )

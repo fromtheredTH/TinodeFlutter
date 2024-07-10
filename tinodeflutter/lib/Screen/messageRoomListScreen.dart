@@ -256,6 +256,14 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
           SizedBox(
             height: 10,
           ),
+          if(roomList.length==0)
+            Expanded(
+              child:Container(
+              alignment: Alignment.center,
+              width: double.maxFinite,
+              height: double.maxFinite,
+              child: AppText(text: "채팅방이 없습니다."),))
+          else
           Expanded(
             child: ListView.builder(
                 cacheExtent: double.infinity,
