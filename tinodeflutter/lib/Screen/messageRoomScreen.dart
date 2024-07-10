@@ -161,7 +161,8 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
   // dynamic data = jsonDecode(dataMessage.content);
 
     if (dataMessage.content is Map) {
-      switch (dataMessage.content['ent'][0]['tp']) {
+    if(dataMessage.content?['ent']!=null)
+      switch (dataMessage.content?['ent'][0]['tp']) {
         case 'IM':
           print("image");
           return eChatType.IMAGE;
@@ -1316,6 +1317,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
                  
                 ],
               )),
+         
           Expanded(
             child: ListView.builder(
                 cacheExtent: double.infinity,
