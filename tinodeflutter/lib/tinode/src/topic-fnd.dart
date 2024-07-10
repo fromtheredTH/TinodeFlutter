@@ -32,7 +32,7 @@ class TopicFnd extends Topic {
 
   /// Publishing to TopicFnd is not supported
   @override
-  Future<CtrlMessage> publishMessage(Message a) {
+  Future<CtrlMessage> publishMessage(Message a,{Map<String, List<String>>? extra=null}) {
     return Future.error(Exception("Publishing to 'fnd' is not supported"));
   }
 

@@ -317,7 +317,7 @@ class TopicMe extends Topic {
   }
 
   @override
-  Future<CtrlMessage> publishMessage(Message a) {
+  Future<CtrlMessage> publishMessage(Message a, {Map<String, List<String>>? extra=null}) {
     return Future.error(Exception("Publishing to 'me' is not supported"));
   }
 
