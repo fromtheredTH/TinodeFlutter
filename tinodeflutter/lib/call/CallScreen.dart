@@ -119,7 +119,7 @@ Future <void> initAgora() async
     uid = response.data?['ctrl']?['params']?['useridx'];
     print("ag token : $agoraToken");
     print("uid $uid");
-    setupVoiceSDKEngine();
+    setupSDKEngine();
     //agoraToken ="007eJxTYPjQ4zl5hS+brlZtactRf/WKj3vPsciIL5vuLCUuZ7XAZL4Cg4WlaVKqkUlSipmBuYlZirGFoaGpRZKJiUlqkomlgVGyzbyetIZARgbH+fNYGBkgEMRnYShJLS5hYAAAZyIcMg==";
   }
   catch(err)
@@ -128,14 +128,13 @@ Future <void> initAgora() async
   }
 }
 
-Future<void> setupVoiceSDKEngine() async {
+Future<void> setupSDKEngine() async {
     // retrieve or request microphone permission
     _promptPermissionSetting();
 
     //create an instance of the Agora engine
     agoraEngine = createAgoraRtcEngine();
 
-    if(isVideo) await agoraEngine.enableVideo();
 
     if (roomTopic?.isP2P() ?? true) {
       await agoraEngine.initialize(const RtcEngineContext(
@@ -198,19 +197,47 @@ Future<void> setupVoiceSDKEngine() async {
       scenario: AudioScenarioType.audioScenarioChatroom,
     ); 
    }
-    _joinChannel();
+    if(isVideo)
+    {
+      await agoraEngine.setVideoEncoderConfiguration(
+        const VideoEncoderConfiguration(
+        dimensions: VideoDimensions(width: 640, height: 360),
+        frameRate: 15,
+        bitrate: 0,
+        ),
+      );
 
+    }
+
+    _joinChannel();
 }
 
 void  _joinChannel() async {
 
-if(isVideo)  await agoraEngine.startPreview();
+  if(isVideo){
+      await agoraEngine.enableVideo();
+      await agoraEngine.startPreview();
+  }
+
 try{
  // Set channel options including the client role and channel profile
-    ChannelMediaOptions options = const ChannelMediaOptions(
-        clientRoleType: ClientRoleType.clientRoleBroadcaster,
-        channelProfile: ChannelProfileType.channelProfileCommunication,
+ ChannelMediaOptions options ;
+  if(isVideo)
+  {
+    options = const ChannelMediaOptions(
+      clientRoleType: ClientRoleType.clientRoleBroadcaster,
+      channelProfile: ChannelProfileType.channelProfileCommunication,
+      publishCameraTrack: true,
+      publishMicrophoneTrack: true,
     );
+  
+  }else{
+      options = const ChannelMediaOptions(
+          clientRoleType: ClientRoleType.clientRoleBroadcaster,
+          channelProfile: ChannelProfileType.channelProfileCommunication,
+      );
+  }
+  
 
     await agoraEngine.joinChannel(
         token: agoraToken,
@@ -316,7 +343,7 @@ catch(err)
         return AgoraVideoView(
           controller: VideoViewController(
             rtcEngine: agoraEngine,
-            canvas:  VideoCanvas(uid: uid),
+            canvas:  VideoCanvas(uid: 0),  // local 사용자는 0으로 uid값이 고정됨
           ),
         );
       } else {
@@ -324,7 +351,7 @@ catch(err)
             controller: VideoViewController(
           rtcEngine: agoraEngine,
           canvas:  VideoCanvas(
-            uid: uid,
+            uid: 0,
             sourceType: VideoSourceType.videoSourceScreen,
           ),
         ));
