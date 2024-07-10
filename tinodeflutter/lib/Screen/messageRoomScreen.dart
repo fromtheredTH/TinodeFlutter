@@ -781,13 +781,18 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
                 "data": {"mime": "video/mp4","preref":thumbnailUrlPath , "ref": videoUrlPath,
                 "duration": 100, "width":100, "height":100, "size": 100}
               }
-            ]
+            ],
+            "fmt": [{"len":1}],
           },
           false, // echo 설정
           head: {"mime": "text/x-drafty"},
         );
+        List<String> videoData = [videoUrlPath,thumbnailUrlPath];
+        Map<String,List<String>> extra = {
+          "attachments": videoData
+        };
 
-        var pub_result = await roomTopic.publishMessage(message);
+        var pub_result = await roomTopic.publishMessage(message, extra:extra );
 
         if(pub_result?.text =='accepted') showToast('complete video');
       }
@@ -871,14 +876,19 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
               {
                 "tp": "IM",
                 "data": {"mime": "image/png", "ref": urlPath}
-              }
-            ]
+              },
+            ],
+            "fmt": [{"len":1}],
           },
           false, // echo 설정
           head: {"mime": "text/x-drafty"},
         );
+        List<String> imageData = [urlPath];
+        Map<String,List<String>> extra = {
+          "attachments": imageData
+        };
 
-        var pub_result = await roomTopic.publishMessage(message);
+        var pub_result = await roomTopic.publishMessage(message,extra:extra);
 
         if(pub_result?.text =='accepted') showToast('complete');
         
