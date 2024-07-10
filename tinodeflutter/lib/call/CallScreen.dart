@@ -52,8 +52,11 @@ class _CallScreenState extends State<CallScreen>  {
      bool isJoined = false,
       isVideo=false,
       _isScreenShared = false,
+      _isLocalAudioMuted=false,
+      _isFrontCamera= true,
       openMicrophone = true,
-      _isMuted = false,
+      _isSpeakerOn=false,
+      _isMutedTheOthers = false,
       muteAllRemoteAudio = false,
       enableSpeakerphone = true,
       playEffect = false;
@@ -114,6 +117,7 @@ Future <void> initAgora() async
   try{
     //get agora token
     channelName = sortAndCombineStrings(roomTopic?.name??"", tinode.userId ); //roomTopic?.name??"";
+    print("channelName : $channelName");
     var response =await DioClient.getAgoraToken(channelName, token);
     agoraToken = response.data?['ctrl']?['params']?['token'];
     uid = response.data?['ctrl']?['params']?['useridx'];
@@ -201,7 +205,7 @@ Future<void> setupSDKEngine() async {
     {
       await agoraEngine.setVideoEncoderConfiguration(
         const VideoEncoderConfiguration(
-        dimensions: VideoDimensions(width: 640, height: 360),
+        dimensions: VideoDimensions(width: 300, height: 300),
         frameRate: 15,
         bitrate: 0,
         ),
@@ -214,45 +218,67 @@ Future<void> setupSDKEngine() async {
 
 void  _joinChannel() async {
 
-  if(isVideo){
-      await agoraEngine.enableVideo();
-      await agoraEngine.startPreview();
-  }
+  try{
+    if(isVideo){
+        await agoraEngine.enableVideo();
+        await agoraEngine.startPreview();
+        await agoraEngine.setCameraCapturerConfiguration(
+        CameraCapturerConfiguration(
+          cameraDirection: CameraDirection.cameraFront,
+        ),
+      );
+    }
+    
 
-try{
- // Set channel options including the client role and channel profile
- ChannelMediaOptions options ;
-  if(isVideo)
+
+  }
+  catch(err)
   {
+    print(err);
+  }
+  
+  try{
+  // Set channel options including the client role and channel profile
+  ChannelMediaOptions options ;
+    if(isVideo)
+    {
     options = const ChannelMediaOptions(
       clientRoleType: ClientRoleType.clientRoleBroadcaster,
       channelProfile: ChannelProfileType.channelProfileCommunication,
       publishCameraTrack: true,
       publishMicrophoneTrack: true,
-    );
-  
-  }else{
-      options = const ChannelMediaOptions(
-          clientRoleType: ClientRoleType.clientRoleBroadcaster,
-          channelProfile: ChannelProfileType.channelProfileCommunication,
+      publishScreenCaptureVideo: false,
+      publishScreenCaptureAudio: false,
       );
-  }
-  
+    
+    }else{
+        options = const ChannelMediaOptions(
+            clientRoleType: ClientRoleType.clientRoleBroadcaster,
+            channelProfile: ChannelProfileType.channelProfileCommunication,
+        );
+    }
+    
 
-    await agoraEngine.joinChannel(
-        token: agoraToken,
-        channelId: channelName,
-        options: options,
-        uid: uid,
-    );
-    showToast('join channel');
-}
-catch(err)
-{
-  print("join channel $err");
-}
-   
-}
+      await agoraEngine.joinChannel(
+          token: agoraToken,
+          channelId: channelName,
+          options: options,
+          uid: uid,
+      );
+      showToast('join channel');
+
+      if(!isVideo)
+      {
+        _isSpeakerOn=false;
+        await agoraEngine.setDefaultAudioRouteToSpeakerphone(_isSpeakerOn);
+      }
+    }
+  catch(err)
+  {
+    print("join channel $err");
+  }
+    
+  }
 
   void _leaveChannel() {
     noteCallState('hang-up');
@@ -261,16 +287,44 @@ catch(err)
         _remoteUid = null;
     });
     agoraEngine.leaveChannel();
+  }
+  //  onMuteChecked(bool value) { // 상대방을 음소거함.
+  //   setState(() {
+  //     _isMutedTheOthers = value;
+  //     agoraEngine.muteAllRemoteAudioStreams(_isMutedTheOthers);
+  //   });
+  // }
+
+  Future<void> _toggleLocalAudioMute() async {
+  setState(() {
+    _isLocalAudioMuted = !_isLocalAudioMuted;
+  });
+  
+  await agoraEngine.muteLocalAudioStream(_isLocalAudioMuted);
+  
+  showToast(_isLocalAudioMuted ? "로컬 오디오 음소거" : "로컬 오디오 음소거 해제");
 }
 
-
-  _switchMicrophone() async {
-    // await await _engine.muteLocalAudioStream(!openMicrophone);
-    await agoraEngine.enableLocalAudio(!openMicrophone);
-    setState(() {
-      openMicrophone = !openMicrophone;
-    });
+  Future<void> _toggleAudioOutput() async {
+    try {
+      if (_isSpeakerOn) {
+        await agoraEngine.setEnableSpeakerphone(false);
+        showToast("이어폰 모드로 전환");
+      } else {
+        await agoraEngine.setEnableSpeakerphone(true);
+        showToast("스피커 모드로 전환");
+      }
+      setState(() {
+        _isSpeakerOn = !_isSpeakerOn;
+      });
+    } catch (e) {
+      print("오디오 출력 모드 전환 오류: $e");
+      showToast("오디오 출력 모드 전환 실패");
+    }
   }
+
+
+ 
     void noteCallState(String callState) {
     Map<String, dynamic> note = {
       "event": callState,
@@ -288,12 +342,19 @@ catch(err)
     }
   }
 
-   onMuteChecked(bool value) {
+
+  Future<void> _switchCamera() async {
+  try {
+    await agoraEngine.switchCamera();
     setState(() {
-      _isMuted = value;
-      agoraEngine.muteAllRemoteAudioStreams(_isMuted);
+      _isFrontCamera = !_isFrontCamera;
     });
+    showToast(_isFrontCamera ? "전면 카메라로 전환" : "후면 카메라로 전환");
+  } catch (e) {
+    print("카메라 전환 오류: $e");
+    showToast("카메라 전환 실패");
   }
+}
 
 
   Future<bool> _promptPermissionSetting() async {
@@ -438,28 +499,32 @@ catch(err)
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
+
+                if (isVideo) 
                   CallButton(
-                    icon: Icons.mic,
-                    text: 'Mute',
-                    onPressed: (){
-                        onMuteChecked(!_isMuted);
-                        } //controller.toggleMute,
+                    icon: Icons.flip_camera_ios,
+                    text: '카메라 전환',
+                    onPressed: _switchCamera,
                   ),
                   CallButton(
-                    icon: Icons.dialpad,
-                    text: '채널입장',
-                    onPressed: (){
-                      if(!_isJoined)_joinChannel();
-                      else showToast('이미 조인중입니다.');
-                        //_switchMicrophone();
-                        } //controller.showKeypad,
+                    icon: _isLocalAudioMuted ? Icons.mic_off : Icons.mic,
+                    text: _isLocalAudioMuted ? 'Unmute' : 'Mute',
+                    onPressed: _toggleLocalAudioMute,
                   ),
-              
+                  // CallButton(
+                  //   icon: Icons.mic,
+                  //   text: 'Mute',
+                  //   onPressed: (){
+                  //       onMuteChecked(!_isMutedTheOthers);
+                  //       } //controller.toggleMute,
+                  // ),
+                if(!isVideo)
                   CallButton(
-                    icon: Icons.volume_up,
-                    text: 'Speaker',
-                    onPressed: controller.toggleSpeaker,
-                  ),
+                  icon: _isSpeakerOn ? Icons.volume_up : Icons.phone_in_talk,
+                  text: _isSpeakerOn ? 'Speaker' : 'Earpiece',
+                  onPressed: _toggleAudioOutput,
+                ),
+
                   CallButton(
                     icon: Icons.call_end,
                     text: 'End',
