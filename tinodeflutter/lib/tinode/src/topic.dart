@@ -245,7 +245,7 @@ class Topic {
   }
 
   /// Publish message created by Topic.createMessage.
-  Future<CtrlMessage> publishMessage(Message message) async {
+  Future<CtrlMessage> publishMessage(Message message, {Map<String, List<String>> ? extra=null}) async {
     if (!isSubscribed) {
       return Future.error(Exception('Cannot publish on inactive topic'));
     }
@@ -253,7 +253,7 @@ class Topic {
     message.setStatus(message_status.SENDING);
 
     try {
-      var response = await _tinodeService.publishMessage(message); //ctrl message return
+      var response = await _tinodeService.publishMessage(message, extra:extra); //ctrl message return
       var ctrl = response; // change point
 
       message.ts = ctrl.ts;

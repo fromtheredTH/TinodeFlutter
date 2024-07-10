@@ -13,7 +13,7 @@ class PacketGenerator {
     _configService = GetIt.I.get<ConfigService>();
   }
 
-  Packet generate(String type, String? topicName) {
+  Packet generate(String type, String? topicName, {Map<String, List<String>> ? extra=null}) {
     PacketData packetData;
     bool skipId = false;
     switch (type) {
@@ -127,10 +127,10 @@ class PacketGenerator {
     }
 
     if(skipId) {
-      return Packet(type, packetData, null);
+      return Packet(type, packetData, null, extra);
     }
     else {
-      return Packet(type, packetData, Tools.getNextUniqueId());
+      return Packet(type, packetData, Tools.getNextUniqueId(), extra);
     }
   }
 }

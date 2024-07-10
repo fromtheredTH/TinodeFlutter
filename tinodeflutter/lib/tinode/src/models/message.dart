@@ -29,8 +29,8 @@ class Message {
     _packetGenerator = GetIt.I.get<PacketGenerator>();
   }
 
-  Packet asPubPacket() {
-    var packet = _packetGenerator.generate(packet_types.Pub, topicName);
+  Packet asPubPacket({Map<String, List<String>> ? extra=null}) {
+    var packet = _packetGenerator.generate(packet_types.Pub, topicName, extra:extra);
     var data = packet.data as PubPacketData;
     data.content = content;
     data.noecho = !echo;

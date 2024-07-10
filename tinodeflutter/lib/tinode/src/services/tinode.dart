@@ -344,9 +344,9 @@ class TinodeService {
   }
 
   /// Publish message to topic. The message should be created by `createMessage`
-  Future publishMessage(Message message) {
+  Future publishMessage(Message message, {Map<String, List<String>> ? extra=null}) {
     message.resetLocalValues();
-    return _send(message.asPubPacket());
+    return _send(message.asPubPacket(extra: extra),);
   }
 
   /// Request topic metadata
