@@ -172,7 +172,7 @@ class CallService {
       avatar: callerAvatar,
       handle: callerNumber,
       type: 0, // 0 : 오디오 1: 비디오
-      duration: 15000,
+      duration: 60000,  //miliseconds
       textAccept: 'Accept',
       textDecline: 'Decline',
       missedCallNotification: NotificationParams(

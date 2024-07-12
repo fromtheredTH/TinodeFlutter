@@ -66,7 +66,7 @@ class _LoginState extends State<Login> {
 
   void loginProcesss() async {
 
-    id = idController.value.text == "" ? "test3" : idController.value.text;
+    id = idController.value.text == "" ? "test35" : idController.value.text;
     pw = pwController.value.text == "" ? "qwer123!" : pwController.value.text;
  
   try {
