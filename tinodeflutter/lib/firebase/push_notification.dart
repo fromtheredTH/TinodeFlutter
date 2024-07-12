@@ -82,53 +82,86 @@ class PushNotificationService {
           }
         });
     Map<String, dynamic> message = jsonDecode(details?.payload ?? "{}");
-    String title = message["title"];
-    String body = message["body"];
-    try {
-      final meta = jsonDecode(message['meta']);
-      int fcmType = meta['fcmType'];
-      // if (fcmType == 10) {
-      //   int chatRoomId = meta['room']['id'];
-      //   var response = await DioClient.getChatRoom(chatRoomId);
-      //   ChatRoomDto room = ChatRoomDto.fromJson(response.data);
-      //   var msgResponse = await DioClient.getChatRoomFromMessage(meta["chat"]["id"]);
-      //   ChatMsgDto msg = ChatMsgDto.fromJson(msgResponse.data);
-      //   getIt.registerSingleton(EventBus());
-      //   if(msg.chat_idx == -1 ){
-      //     getIt<EventBus>()
-      //         .fire(ChatReceivedEvent(msg, room));
-      //     return;
-      //   }else {
-      //     body = chatContent(msg.contents ?? "", msg.type);
-      //     getIt<EventBus>()
-      //         .fire(ChatReceivedEvent(msg, room));
-      //     int id = Constants.user.id;
-      //     int gChat = gChatRoomUid;
-      //     if (gChatRoomUid == chatRoomId || msg.sender_id == Constants.user.id || title == "my_chat" || msg.type == 5 || title == "Leave") {
-      //       //현재 입장한 채팅방의 채팅 푸시면 리턴
-      //       return;
-      //     }
-      //   }
-      // } else if (fcmType == 0) {
-      //   //시스템 노티
-      //   if (title == 'Leave' ) {
-      //     // 방탈퇴
-      //     try {
-      //       int user_id = int.parse(body.split(",")[0].split(":")[1].trim());
-      //       int room_id = int.parse(body.split(",")[1].split(":")[1].trim());
-      //       getIt<EventBus>().fire(ChatLeaveEvent2(user_id, room_id));
-      //     } catch (error) {}
-      //   }
-      //   return;
-      // }
-    } catch (e) {
-      print(e);
-      return;
-    }
+    
+      //  try {
+      //bool isTinodeConnect = false;
+
+    //   if(message ==null) return;
+    //   //if(tinode_global==null) isTinodeConnect = await reConnectTinode();
+    //  // if(message.data['xfrom'] == Constants.user.id) return;  // 내 메시지
+
+    //   String _fcmType =  message.data['what'];
+    //   int seq =  int.parse(message.data['seq']);
+    //   String topic = message.data['topic'];
+    //   String roomName = message.data['fn'];
+    //   gBackgroundFcmTopic= topic;
+    //   String ts = message.data['ts'];
+    //   dynamic rc = jsonDecode(message.data['rc']);
+    //   eChatType chatType = eChatType.NONE;
+
+    //   if(rc['txt']==" ")
+    //   {
+    //       if(rc['ent']!=null)
+    //       {
+    //         switch(rc['ent'][0]['tp'])
+    //           {
+    //           case 'IM':
+    //             print("image");
+    //             chatType= eChatType.IMAGE;
+    //             break;
+    //           case 'VD':
+    //             print("video");
+    //             chatType= eChatType.VIDEO;
+    //             break;
+    //           case 'AU':
+    //             print("audio");
+    //             chatType= eChatType.AUDIO;
+    //             break;
+    //           default:
+    //             chatType = eChatType.NONE;
+    //             break;
+    //           }
+    //       }
+    //   }
+    //   else
+    //   {
+    //     chatType= eChatType.TEXT;
+    //   }
+
+    //     if(message.data['webrtc'] !=null)
+    //     {
+    //         // if(stringToBool(message.data['aonly'])) chatType= eChatType.VOICE_CALL;
+    //         if(message.data['aonly']!=null)chatType= eChatType.VOICE_CALL;
+    //         else chatType= eChatType.VIDEO_CALL;
+    //     }
+      
+    //   if(chatType==eChatType.VOICE_CALL || chatType==eChatType.VIDEO_CALL)
+    //   {
+    //     Map<String,dynamic> callData;
+    //     if(chatType==eChatType.VOICE_CALL )
+    //     {
+    //         callData={
+    //           'room_id': topic,
+    //           'room_name':roomName,
+    //           "callType" : eChatType.VOICE_CALL.index,
+    //         };
+    //     }
+    //     else // video call
+    //     {
+    //         callData={
+    //           'room_id': topic,
+    //           'room_name':roomName,
+    //           "callType" : eChatType.VIDEO_CALL.index,
+    //         };
+    //     }
+    //       saveData(topic,callData);
+    //       CallService.instance.showIncomingCall(roomTopicId: topic, callerName : roomName ,callerNumber: '', callerAvatar: "");
+    //       return;
+    //   }
     flutterLocalNotificationsPlugin.show(
         details?.hashCode ?? 0,
-        title,
-        body,
+        details.input,
+        details.input,
         NotificationDetails(
             android: AndroidNotificationDetails(
               channel.id,
@@ -238,6 +271,7 @@ class PushNotificationService {
 
         if(message.data['webrtc'] !=null)
         {
+          if(message.data['webrtc']=='missed') return;
             // if(stringToBool(message.data['aonly'])) chatType= eChatType.VOICE_CALL;
             if(message.data['aonly']!=null)chatType= eChatType.VOICE_CALL;
             else chatType= eChatType.VIDEO_CALL;
@@ -345,9 +379,9 @@ class PushNotificationService {
   static void onClick(Map<String, dynamic> data) async {
     print(data);
     gPushClick = true;
-    final meta = jsonDecode(data['meta']);
-    int fcmType = meta['fcmType'];
-    String link = data['link'];
+    // final meta = jsonDecode(data['meta']);
+    // int fcmType = meta['fcmType'];
+    // String link = data['link'];
     // link = link.replaceAll("zempie.com", "namjungkim.github.io");
     // if (fcmType == 10) {
     //   // 채팅
@@ -421,7 +455,7 @@ class PushNotificationService {
         }else isTinodeConnect=true;
 
         if(isTinodeConnect && message.data['xfrom'] == tinode_global.userId) return;  // 내 메시지
-
+        if(message.data['seq']==null) return; // 메시지 번호가 없는 의미 없는 데이터
         String _fcmType =  message.data['what'];
         int seq =  int.parse(message.data['seq']);
         String topic = message.data['topic'];
@@ -461,6 +495,7 @@ class PushNotificationService {
         try{
         if(message.data['webrtc'] !=null)
         {
+          if(message.data['webrtc']=='missed') return;
             print("call");
             //if(stringToBool(message.data['aonly'])) chatType= eChatType.VOICE_CALL;
             if(message.data['aonly']!=null)chatType= eChatType.VOICE_CALL;
