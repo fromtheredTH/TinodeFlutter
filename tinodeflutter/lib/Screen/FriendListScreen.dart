@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
 
@@ -73,6 +74,7 @@ class _FriendListScreenState extends State<FriendListScreen> {
   List<UserModel> userList = <UserModel>[];
   List<UserModel> friendList = <UserModel>[];
   List<TopicSubscription> userTopicSubList = <TopicSubscription>[];
+  StreamSubscription? _metaSubscription;
 
   @override
   void initState() {
@@ -82,13 +84,17 @@ class _FriendListScreenState extends State<FriendListScreen> {
     me = tinode.getMeTopic();
     _getFriendList();
     _initializeFndTopic();
-
-
+  }
+      @override
+  void dispose() {
+    if(_metaSubscription!=null) _metaSubscription?.cancel();
+    _fndTopic.leave(true); 
+    super.dispose();
   }
 
    void _initializeFndTopic() async{
     _fndTopic = tinode.getTopic('fnd') as TopicFnd;
-    _fndTopic.onMeta.listen((value) {
+    _metaSubscription= _fndTopic.onMeta.listen((value) {
       _handleMetaMessage(value);
     });
     if(!_fndTopic.isSubscribed) await _fndTopic.subscribe(MetaGetBuilder(_fndTopic).withData(null, null, null).build(), null);
@@ -96,7 +102,6 @@ class _FriendListScreenState extends State<FriendListScreen> {
 
   void _handleMetaMessage(MetaMessage msg) {
     if (msg.sub != null) {
-      setState(() {
         try{
         print("search list :");
         for(int i = 0 ; i<msg.sub!.length ;i++)
@@ -113,7 +118,6 @@ class _FriendListScreenState extends State<FriendListScreen> {
         {
           print("err : $err");
         }
-      });
     }
   }
 
