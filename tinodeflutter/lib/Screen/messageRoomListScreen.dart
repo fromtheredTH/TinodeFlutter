@@ -76,14 +76,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
   int count = 0;
   int compareRoomList(TopicSubscription a, TopicSubscription b)
   {
-    if(a.touched ==null )
-    {
-      a.touched = DateTime.now();
-    }
-    if(b.touched==null)
-    {
-      b.touched = DateTime.now();
-    }
+    
     if(a.public?['fn'] == null)
     {
        Map<String,dynamic> publicData = {
@@ -134,7 +127,8 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
           TopicSubscription topicSubscription = TopicSubscription(topic: roomTopic.name, acs: roomTopic.acs, public: roomTopic.public, seq: roomTopic.maxSeq,created: roomTopic.created, updated: roomTopic.updated, touched: roomTopic.touched );
           roomList.insert(0,topicSubscription);
           setState(() {
-             roomList.sort((a, b) => b.touched!.compareTo(a.touched!));
+            
+             roomList.sort(compareRoomList);
           });
          }
           
