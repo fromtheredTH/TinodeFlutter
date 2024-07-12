@@ -2,48 +2,106 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	</array>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Tinodeflutter</string>
+	<string>JadeChat</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
+	<string>1.1.30</string>
 	<key>CFBundleName</key>
-	<string>tinodeflutter</string>
+	<string>app</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>$(FLUTTER_BUILD_NAME)</string>
+	<string>1.1.30</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb2461801087295883</string>
+				<string>com.googleusercontent.apps.360596887858-8j8prv6nv3ra3stcfat60p4drpc78bd6</string>
+				<string>kakaoe28d057d000a84f1622d48087babfee4</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
-	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<string>2024071212</string>
+	<key>FacebookAppID</key>
+	<string>2461801087295883</string>
+	<key>FacebookClientToken</key>
+	<string>1e8bb1fef47ab157862eeacfcf8af8b0</string>
+	<key>FacebookDisplayName</key>
+	<string>JadeChat</string>
+	<key>FlutterDeepLinkingEnabled</key>
+	<string>YES</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>kakaolink</string>
+		<string>fbapi</string>
+		<string>fb-messenger-share-api</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSExceptionDomains</key>
+		<dict/>
+	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>To upload profile or photo, we need to use your camera.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>To record audio chat, we need to use your micro phone.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>To upload profile or photo, we need to use your photo library.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>To record audio chat, we need to use your micro phone.</string>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>voip</string>
+		<string>remote-notification</string>
+		<string>processing</string>
+	</array>
+	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>UIStatusBarHidden</key>
+	<false/>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
-		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<key>UISupportsDocumentBrowser</key>
 	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
 </dict>
 </plist>
