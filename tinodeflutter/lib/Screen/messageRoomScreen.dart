@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -51,8 +52,9 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 class MessageRoomScreen extends StatefulWidget {
   Tinode tinode;
   String clickTopic;
+  Topic? roomTopic;
   MessageRoomScreen(
-      {super.key, required this.tinode, required this.clickTopic});
+      {super.key, required this.tinode, required this.clickTopic, this.roomTopic});
 
   @override
   State<MessageRoomScreen> createState() => _MessageRoomScreenState();
@@ -72,11 +74,16 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
   late TopicSubscription roomMetaSubData;
   late Topic roomTopicData;
 
+  StreamSubscription? _metaDescSubscription;
+  StreamSubscription? _dataSubscription;
+
+
   @override
   void initState() {
     super.initState();
     tinode = widget.tinode;
     clickTopic = widget.clickTopic;
+    // if(widget.roomTopic!=null) roomTopic = widget.roomTopic!;
     getMsgList();
   }
 
@@ -84,12 +91,14 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
   void dispose() {
     super.dispose();
     roomTopic.leave(false);
+    if(_metaDescSubscription!=null)_metaDescSubscription?.cancel();
+    if(_dataSubscription!=null)_dataSubscription?.cancel();
   }
 
   Future<void> getMsgList() async {
-    roomTopic = tinode.getTopic(clickTopic);
+   roomTopic = tinode.getTopic(clickTopic);
    
-    roomTopic.onData.listen((data) {
+    _dataSubscription = roomTopic.onData.listen((data) {
       try {
         if (data != null) {
           if(data.content is String)
@@ -110,7 +119,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
       }
     });
  
-     roomTopic.onMetaDesc.listen((onMetaDesc){
+    _metaDescSubscription= roomTopic.onMetaDesc.listen((onMetaDesc){
       try{
         roomTopicData = onMetaDesc;
         for(int i = 0 ; i<onMetaDesc.subscribers.length;i++)
@@ -197,7 +206,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
       case eChatType.VOICE_CALL:
       case eChatType.VIDEO_CALL:
         //Get.to(CallScreen(tinode: tinode, roomTopic: roomTopic, joinUserList: joinUserList,));
-        if(isDifferenceDateTimeLessOneMinute(DateTime.now(),dataMessage.ts)) checkCallState(dataMessage);
+       // if(isDifferenceDateTimeLessOneMinute(DateTime.now(),dataMessage.ts)) checkCallState(dataMessage);
         return callTile(index,dataMessage);
 
       default:

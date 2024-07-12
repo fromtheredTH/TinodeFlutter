@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -39,13 +40,22 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
   PositionRetainedScrollPhysics physics = PositionRetainedScrollPhysics();
   List<UserModel> _searchResults = [];
   late TopicFnd _fndTopic;
+  StreamSubscription? _metaSubscription;
+
 
   @override
   void initState() {
     super.initState();
     tinode = widget.tinode;
-    _initializeFndTopic();
+    initializeFndTopic();
   }
+    @override
+  void dispose() {
+    if(_metaSubscription!=null) _metaSubscription?.cancel();
+    _fndTopic.leave(true); 
+    super.dispose();
+  }
+
 
   String clickTopic = "";
   Future<void> onClickMsgRoom(String clickTopic) async {
@@ -56,9 +66,9 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
     ));
   }
 
-  void _initializeFndTopic() async{
+  void initializeFndTopic() async{
     _fndTopic = tinode.getTopic('fnd') as TopicFnd;
-    _fndTopic.onMeta.listen((value) {
+    _metaSubscription= _fndTopic.onMeta.listen((value) {
       _handleMetaMessage(value);
     });
     if(!_fndTopic.isSubscribed) await _fndTopic.subscribe(MetaGetBuilder(_fndTopic).withData(null, null, null).build(), null);
@@ -66,27 +76,30 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
 
   void _handleMetaMessage(MetaMessage msg) {
     if (msg.sub != null) {
-      setState(() {
         try{
         print("search list :");
         for(int i = 0 ; i<msg.sub!.length ;i++)
-        {
-          String pictureUrl = msg.sub?[i].public['photo']?['ref'] != null ? changePathToLink(msg.sub?[i].public['photo']['ref']) : "";
-          UserModel user = UserModel(id: msg.sub?[i].user ?? "" , name : msg.sub?[i].public['fn'], picture : pictureUrl, isFreind: msg.sub?[i].isFriend ?? false);
-          _searchResults.add(user);
-        }
+          {
+            String pictureUrl = msg.sub?[i].public['photo']?['ref'] != null ? changePathToLink(msg.sub?[i].public['photo']['ref']) : "";
+            UserModel user = UserModel(id: msg.sub?[i].user ?? "" , name : msg.sub?[i].public['fn'], picture : pictureUrl, isFreind: msg.sub?[i].isFriend ?? false);
+            _searchResults.add(user);
+          }
+          setState(() {
+            
+          });
         }
         catch(err)
         {
           print("err : $err");
         }
-      });
     }
+    else showToast('검색한 유저가 없습니다.');
   }
 
   Future<void> _searchUsers(String query) async {
     try {
       inputController.text="";
+      _searchResults =[];
       // SetParams 객체를 생성하여 검색 쿼리 설정
       SetParams setParams = SetParams(
         desc: TopicDescription(
@@ -216,7 +229,14 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
                   ),
                 ],
               )),
-
+          if(_searchResults.length==0)
+           Expanded(
+              child:Container(
+              alignment: Alignment.center,
+              width: double.maxFinite,
+              height: double.maxFinite,
+              child: AppText(text: "검색한 유저는 없습니다.", fontSize: 20,),))
+          else
           Expanded(
             child: ListView.builder(
                 cacheExtent: double.infinity,

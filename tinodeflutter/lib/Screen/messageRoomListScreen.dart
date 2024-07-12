@@ -53,11 +53,16 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
   //  _initializeTopic();
     // getMsgRoomList();
   }
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
 
    void _initializeTopic() async {
     me = tinode.getMeTopic();
     var result = await me.subscribe(MetaGetBuilder(me).withLaterSub(null).build(), null);
-    _loadRooms();
+    //_loadRooms();
     _setupListeners();
   }
 
@@ -65,31 +70,108 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
     var subs = me.subscribers;
     setState(() {
       roomList = subs.values.toList();
-       roomList.sort((a, b) => b.updated!.compareTo(a.updated!));
+       roomList.sort((a, b) => b.touched!.compareTo(a.touched!));
     });
   }
-  
-  void _setupListeners() async{
+  int count = 0;
+  int compareRoomList(TopicSubscription a, TopicSubscription b)
+  {
+    if(a.touched ==null )
+    {
+      a.touched = DateTime.now();
+    }
+    if(b.touched==null)
+    {
+      b.touched = DateTime.now();
+    }
+    if(a.public?['fn'] == null)
+    {
+       Map<String,dynamic> publicData = {
+        'fn' : "New Room",
+        'description' :"New  Room"
+      };
+      a.public = publicData;
+    }
+    if(b.public?['fn'] == null)
+    {
+      Map<String,dynamic> publicData = {
+        'fn' : "New Room",
+        'description' :"New Room"
+      };
+      b.public = publicData;
+    }
+    print("${a.topic} : ${a.touched} , ${b.topic} : ${b.touched}     count : ${count++}   , a fn : ${a.public?['fn']?? "null"} , b fn : ${b.public?['fn']??"null"}");
+    return b.touched!.compareTo(a.touched!);    
+  }
 
+  void _setupListeners() async{
+    try{
     me.onSubsUpdated.listen((value) {
       print("Subs updated: $value");
+      count = 0; 
       setState(() {
         roomList = value;
-        roomList.sort((a, b) => b.updated!.compareTo(a.updated!));
+        roomList.sort(compareRoomList);
       });
     });
 
-    me.onPres.listen((event) {
+    me.onPres.listen((event) async{
       print("Presence event: $event");
-      if (event.what == 'acs') {
-       // getMsgRoomList();
-       print("come acs");
+      String topic = event.src ?? "";
+      int seq = event.seq ?? -1;
+      String sender = event.act?? "";
+      bool isExistRoom = roomList.any((subscription) => subscription.topic!. contains(topic));
+      switch(event.what)
+      {
+        case 'msg':
+         
+        break;
+        case 'acs': // 방 생성
+          Topic roomTopic = tinode.getTopic(topic);
+         if(!roomTopic.isSubscribed)
+         {
+          await roomTopic.subscribe(MetaGetBuilder(roomTopic).withData(null, null, null).withSub(null, null, null).withDesc(null).build(), null);
+          TopicSubscription topicSubscription = TopicSubscription(topic: roomTopic.name, acs: roomTopic.acs, public: roomTopic.public, seq: roomTopic.maxSeq,created: roomTopic.created, updated: roomTopic.updated, touched: roomTopic.touched );
+          roomList.insert(0,topicSubscription);
+          setState(() {
+             roomList.sort((a, b) => b.touched!.compareTo(a.touched!));
+          });
+         }
+          
+        break;
+
+        case 'on':
+        return;
+
+        default:
+        break;
       }
+      print("ddd");
+
+      // if(isExistRoom)
+      // {
+      //   //update
+      // }
+      // else if(src != "") //새로운 방
+      // {
+      //   TopicSubscription topicSubscription = TopicSubscription(topic: src, seq: seq, );
+      //   roomList.add(topicSubscription);
+      //   setState(() {
+          
+      //   });
+      // }
+
     });
     
-    await me.subscribe(MetaGetBuilder(me).withLaterSub(null).build(), null);
+    await me.subscribe(MetaGetBuilder(me).withSub(null,null,null).build(), null);
 
     getMyInfo();
+    }
+    catch(err)
+    {
+      print("err");
+    }
+    
   }
 
   Future<void> getMyInfo() async
@@ -262,7 +344,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
               alignment: Alignment.center,
               width: double.maxFinite,
               height: double.maxFinite,
-              child: AppText(text: "채팅방이 없습니다.", fontSize: 25,),))
+              child: AppText(text: "채팅방이 없습니다.", fontSize: 20,),))
           else
           Expanded(
             child: ListView.builder(
@@ -292,17 +374,17 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
                                   height: 40,
                                   child: Row(children: [
                                     AppText(
-                                      text: roomList[index].public !=null ? roomList[index].public['fn'] : "혼자인 방",
+                                      text: roomList[index].public !=null ? roomList[index].public['fn'] : (roomList[index].topic ?? "혼자인 방"),
                                       fontSize: 12,
                                       color: Colors.black,
                                     ),
                                     SizedBox(
                                       width: 10,
                                     ),
-                                    if (roomList[index].updated != null)
+                                    if (roomList[index].touched != null)
                                       AppText(
                                         text: (roomList[index]
-                                            .updated
+                                            .touched
                                             .toString()),
                                         fontSize: 12,
                                         color: Colors.black,

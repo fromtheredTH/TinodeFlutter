@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -57,6 +58,8 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
 
   ScrollController userScrollController = ScrollController();
   ScrollController mainScrollController = ScrollController();
+  
+  StreamSubscription? _metaSubscription;
 
   bool hasNextPage = false;
 
@@ -87,6 +90,8 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
 
   @override
   void dispose() {
+    if(_metaSubscription!=null) _metaSubscription?.cancel();
+    _fndTopic.leave(true); 
     super.dispose();
   }
 
@@ -120,7 +125,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
 
   void _initializeFndTopic() async {
     _fndTopic = tinode.getTopic('fnd') as TopicFnd;
-    _fndTopic.onMeta.listen((value) {
+    _metaSubscription = _fndTopic.onMeta.listen((value) {
       _handleMetaMessage(value);
     });
     if (!_fndTopic.isSubscribed)
