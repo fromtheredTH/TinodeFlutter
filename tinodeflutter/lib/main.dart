@@ -249,7 +249,7 @@ class MyApp extends StatelessWidget {
       // home:SplashPage(),
       home:Login(title: "JadeChat",),
       //navigatorObservers: <NavigatorObserver>[observer],
-      themeMode: Platform.isIOS ? ThemeMode.dark : ThemeMode.light,
+      themeMode: Platform.isIOS ? ThemeMode.light : ThemeMode.light,
       darkTheme: ThemeData(brightness: Platform.isIOS ? Brightness.dark : Brightness.light),
       navigatorKey: Constants.navigatorKey,
     );
