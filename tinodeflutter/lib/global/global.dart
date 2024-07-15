@@ -15,7 +15,8 @@ int gCurrentId = 0;
 bool gPushClick = false;
 
 const apiKey = "AQAAAAABAAC5Ym2pu9wKC_cbu2omxbD6";
-const hostAddres = "3.37.226.251:6060";
+const hostAddres = "api.jade-chat.com";
+// const hostAddres = "3.37.226.251:6060";
 
 const String agoraAppId = "895be24bd60746d381158b444eb4902c";
 
@@ -41,13 +42,13 @@ String gBackgroundFcmTopic="";
     var key = apiKey;
     // var host = 'sandbox.tinode.co';
     var host = hostAddres;
-    id =  "test3";
+    id =  "test35";
     pw = 'qwer123!';
 
     var loggerEnabled = true;
     tinode_global = Tinode(
       'JadeChat',
-      ConnectionOptions(host, key, secure: false),
+      ConnectionOptions(host, key, secure: true),
       loggerEnabled,
       versionApp: versionApp,
       deviceLocale: deviceLocale,

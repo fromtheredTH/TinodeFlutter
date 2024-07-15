@@ -53,7 +53,7 @@ class _LoginState extends State<Login> {
     var loggerEnabled = true;
     tinode = Tinode(
       'JadeChat',
-      ConnectionOptions(host, key, secure: false),
+      ConnectionOptions(host, key, secure: true),
       loggerEnabled,
       versionApp: versionApp,
       deviceLocale: deviceLocale,

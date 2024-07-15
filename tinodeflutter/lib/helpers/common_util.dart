@@ -201,7 +201,7 @@ String pad2(int i) {
 
   String changePathToLink(String path)
   {
-    String link = "http://$hostAddres/$path?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+    String link = "https://$hostAddres/$path?apikey=$apiKey&auth=token&secret=$url_encoded_token";
     return link;
   }
 

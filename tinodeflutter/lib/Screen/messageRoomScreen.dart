@@ -324,13 +324,17 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
 
   String fileUrl = "";
 
-  String getFileUrl(DataMessage dataMessage, eChatType fileType) {
+  String getFileUrl(DataMessage dataMessage, eChatType fileType, {bool getVideoThumbnail =false}) {
     switch(fileType)
     { case eChatType.IMAGE:
-        fileUrl ="http://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+        fileUrl ="https://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
         break;
       case eChatType.VIDEO:
-        fileUrl ="http://$hostAddres/${dataMessage.content['ent'][0]['data']['preref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+        if(getVideoThumbnail)
+        fileUrl ="https://$hostAddres/${dataMessage.content['ent'][0]['data']['preref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+        else{
+          fileUrl ="https://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+        }
         break;
       default:
         break;
@@ -380,8 +384,13 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
         children: [
           GestureDetector(
             onTap: () {
-              fullView(
-                  context, 0, dataMessage.content['ent'][0]['data']['ref']);
+               isBase64
+                ?fullView(
+                  context, 0,  Base64Decoder().convert(dataMessage.content['ent'][0]['data']['val']) as String)
+                : fullView(
+                  context, 0,   getFileUrl(dataMessage,eChatType.IMAGE) );
+
+                  ;
             },
             onLongPress: () {
               deleteMsgForAllPerson(msgList[index].seq ?? -1);
@@ -451,7 +460,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
             MaterialPageRoute(
                 builder: (context) => ImageViewer(
                       // images: (info.contents ?? '').split(","),
-                      images: [getFileUrl(dataMessage, eChatType.VIDEO)], // video url
+                      images: [getFileUrl(dataMessage, eChatType.VIDEO, getVideoThumbnail: false),], // video url
                       selected: 0,
                       isVideo: true,
                       // user: getUser(),
@@ -471,7 +480,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
               isBase64
                 ? getImageBase64Decoder(
                     dataMessage.content['ent'][0]['data']['preview'])
-                : getUrltoImage(getFileUrl(dataMessage, eChatType.VIDEO)),
+                : getUrltoImage(getFileUrl(dataMessage, eChatType.VIDEO, getVideoThumbnail: true)),
               // info.file.isNotEmpty
               //     ? Image.file(
               //         info.file[0],

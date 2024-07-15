@@ -20,7 +20,7 @@ class DioClient {
   static const String communityBaseUrl = "https://comm.jade-chat.com/api/v1"; // 커뮤니티 실서버
   static const String platformBaseUrl = "https://api.jade-chat.com/api/v1"; // 플랫폼 실서버
 
-  static const String tinodeUrl = "http://$hostAddres";
+  static const String tinodeUrl = "https://$hostAddres";
 
   static Dio getInstance(String baseUrl) {
     Dio dio = Dio(

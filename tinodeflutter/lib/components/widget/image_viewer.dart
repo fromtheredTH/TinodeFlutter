@@ -306,58 +306,58 @@ class _ImageViewerState extends State<ImageViewer> {
                     },
                   ),
                 ),
-                Visibility(
-                  visible: !widget.isVideo,
-                  child: Container(
-                    margin: const EdgeInsets.only(top: 10),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                            height: Get.width * 0.15,
-                            child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        selectedImage = index;
-                                        pageController?.jumpToPage(selectedImage);
-                                      });
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 2),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                            color: index == selectedImage ? ColorConstants.colorMain :Colors.transparent,
-                                            width: 1
-                                          )
-                                        ),
-                                        padding: EdgeInsets.all(1),
-                                        child: CachedNetworkImage(
-                                          imageUrl: widget.images[index],
-                                          fit: BoxFit.cover,
-                                          placeholder: (context, url) => CircularProgressIndicator(color: ColorConstants.colorMain,),
-                                          errorWidget: (context, url, error) => Icon(Icons.error),
-                                          width: Get.width * 0.15,
-                                          height: Get.width * 0.15,
-                                        ),
-                                      )
-                                    ),
-                                  );
-                                },
-                                itemCount: widget.isVideo ? 0 : widget.images.length)),
-                        const SizedBox(height: 20),
-                        Center(
-                         child: AppText(
-                           text: "${selectedImage + 1} / ${widget.images.length}",
-                           fontSize: 13,
-                         ),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
+                // Visibility(
+                //   visible: !widget.isVideo,
+                //   child: Container(
+                //     margin: const EdgeInsets.only(top: 10),
+                //     child: Column(
+                //       children: [
+                //         SizedBox(
+                //             height: Get.width * 0.15,
+                //             child: ListView.builder(
+                //                 scrollDirection: Axis.horizontal,
+                //                 itemBuilder: (BuildContext context, int index) {
+                //                   return GestureDetector(
+                //                     onTap: () {
+                //                       setState(() {
+                //                         selectedImage = index;
+                //                         pageController?.jumpToPage(selectedImage);
+                //                       });
+                //                     },
+                //                     child: Padding(
+                //                       padding: const EdgeInsets.symmetric(horizontal: 2),
+                //                       child: Container(
+                //                         decoration: BoxDecoration(
+                //                           border: Border.all(
+                //                             color: index == selectedImage ? ColorConstants.colorMain :Colors.transparent,
+                //                             width: 1
+                //                           )
+                //                         ),
+                //                         padding: EdgeInsets.all(1),
+                //                         child: CachedNetworkImage(
+                //                           imageUrl: widget.images[index],
+                //                           fit: BoxFit.cover,
+                //                           placeholder: (context, url) => CircularProgressIndicator(color: ColorConstants.colorMain,),
+                //                           errorWidget: (context, url, error) => Icon(Icons.error),
+                //                           width: Get.width * 0.15,
+                //                           height: Get.width * 0.15,
+                //                         ),
+                //                       )
+                //                     ),
+                //                   );
+                //                 },
+                //                 itemCount: widget.isVideo ? 0 : widget.images.length)),
+                //         const SizedBox(height: 20),
+                //         Center(
+                //          child: AppText(
+                //            text: "${selectedImage + 1} / ${widget.images.length}",
+                //            fontSize: 13,
+                //          ),
+                //         )
+                //       ],
+                //     ),
+                //   ),
+                // ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   child: Row(
