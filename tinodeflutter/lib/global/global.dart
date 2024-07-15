@@ -73,6 +73,8 @@ String gBackgroundFcmTopic="";
     }
   }
 
+  
+
 
 enum eChatType {
   NONE,

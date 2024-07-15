@@ -60,7 +60,7 @@ class MessageRoomScreen extends StatefulWidget {
   State<MessageRoomScreen> createState() => _MessageRoomScreenState();
 }
 
-class _MessageRoomScreenState extends State<MessageRoomScreen> {
+class _MessageRoomScreenState extends State<MessageRoomScreen> with WidgetsBindingObserver {
   late Tinode tinode;
   late Topic roomTopic;
   late Topic me;
@@ -83,6 +83,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     super.initState();
     tinode = widget.tinode;
     clickTopic = widget.clickTopic;
+    WidgetsBinding.instance.addObserver(this);
     // if(widget.roomTopic!=null) roomTopic = widget.roomTopic!;
     getMsgList();
   }
@@ -93,6 +94,43 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     roomTopic.leave(false);
     if(_metaDescSubscription!=null)_metaDescSubscription?.cancel();
     if(_dataSubscription!=null)_dataSubscription?.cancel();
+  }
+  
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+    super.didChangeAppLifecycleState(state);
+
+
+    switch (state) {
+      // case AppLifecycleState.detached:	// (5)
+      //   print("## detached");
+      //   break;
+      // case AppLifecycleState.inactive:	// (6)
+      //   print("## inactive");
+      //   break;
+      // case AppLifecycleState.paused:	// (7)
+      //   print("## paused");
+      //   break;
+       case AppLifecycleState.resumed:	// (8)
+       // showToast("forground resumed");
+        try{
+          if(!tinode.isConnected)
+            {
+              showToast('connecting ws ...');
+              Utils.showDialogWidget(context);
+              await tinode.connect();
+              Get.back();
+            }
+          }
+          catch(err){
+            showToast('fail to connect');
+          }
+        break;
+      default:
+        break;
+    }
+    
+   
   }
 
   Future<void> getMsgList() async {
