@@ -166,7 +166,7 @@ class CallService {
   }) async {
     final String callId = _uuid.v4();
     final params = CallKitParams(
-      id: roomTopicId,
+      id: callId,
       nameCaller: callerName,
       appName: 'JadeChat',
       avatar: callerAvatar,

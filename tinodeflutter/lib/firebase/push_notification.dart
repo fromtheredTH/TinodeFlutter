@@ -296,7 +296,7 @@ class PushNotificationService {
               "callType" : eChatType.VIDEO_CALL.index,
             };
         }
-          saveData(topic,callData);
+          saveData('call',callData);
           CallService.instance.showIncomingCall(roomTopicId: topic, callerName : roomName ,callerNumber: '', callerAvatar: "");
           return;
       }

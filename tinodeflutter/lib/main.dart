@@ -135,10 +135,11 @@ Future<void> initFcm() async {
     FlutterCallkitIncoming.onEvent.listen((event) async {
     if (event?.event == Event.actionCallAccept) {
       // 앱이 백그라운드에서 시작될 때 호출
-      String roomTopicId = event?.body['id'];
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? jsonString = prefs.getString(roomTopicId);
+      
+      String? jsonString = prefs.getString('call');
       Map<String, dynamic> _data = jsonDecode(jsonString ?? "");
+      String roomTopicId = _data['room_id'];
 
       // roomtopic name 설정이 안되어있음
       CallService.instance.roomTopicName = roomTopicId;

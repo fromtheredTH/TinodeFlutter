@@ -93,6 +93,14 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
       };
       b.public = publicData;
     }
+    if(a.touched ==null)
+    {
+      a.touched= DateTime.now();
+    }
+    if(b.touched ==null)
+    {
+      b.touched= DateTime.now();
+    }
     print("${a.topic} : ${a.touched} , ${b.topic} : ${b.touched}     count : ${count++}   , a fn : ${a.public?['fn']?? "null"} , b fn : ${b.public?['fn']??"null"}");
     return b.touched!.compareTo(a.touched!);    
   }
