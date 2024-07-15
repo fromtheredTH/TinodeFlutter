@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -287,6 +288,8 @@ void  _joinChannel() async {
         _remoteUid = null;
     });
     agoraEngine.leaveChannel();
+    FlutterCallkitIncoming.endAllCalls();
+
   }
   //  onMuteChecked(bool value) { // 상대방을 음소거함.
   //   setState(() {

@@ -33,6 +33,7 @@ class CallService {
   final FlutterCallkitIncoming _callKit = FlutterCallkitIncoming();
   final Uuid _uuid = Uuid();
   late Topic roomTopic;
+  String callId = "";
 
   bool isInit = false;
 
@@ -164,7 +165,7 @@ class CallService {
     String? callerNumber,
     String? callerAvatar,
   }) async {
-    final String callId = _uuid.v4();
+    callId = _uuid.v4();
     final params = CallKitParams(
       id: callId,
       nameCaller: callerName,
