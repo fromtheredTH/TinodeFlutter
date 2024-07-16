@@ -15,6 +15,7 @@ import 'package:get/get.dart' hide Trans;
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tinodeflutter/Constants/utils.dart';
+import 'package:tinodeflutter/Screen/Login/CreateAccountPhoneNumber.dart';
 import 'package:tinodeflutter/Screen/Login/CreateAccountScreen.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/model/UserAuthModel.dart' ;
@@ -260,7 +261,7 @@ class _SignupTypeScreen extends State<SignupTypeScreen> {
               SizedBox(height: 10),
               ElevatedButton(
                       onPressed: () {
-                        Get.to(CreateAccount());
+                        Get.to(CreateAccountPhoneNumber());
                       },
                       style: ElevatedButton.styleFrom(
                           fixedSize: Size(Get.width, 50),

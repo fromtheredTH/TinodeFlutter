@@ -7,8 +7,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:tinodeflutter/Constants/utils.dart';
+import 'package:tinodeflutter/Screen/messageRoomListScreen.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/app_text_field.dart';
+import 'package:tinodeflutter/global/global.dart';
 import 'package:tinodeflutter/model/UserAuthModel.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/page/base/page_layout.dart';
@@ -632,7 +634,7 @@ class _CreateAccountState extends State<CreateAccount> {
                       UserModel user = UserModel.fromJson(signupResponse.data["result"]["user"]);
                       Get.back();
                       Utils.showToast("complete_sign_up".tr());
-                    
+                      Get.offAll(MessageRoomListScreen(tinode: tinode_global));
                     },
                     child: Align(
                       alignment: Alignment.bottomCenter,

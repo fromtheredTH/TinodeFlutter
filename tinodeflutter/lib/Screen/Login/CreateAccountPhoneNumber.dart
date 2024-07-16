@@ -7,8 +7,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:tinodeflutter/Constants/utils.dart';
+import 'package:tinodeflutter/Screen/messageRoomListScreen.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/app_text_field.dart';
+import 'package:tinodeflutter/global/global.dart';
 import 'package:tinodeflutter/model/UserAuthModel.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/page/base/page_layout.dart';
@@ -20,16 +22,16 @@ import '../../../../global/DioClient.dart';
 
 
 
-class CreateAccount extends StatefulWidget {
-   CreateAccount({super.key, this.socialInfo});
+class CreateAccountPhoneNumber extends StatefulWidget {
+   CreateAccountPhoneNumber({super.key, this.socialInfo});
    UserSocialInfo? socialInfo;
 
   @override
-  State<CreateAccount> createState() => _CreateAccountState();
+  State<CreateAccountPhoneNumber> createState() => _CreateAccountPhoneNumberState();
 }
 
 
-class _CreateAccountState extends State<CreateAccount> {
+class _CreateAccountPhoneNumberState extends State<CreateAccountPhoneNumber> {
 
   TextEditingController phoneNumberController = TextEditingController();
   TextEditingController nameController = TextEditingController();
@@ -148,7 +150,7 @@ class _CreateAccountState extends State<CreateAccount> {
                                     isTapEmailOkBtn.value = false;
                                     isPhoneNumberEmpty.value = value.isEmpty;
                                     isPhoneNumberNotDuplicate.value = true;
-                                    if(!GetUtils.isEmail(value) && value.isNotEmpty) {
+                                    if(!GetUtils.isPhoneNumber(value) && value.isNotEmpty) {
                                       isPhoneNumberCorrect.value = false;
                                     }else{
                                       isPhoneNumberCorrect.value = true;
@@ -172,10 +174,10 @@ class _CreateAccountState extends State<CreateAccount> {
 
                                 Obx(() => AppText(
                                   text:
-                                  isPhoneNumberCorrect.value && isPhoneNumberNotDuplicate.value && isPhoneNumberEmpty.value ? "please_input_email_address".tr() :
-                                  isPhoneNumberCorrect.value && isPhoneNumberNotDuplicate.value ? "correct_email".tr() :
-                                  !isPhoneNumberCorrect.value ? "email_guide_incorrect".tr()
-                                      : "already_email".tr(),
+                                  isPhoneNumberCorrect.value && isPhoneNumberNotDuplicate.value && isPhoneNumberEmpty.value ? "please_input_phone_number".tr() :
+                                  isPhoneNumberCorrect.value && isPhoneNumberNotDuplicate.value ? "correct_phone_number".tr() :
+                                  !isPhoneNumberCorrect.value ? "phone_number_guide_incorrect".tr()
+                                      : "already_phone_number".tr(),
                                   color: isPhoneNumberCorrect.value && isPhoneNumberNotDuplicate.value && isPhoneNumberEmpty.value ? isTapEmailOkBtn.value ? ColorConstants.red : ColorConstants.halfBlack :
                                   isPhoneNumberCorrect.value && isPhoneNumberNotDuplicate.value ? ColorConstants.halfBlack :
                                   !isPhoneNumberCorrect.value ? ColorConstants.red
@@ -589,12 +591,14 @@ class _CreateAccountState extends State<CreateAccount> {
                           return;
                         }else {
 
-                          var emailResponse = await DioClient.checkEmail(phoneNumberController.text);
+                          //중복 체크
+
+                          //var emailResponse = await DioClient.checkEmail(phoneNumberController.text);
                           //var nicknameResponse = await DioClient.checkNickname(nicknameController.text);
 
-                          if(emailResponse.data["result"] is bool){
-                            isPhoneNumberNotDuplicate.value = emailResponse.data["result"];
-                          }
+                          // if(emailResponse.data["result"] is bool){
+                          //   isPhoneNumberNotDuplicate.value = emailResponse.data["result"];
+                          // }
 
                           // if(nicknameResponse.data["result"]["success"]){
                           //   isNicknameNotDuplicate.value = false;
@@ -632,7 +636,8 @@ class _CreateAccountState extends State<CreateAccount> {
                       UserModel user = UserModel.fromJson(signupResponse.data["result"]["user"]);
                       Get.back();
                       Utils.showToast("complete_sign_up".tr());
-                    
+                      Get.offAll(MessageRoomListScreen(tinode: tinode_global));
+
                     },
                     child: Align(
                       alignment: Alignment.bottomCenter,

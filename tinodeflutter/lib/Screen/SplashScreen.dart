@@ -16,10 +16,12 @@ import 'package:get/get.dart' hide Trans;
 import 'package:get/get_core/src/get_main.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tinodeflutter/Screen/Login/login.dart';
+import 'package:tinodeflutter/Screen/Login/login.dart' as login;
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/components/widget/dialog.dart';
+import 'package:tinodeflutter/global/global.dart';
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/tinode/tinode.dart';
 
 import '../../Constants/ColorConstants.dart';
 import '../../Constants/Constants.dart';
@@ -35,10 +37,12 @@ class SplashPage extends StatefulWidget {
 }
 
 class SplashPageState extends State<SplashPage> {
+  late Tinode tinode;
 
   @override
   void initState() {
     super.initState();
+    connectWsTinode();
     load();
   }
 
@@ -46,6 +50,24 @@ class SplashPageState extends State<SplashPage> {
   void dispose() {
     super.dispose();
   }
+
+  void connectWsTinode() async{
+   var key = apiKey;
+    var host = hostAddres;
+    var loggerEnabled = true;
+    tinode = Tinode(
+      'JadeChat',
+      ConnectionOptions(host, key, secure: true),
+      loggerEnabled,
+      versionApp: versionApp,
+      deviceLocale: deviceLocale,
+    );
+    await tinode.connect();
+    tinode_global = tinode;
+    print('Is Connected:' + tinode.isConnected.toString());
+
+  }
+  
 
   Future<void> load() async {
    // var response = await DioClient.getVersion();
@@ -79,7 +101,7 @@ class SplashPageState extends State<SplashPage> {
       prefs.setBool('first_run', false);
     }
 
-    Get.off(Login(),transition: Transition.rightToLeft);
+    Get.off(const login.Login(),transition: Transition.rightToLeft);
     return;
 
     User? user = await FirebaseAuth.instance.currentUser;
@@ -96,10 +118,10 @@ class SplashPageState extends State<SplashPage> {
         
       } catch(e) {
         print(e);
-        Get.off(Login(),transition: Transition.rightToLeft);
+        Get.off(login.Login(),transition: Transition.rightToLeft);
       }
     }else{
-      Get.off(Login(),transition: Transition.rightToLeft);
+      Get.off(login.Login(),transition: Transition.rightToLeft);
     }
   }
 
