@@ -275,6 +275,30 @@ class _SignupTypeScreen extends State<SignupTypeScreen> {
                           
                       child: Center(
                         child: AppText(
+                          text: "전화번호 회원가입",
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      )).paddingSymmetric(vertical: 10)
+              ,
+              ElevatedButton(
+                      onPressed: () {
+                        Get.to(CreateAccount());
+                      },
+                      style: ElevatedButton.styleFrom(
+                          fixedSize: Size(Get.width, 50),
+                          backgroundColor: ColorConstants.colorMain,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                            side: BorderSide(
+                                color: ColorConstants.colorMain.withOpacity(0.5),
+                                width:1.0
+                                ),                              
+                          )),
+                          
+                      child: Center(
+                        child: AppText(
                           text: "이메일 회원가입",
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
