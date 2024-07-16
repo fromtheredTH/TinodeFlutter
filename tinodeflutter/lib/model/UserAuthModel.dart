@@ -15,7 +15,7 @@ const Map<AuthProvider, String> kAuthProviderNames = {
 class UserSocialInfo {
   late AuthProvider authProvider;
   late String id;
-  String? nickname;
+  String? uid;
   String? name;
   String? profileImage;
   String? mobile;
@@ -25,8 +25,8 @@ class UserSocialInfo {
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {};
-    if (nickname != null) {
-      json['nickname'] = nickname;
+    if (uid != null) {
+      json['uid'] = uid;
     }
     if (profileImage != null) {
       json['profileImage'] = profileImage;

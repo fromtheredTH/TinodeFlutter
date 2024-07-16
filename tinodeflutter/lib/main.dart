@@ -25,9 +25,10 @@ import 'package:get_it/get_it.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tinodeflutter/Constants/ColorConstants.dart';
 import 'package:tinodeflutter/Constants/Constants.dart';
+import 'package:tinodeflutter/Screen/SplashScreen.dart';
 import 'package:tinodeflutter/firebase/firebase_options.dart';
 import 'package:tinodeflutter/firebase/push_notification.dart';
-import 'package:tinodeflutter/Screen/login.dart';
+import 'package:tinodeflutter/Screen/Login/login.dart';
 import 'package:tinodeflutter/services/social_service.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:intl/intl_standalone.dart';
@@ -248,7 +249,7 @@ class MyApp extends StatelessWidget {
       locale: context.locale,
       title: 'jade-chat',
       // home:SplashPage(),
-      home:Login(title: "JadeChat",),
+      home:SplashPage(),
       //navigatorObservers: <NavigatorObserver>[observer],
       themeMode: Platform.isIOS ? ThemeMode.light : ThemeMode.light,
       darkTheme: ThemeData(brightness: Platform.isIOS ? Brightness.dark : Brightness.light),

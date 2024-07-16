@@ -42,7 +42,7 @@ class SocialService {
 
           socialInfo.authProvider = authProvider;
           socialInfo.id = googleUser.id;
-          socialInfo.nickname = googleUser.displayName;
+          socialInfo.uid = googleUser.displayName;
           socialInfo.profileImage = googleUser.photoUrl;
           socialInfo.email = googleUser.email;
           socialInfo.accessToken = googleSignInAuthentication.accessToken;
@@ -81,7 +81,7 @@ class SocialService {
 
           socialInfo.authProvider = authProvider;
           socialInfo.id = appleUser.uid;
-          socialInfo.nickname = appleUser.displayName;
+          socialInfo.uid = appleUser.displayName;
           socialInfo.name = "${appleCredential.givenName}${(appleCredential.familyName ?? "")}";
           socialInfo.profileImage = appleUser.photoURL;
           socialInfo.email = appleUser.providerData.isNotEmpty ? appleUser.providerData.first.email : appleUser.email;
@@ -108,7 +108,7 @@ class SocialService {
 
           socialInfo.authProvider = authProvider;
           socialInfo.id = facebookUser.uid;
-          socialInfo.nickname = facebookUser.displayName;
+          socialInfo.uid = facebookUser.displayName;
           socialInfo.profileImage = facebookUser.photoURL;
           socialInfo.email = facebookUser.email;
           socialInfo.accessToken = result.accessToken?.token ?? "";

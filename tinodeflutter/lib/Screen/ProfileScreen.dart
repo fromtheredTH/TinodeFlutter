@@ -25,9 +25,9 @@ import 'package:tinodeflutter/model/btn_bottom_sheet_model.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
-import 'package:tinodeflutter/Screen/login.dart';
+import 'package:tinodeflutter/Screen/Login/login.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
-import 'package:tinodeflutter/Screen/login.dart' as LoignScreen;
+import 'package:tinodeflutter/Screen/Login/login.dart' as LoignScreen;
 
 class ProfileScreen extends StatefulWidget {
   Tinode tinode;
@@ -266,7 +266,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       },
                                       logout: () async {
                                         tinode.logout();
-                                        Get.offAll(()=>LoignScreen.Login(title: 'Tinode'));
+                                        Get.offAll(()=>LoignScreen.Login());
                                         // await DioClient.deleteFCM(
                                         //     gPushKey);
                                         // await FirebaseMessaging.instance
