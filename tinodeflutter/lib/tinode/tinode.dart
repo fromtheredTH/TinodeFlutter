@@ -420,6 +420,13 @@ class Tinode {
     return createAccount('basic', secret, login, params);
   }
 
+
+   Future createAccountFirebase(
+      String username, String password, AccountParams? params , String firebaseToken, {bool login =true}) {
+    var secret = base64.encode(utf8.encode(firebaseToken)); //firebase toekn encoded base64 
+    return createAccount('firebase', secret, login, params);
+  }
+
   /// Update account with basic
   Future updateAccountBasic(
       String userId, String username, String password, AccountParams? params) {
