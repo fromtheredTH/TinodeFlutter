@@ -16,10 +16,13 @@ import 'package:get/get.dart' hide Trans;
 import 'package:get/get_core/src/get_main.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tinodeflutter/Screen/Login/DefaultScreen.dart';
 import 'package:tinodeflutter/Screen/Login/login.dart' as login;
+import 'package:tinodeflutter/Screen/messageRoomListScreen.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/components/widget/dialog.dart';
 import 'package:tinodeflutter/global/global.dart';
+import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
 
@@ -42,16 +45,21 @@ class SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    connectWsTinode();
-    load();
+    init();
   }
 
   @override
   void dispose() {
     super.dispose();
   }
+  void init() async
+  {
+    await connectWsTinode();
+    load();
+  }
 
-  void connectWsTinode() async{
+  Future<bool> connectWsTinode() async{
+  
    var key = apiKey;
     var host = hostAddres;
     var loggerEnabled = true;
@@ -65,7 +73,7 @@ class SplashPageState extends State<SplashPage> {
     await tinode.connect();
     tinode_global = tinode;
     print('Is Connected:' + tinode.isConnected.toString());
-
+    return true;
   }
   
 
@@ -91,37 +99,62 @@ class SplashPageState extends State<SplashPage> {
       return;
     }
     final prefs = await SharedPreferences.getInstance();
+    token = prefs.getString('token')!;
+    url_encoded_token = prefs.getString('url_encoded_token')!;
 
+    if(prefs.getString('token') !=null)
+    {
+    }
+    if( prefs.getString('url_encoded_token')!.isNotEmpty)
+    {
+    }
     if (prefs.getBool('first_run') ?? true) {
       FlutterSecureStorage storage = FlutterSecureStorage();
-
+      prefs.clear();
       await storage.deleteAll();
       await FirebaseAuth.instance.signOut();
 
       prefs.setBool('first_run', false);
     }
 
-    Get.off(const login.Login(),transition: Transition.rightToLeft);
-    return;
+    //  Get.offAll(DefaultScreen(),transition: Transition.rightToLeft);
+    //  return;
 
     User? user = await FirebaseAuth.instance.currentUser;
     if(user != null){
       try {
 
-        String token = " ${await FirebaseAuth.instance.currentUser?.getIdToken()}";
-        print("firebase login token : $token ");
+        String firebaseToken = " ${await FirebaseAuth.instance.currentUser?.getIdToken()}";
+        print("firebase login token : $firebaseToken ");
         //var response = await apiP.userInfo(token);
        // UserModel user = UserModel.fromJson(response.data["result"]["user"]);
-
         
+       if(token!="")
+       {
+        var reponse = await tinode_global.loginWithAccessToken(token);
+        token = reponse.params['token'];
+        url_encoded_token = Uri.encodeComponent(reponse.params['token']);
+        prefs.setString('token', token);
+        prefs.setString('url_encoded_token', url_encoded_token);
+        tinode.setDeviceToken(gPushKey); //fcm push token 던지기
+
+        print("ddd");
+        Get.offAll(MessageRoomListScreen);
+       }
+       else{
+          print("일로 오면 안돼");
+          showToast('파이어베이스 로그인 미구현');
+          Get.offAll(DefaultScreen(),transition: Transition.rightToLeft);
+       }
+       
          // Constants.getUserInfo(false,context, apiP);
         
       } catch(e) {
         print(e);
-        Get.off(login.Login(),transition: Transition.rightToLeft);
+          Get.offAll(DefaultScreen(),transition: Transition.rightToLeft);
       }
     }else{
-      Get.off(login.Login(),transition: Transition.rightToLeft);
+          Get.offAll(DefaultScreen(),transition: Transition.rightToLeft);
     }
   }
 
@@ -136,7 +169,7 @@ class SplashPageState extends State<SplashPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Image.asset(ImageConstants.splashLogo,width: Get.width*0.3, fit: BoxFit.cover,),
+                Image.asset(ImageConstants.splashLogo,width: Get.width*0.5, fit: BoxFit.cover,),
 
                 SizedBox(height: 20,),
                 AppText(
