@@ -70,6 +70,8 @@ class _CreateAccountState extends State<CreateAccount> {
   RxBool isAgreeToPersonalInfo = false.obs;
   RxBool isAgreeToMarketingPromotion = false.obs;
 
+  late String firebaseToken;
+
   void setAgree() {
     if(!isAgreeTermOfServices.value || !isAgreeToPersonalInfo.value || !isAgreeToMarketingPromotion.value) {
       isEveryOneAgrees.value = false;
@@ -101,7 +103,6 @@ class _CreateAccountState extends State<CreateAccount> {
     passwordConfirmController.dispose(); 
   }
   
-  String firebaseToken = "";
 
   void _submitForm() async{
       
@@ -188,18 +189,25 @@ class _CreateAccountState extends State<CreateAccount> {
                             //   text: "JadeChat 회원가입으로 다양한 혜택을 누려보세요!",
                             //   fontSize: 16,
                             // ),
-                            //SizedBox(height: Get.height*0.05),
-                            SizedBox(height: Get.height*0.01),
+                            // SizedBox(height: Get.height*0.05),
+                            SizedBox(height: Get.height*0.03),
 
                             widget.socialInfo != null ?
-                            Container(
-                              width: double.maxFinite,
+                            Row(children: [
+                              AppText(text: '이메일', fontSize: 14,
+                               color: ColorConstants.halfBlack,),
+                               SizedBox(width: 10,),
+                               Container(
+                              width: Get.width*0.6,
                               child: AppText(
                                 text: widget.socialInfo!.email!,
                                 fontSize: 14,
                                 color: ColorConstants.halfBlack,
                               ),
                             )
+                            ],
+                            )
+                            
                                 : Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -304,14 +312,21 @@ class _CreateAccountState extends State<CreateAccount> {
                             // SizedBox(height: Get.height*0.01),
 
                             widget.socialInfo?.uid != null ?
-                            Container(
-                              width: double.maxFinite,
+                            Row(
+                              children: [
+                              AppText(text: '이름', fontSize: 14,
+                               color: ColorConstants.halfBlack,),
+                               SizedBox(width: 22,),
+                              Container(
+                              width: Get.width*0.6,
                               child: AppText(
                                 text: widget.socialInfo!.uid ?? "",
                                 fontSize: 14,
                                 color: ColorConstants.halfBlack,
                               ),
                             )
+                            ],)
+                           
                                 : Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -635,18 +650,15 @@ class _CreateAccountState extends State<CreateAccount> {
                       isTapNameOkBtn.value = true;
                       isTapPasswordOkBtn.value = true;
                       isTapPasswordConfirmOkBtn.value = true;
-
-
+                      
                       if(widget.socialInfo != null){
-                        if(isNicknameEmpty.value || !isNicknameCorrect.value){
-                          Get.back();
-                          return;
-                        }
-
-                      }else{
+                       
+                      }
+                      else{
+                     
                         if(!isEmailCorrect.value || isEmailEmpty.value 
                              || isNameEmpty.value || !isNameCorrect.value
-                            || isPasswordEmpty.value){
+                            || isPasswordEmpty.value  ){
                           Get.back();
                           return;
                         }else {
@@ -683,17 +695,20 @@ class _CreateAccountState extends State<CreateAccount> {
                               email: emailController.text,
                               password: passwordConfirmController.text,
                             );
-                             var response= await FirebaseAuth.instance.currentUser?.getIdToken();
-                             if(response!=null) firebaseToken = response;
+                           
                           } on FirebaseAuthException catch (e) {
                             Utils.showToast(e.message ?? "");
                             print(e.code);
                           }
+                          }
                         }
-                      }
+                        
+                        var response= await FirebaseAuth.instance.currentUser?.getIdToken();
+                        if(response!=null) firebaseToken = response;  
+                        // 바로 나왔으면 소셜 / 일반 이메일 로그인이었으면 파이어베이스 등록되고 나옴
+                        _submitForm();
+ 
 
-                      _submitForm();
-                     
                     },
                     child: Align(
                       alignment: Alignment.bottomCenter,

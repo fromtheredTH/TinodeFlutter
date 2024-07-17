@@ -107,7 +107,7 @@ class _CreateAccountPhoneNumberState extends State<CreateAccountPhoneNumber> {
 
     // var signupResponse = await DioClient.signUp(nicknameController.text, nameController.text);
     // UserModel user = UserModel.fromJson(signupResponse.data["result"]["user"]);
-    _submitForm();
+    _submitAccountForm();
 
     }
     on FirebaseAuthException catch (e) {
@@ -116,7 +116,7 @@ class _CreateAccountPhoneNumberState extends State<CreateAccountPhoneNumber> {
       }    
   }
 
-   void _submitForm() async{
+   void _submitAccountForm() async{
       
       if(gPushKey=="") showToast('fcm token 없음');
       final prefs = await SharedPreferences.getInstance();
@@ -141,14 +141,8 @@ class _CreateAccountPhoneNumberState extends State<CreateAccountPhoneNumber> {
         return;
       }
 
-      
-      // var signupResponse = await DioClient.signUp(nicknameController.text, nameController.text);
-      // UserModel user = UserModel.fromJson(signupResponse.data["result"]["user"]);
       Get.back(); // loading off
       Utils.showToast("complete_sign_up".tr());
-      
-      // if(result.code >=400 && result.code<500)
-      //   showToast("회원가입 실패 ${result.text}");
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('회원가입이 완료되었습니다.')),

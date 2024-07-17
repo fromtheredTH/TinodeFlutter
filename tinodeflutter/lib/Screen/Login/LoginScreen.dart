@@ -39,35 +39,42 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreen extends State<LoginScreen> {
-  LoginController controller = Get.put(LoginController());
+  
+  TextEditingController phoneNumberController=TextEditingController();
+  TextEditingController passwordController=TextEditingController();
+  RxString phoneNumberValidationText="".obs;
   RxBool isVisiblePassword = true.obs;
   bool isLoginIng = false;
 
+  late String firebaseToken;
+  late String phoneNumberEmail;
+
   Future<void> onClickLogin() async {
     try {
+      phoneNumberEmail = '${phoneNumberController.text}@phoneNumber.com';
+
       final data = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: controller.emailController.text,
-        password: controller.passwordController.text,
+        email: phoneNumberEmail,
+        password: passwordController.text,
       );
 
-      String token =
-          "Bearer ${await FirebaseAuth.instance.currentUser?.getIdToken()}";
+      firebaseToken = "${await FirebaseAuth.instance.currentUser?.getIdToken()}";
 
-      String device_id = "";
-      DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+      // device id get 코드
+      // String device_id = "";
+      // DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
-      if (Platform.isAndroid) {
-        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-        device_id = androidInfo.id;
-        const _androidIdPlugin = AndroidId();
-        device_id = await _androidIdPlugin.getId() ?? '';
-      } else if (Platform.isIOS) {
-        IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-        device_id = iosInfo.identifierForVendor ?? '';
-      }
-
-      //var response = await apiP.userInfo(token);
-     // UserModel user = UserModel.fromJson(response.data["result"]["user"]);
+      // if (Platform.isAndroid) {
+      //   AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      //   device_id = androidInfo.id;
+      //   const _androidIdPlugin = AndroidId();
+      //   device_id = await _androidIdPlugin.getId() ?? '';
+      // } else if (Platform.isIOS) {
+      //   IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+      //   device_id = iosInfo.identifierForVendor ?? '';
+      // }
+       var response = await tinode_global.firebaseLogin(firebaseToken);
+      print('User Id: ' + response.toString());
 
       if(isLoading) {
         Get.back();
@@ -75,8 +82,8 @@ class _LoginScreen extends State<LoginScreen> {
       }
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString('authProvider', "email");
-      prefs.setString('id', controller.emailController.text);
-      prefs.setString('pwd', controller.passwordController.text);
+      prefs.setString('id', phoneNumberController.text);
+      prefs.setString('pwd', passwordController.text);
       //Constants.getUserInfo(true, context, apiP);
 
     } on FirebaseAuthException catch (e) {
@@ -90,35 +97,6 @@ class _LoginScreen extends State<LoginScreen> {
     }
   }
 
-  Future<void> socialLogin(UserSocialInfo userInfo) async {
-    try {
-      String token =
-          "${await FirebaseAuth.instance.currentUser?.getIdToken()}";
-     // var response = await apiP.userInfo(token);
-      if(isLoading) {
-        Get.back();
-        isLoading = false;
-      }
-     // UserModel user = UserModel.fromJson(response.data["result"]["user"]);
-
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('authProvider', userInfo.authProvider.name);
-      prefs.setString('accessToken', userInfo.accessToken ?? "");
-      prefs.setString('idToken', userInfo.refreshToken ?? "");
-    //  Constants.getUserInfo(true, context, apiP);
-      Get.offAll(MessageRoomListScreen(tinode: tinode_global));
-    } catch (e) {
-      print(e);
-      if(isLoading) {
-        Get.back();
-        isLoading = false;
-      }
-      isLoginIng = false;
-      Get.to(CreateAccount(
-        socialInfo: userInfo,
-      ));
-    }
-  }
 
 
  Future<bool> onKeyboardHide() async {
@@ -128,124 +106,6 @@ class _LoginScreen extends State<LoginScreen> {
     return false;
   }
 
-   Widget googleLoginWidget()
-  {
-    return   GestureDetector(
-                onTap: () async {
-                  if (isLoginIng) {
-                    return;
-                  }
-                  isLoginIng = true;
-                  if(!isLoading)
-                  {Utils.showDialogWidget(context);
-                  isLoading=true;}
-
-                  SocialService socialService = GetIt.I.get<SocialService>();
-                  UserSocialInfo? socialInfo =
-                      await socialService.getProfile(model.AuthProvider.google);
-                  if(isLoading) {
-                    Get.back();
-                    isLoading = false;
-                  }
-                  if (socialInfo != null) {
-                    socialLogin(socialInfo);
-                  } else {
-                    isLoginIng = false;
-                  }
-                },
-                
-                child: Container(
-                  margin: EdgeInsets.symmetric(vertical:  5),
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 15),
-                  decoration: BoxDecoration(
-                    color: Color(0xFFFFFFFF),
-                    borderRadius: BorderRadius.circular(5),
-                     boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: Offset(0, 3), // changes position of shadow
-                      ),
-                    ],
-                  ),
-                  
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const SizedBox(width: 10),
-                      
-                      SvgPicture.asset(
-                        ImageConstants.googleLogo,
-                        width: 24,
-                        height: 24,
-                      ),
-                      const SizedBox(width: 10),
-                      Flexible(
-                        child: AppText(
-                          text: "구글 계정으로 로그인",
-                          color: ColorConstants.black,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-  }
-  Widget appleLoginWidget()
-  {
-    return GestureDetector(
-                  onTap: () async {
-                    if (isLoginIng) {
-                      return;
-                    }
-                    if(!isLoading)
-                    {Utils.showDialogWidget(context); isLoading=true;}
-                    isLoginIng = true;
-                    SocialService socialService = GetIt.I.get<SocialService>();
-                    UserSocialInfo? socialInfo = await socialService
-                        .getProfile(model.AuthProvider.apple);
-                    if(isLoading) {
-                      Get.back();
-                      isLoading = false;
-                    }   
-                    if (socialInfo != null) {
-                      socialLogin(socialInfo);
-                    } else {
-                      isLoginIng = false;
-                    }
-                  },
-                  child: Container(
-                    margin:
-                        EdgeInsets.symmetric(vertical:  5),
-                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                    decoration: BoxDecoration(
-                      color: Color(0xFF000000),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        const SizedBox(width: 10),
-                        SvgPicture.asset(
-                          ImageConstants.appleLogo,
-                          width: 24,
-                          height: 24,
-                        ),
-                        const SizedBox(width: 10),
-                        Flexible(
-                          child: AppText(
-                            text: "signin_apple".tr(),
-                            color: ColorConstants.white,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-  }
 
 
   @override
@@ -336,9 +196,9 @@ class _LoginScreen extends State<LoginScreen> {
                       child: TextField(
                         style: TextStyle(color: Colors.black.withOpacity(0.7)),
                         cursorColor: Colors.black.withOpacity(0.7),
-                        controller: controller.emailController,
+                        controller: phoneNumberController,
                         onChanged: (text) {
-                          controller.emailValidationText.value = "";
+                          phoneNumberValidationText.value = "";
                         },
                         decoration: InputDecoration(
                           border: InputBorder.none,
@@ -376,7 +236,7 @@ class _LoginScreen extends State<LoginScreen> {
                       ),
                     ),
                     Obx(() => Text(
-                          controller.emailValidationText.value,
+                          phoneNumberValidationText.value,
                           textAlign: TextAlign.start,
                           style: TextStyle(
                             color: Color(0xFFEB5757),
@@ -390,7 +250,7 @@ class _LoginScreen extends State<LoginScreen> {
                         ),
                         child: Obx(
                           () => TextField(
-                            controller: controller.passwordController,
+                            controller: passwordController,
                             style: TextStyle(
                               color: Colors.black.withOpacity(0.7),
                             ),
@@ -503,27 +363,28 @@ class _LoginScreen extends State<LoginScreen> {
                          if(!isLoading)
                           {Utils.showDialogWidget(context);
                           isLoading=true;}
-                        if (!EmailValidator.validate(
-                            controller.emailController.text, true)) {
+                        if (!GetUtils.isPhoneNumber(
+                            phoneNumberController.text)) {
                           // Use EmailValidator.validate() to validate email
-                          controller.emailValidationText.value =
-                              "email_guide_incorrect".tr();
+                          phoneNumberValidationText.value =
+                              "올바른 휴대폰 번호 형식을 입력해 주세요";
                           isLoginIng = false;
                           if(isLoading) {
                               Get.back();
                               isLoading = false;
                             }
                         } else {
-                          if (controller.emailController.text.isEmpty) {
-                            showToast("please_input_email".tr());
+                          if (phoneNumberController.text.isEmpty) {
+                            onKeyboardHide();
+                            showToast("휴대폰 번호를 입력해주세요");
                             isLoginIng = false;
                             if(isLoading) {
                               Get.back();
                               isLoading = false;
                             }
                             return;
-                          } else if (controller
-                              .passwordController.text.isEmpty) {
+                          } else if (passwordController.text.isEmpty) {
+                            onKeyboardHide();
                             showToast("please_input_password".tr());
                             isLoginIng = false;
                             if(isLoading) {
@@ -533,11 +394,11 @@ class _LoginScreen extends State<LoginScreen> {
                             return;
                           }
                           // var emailResponse = await DioClient.checkEmail(
-                          //     controller.emailController.text);
+                          //     controller.phoneNumberController.text);
 
                           // if (emailResponse.data["result"] is bool &&
                           //     !emailResponse.data["result"]) {
-                          //   controller.emailValidationText.value =
+                          //   controller.phoneNumberValidationText.value =
                           //       "email_is_empty".tr();
                           //  if(isLoading) {
                           //     Get.back();
@@ -546,7 +407,7 @@ class _LoginScreen extends State<LoginScreen> {
                           //   isLoginIng = false;
                           //   return;
                           // }
-                          controller.emailValidationText.value = "";
+                          phoneNumberValidationText.value = "";
                           if(isLoading) {
                               Get.back();
                               isLoading = false;

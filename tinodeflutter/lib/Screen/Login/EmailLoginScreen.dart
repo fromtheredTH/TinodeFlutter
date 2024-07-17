@@ -21,6 +21,7 @@ import 'package:tinodeflutter/model/UserAuthModel.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/page/base/page_layout.dart';
 import 'package:tinodeflutter/services/social_service.dart';
+import 'package:tinodeflutter/tinode/src/models/credential.dart';
 import '../../../Constants/ColorConstants.dart';
 import '../../../Constants/Constants.dart';
 import '../../../Constants/FontConstants.dart';
@@ -41,6 +42,8 @@ class _EmailLoginScreen extends State<EmailLoginScreen> {
     LoginController controller = Get.put(LoginController());
   RxBool isVisiblePassword = true.obs;
   bool isLoginIng = false;
+  late String firebaseToken;
+
 
   Future<void> onClickLogin() async {
     try {
@@ -49,21 +52,23 @@ class _EmailLoginScreen extends State<EmailLoginScreen> {
         password: controller.passwordController.text,
       );
 
-      String token =
-          "Bearer ${await FirebaseAuth.instance.currentUser?.getIdToken()}";
+      firebaseToken ="${await FirebaseAuth.instance.currentUser?.getIdToken()}";
 
-      String device_id = "";
-      DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+      // String device_id = "";
+      // DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
-      if (Platform.isAndroid) {
-        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-        device_id = androidInfo.id;
-        const _androidIdPlugin = AndroidId();
-        device_id = await _androidIdPlugin.getId() ?? '';
-      } else if (Platform.isIOS) {
-        IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-        device_id = iosInfo.identifierForVendor ?? '';
-      }
+      // if (Platform.isAndroid) {
+      //   AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      //   device_id = androidInfo.id;
+      //   const _androidIdPlugin = AndroidId();
+      //   device_id = await _androidIdPlugin.getId() ?? '';
+      // } else if (Platform.isIOS) {
+      //   IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+      //   device_id = iosInfo.identifierForVendor ?? '';
+      // }
+      
+      var response = await tinode_global.firebaseLogin(firebaseToken);
+      print('User Id: ' + response.toString());
 
       //var response = await apiP.userInfo(token);
      // UserModel user = UserModel.fromJson(response.data["result"]["user"]);
@@ -89,22 +94,24 @@ class _EmailLoginScreen extends State<EmailLoginScreen> {
     }
   }
 
-  Future<void> socialLogin(UserSocialInfo userInfo) async {
+   Future<void> socialLogin(UserSocialInfo userInfo) async {
     try {
-      String token =
-          "${await FirebaseAuth.instance.currentUser?.getIdToken()}";
-     // var response = await apiP.userInfo(token);
-      if(isLoading) {
-        Get.back();
-        isLoading = false;
-      }
-     // UserModel user = UserModel.fromJson(response.data["result"]["user"]);
-
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+     firebaseToken = "${await FirebaseAuth.instance.currentUser?.getIdToken()}";
+      
       prefs.setString('authProvider', userInfo.authProvider.name);
       prefs.setString('accessToken', userInfo.accessToken ?? "");
       prefs.setString('idToken', userInfo.refreshToken ?? "");
-    //  Constants.getUserInfo(true, context, apiP);
+
+      if(isLoading) {
+        Get.back();
+        isLoading = false;
+      }     
+      var response = await tinode_global.firebaseLogin(firebaseToken);
+      print('User Id: ' + response.toString());
+        
+      //await createAccount(userName);
+
       Get.offAll(MessageRoomListScreen(tinode: tinode_global));
     } catch (e) {
       print(e);

@@ -25,6 +25,8 @@ import 'package:tinodeflutter/model/UserAuthModel.dart' as model;
 import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/page/base/page_layout.dart';
 import 'package:tinodeflutter/services/social_service.dart';
+import 'package:tinodeflutter/tinode/src/models/account-params.dart';
+import 'package:tinodeflutter/tinode/src/models/credential.dart';
 import '../../../Constants/ColorConstants.dart';
 import '../../../Constants/Constants.dart';
 import '../../../Constants/FontConstants.dart';
@@ -45,24 +47,31 @@ class _SignupTypeScreen extends State<SignupTypeScreen> {
   bool isOnlySocial = true;
 
   bool isLoginIng = false;
-
+  late String firebaseToken;
 
   Future<void> socialLogin(UserSocialInfo userInfo) async {
     try {
-      String token =
-          "${await FirebaseAuth.instance.currentUser?.getIdToken()}";
-     // var response = await apiP.userInfo(token);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+     firebaseToken = "${await FirebaseAuth.instance.currentUser?.getIdToken()}";
+      
+      prefs.setString('authProvider', userInfo.authProvider.name);
+      prefs.setString('accessToken', userInfo.accessToken ?? "");
+      prefs.setString('idToken', userInfo.refreshToken ?? "");
+
       if(isLoading) {
         Get.back();
         isLoading = false;
       }
-     // UserModel user = UserModel.fromJson(response.data["result"]["user"]);
+      String userName = userInfo.uid ?? "";
+      Credential credential = Credential();
+     
+      var response = await tinode_global.firebaseLogin(firebaseToken);
+      print('User Id: ' + response.toString());
+        
+     
 
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('authProvider', userInfo.authProvider.name);
-      prefs.setString('accessToken', userInfo.accessToken ?? "");
-      prefs.setString('idToken', userInfo.refreshToken ?? "");
-    //  Constants.getUserInfo(true, context, apiP);
+      //await createAccount(userName);
+
       Get.offAll(MessageRoomListScreen(tinode: tinode_global));
     } catch (e) {
       print(e);
@@ -75,6 +84,30 @@ class _SignupTypeScreen extends State<SignupTypeScreen> {
         socialInfo: userInfo,
       ));
     }
+  }
+
+  Future<void> createAccount(String userName) async
+  {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+     try{
+        AccountParams accountParams = AccountParams(cred: [] , public:{'fn':userName} );
+      
+        var result = await tinode_global.createAccountFirebase(userName, "",  accountParams, firebaseToken , login: true);
+        
+        token = result.params['token'];
+        url_encoded_token = Uri.encodeComponent(result.params['token']);
+        prefs.setString('token', token);
+        prefs.setString('url_encoded_token', url_encoded_token);
+
+        tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
+
+      }
+      catch(err)
+      {
+       // duplicate
+         print("firebase signup err");
+      }
   }
 
   Future<bool> onKeyboardHide() async {
