@@ -55,11 +55,11 @@ Future<void> main() async {
   setupLocator();
   await Permission.notification.request(); // 유저 승인 요청 후 initFcm()
 
-  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    statusBarColor:ColorConstants.colorBg1, // Replace with your desired color
-      statusBarBrightness: Platform.isIOS ? Brightness.dark : Brightness.light,
-      statusBarIconBrightness: Platform.isIOS ? Brightness.dark : Brightness.light
-  ));
+ SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+  statusBarColor: Colors.white, // 상태바 배경색을 흰색으로 설정
+  statusBarBrightness: Brightness.light, // iOS에서 상태바 콘텐츠를 어둡게 (검은색)
+  statusBarIconBrightness: Brightness.dark, // Android에서 상태바 아이콘을 어둡게 (검은색)
+));
   
 
   //fcm
@@ -251,7 +251,7 @@ class MyApp extends StatelessWidget {
       // home:SplashPage(),
       home:SplashPage(),
       //navigatorObservers: <NavigatorObserver>[observer],
-      themeMode: Platform.isIOS ? ThemeMode.light : ThemeMode.light,
+      themeMode: ThemeMode.light, //Platform.isIOS ? ThemeMode.light : ThemeMode.light,
       darkTheme: ThemeData(brightness: Platform.isIOS ? Brightness.dark : Brightness.light),
       navigatorKey: Constants.navigatorKey,
     );
