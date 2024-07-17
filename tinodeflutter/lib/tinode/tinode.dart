@@ -356,6 +356,11 @@ class Tinode {
     // clear db
     _tinodeService.clearDb();
   }
+  void jadechatLogout()
+  {
+    _authService.reset();
+    _tinodeService.clearDb();
+  }
 
   /// Current user token
   AuthToken? get token {
