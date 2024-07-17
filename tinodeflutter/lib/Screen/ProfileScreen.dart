@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -15,6 +17,7 @@ import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:tinodeflutter/Constants/ImageConstants.dart';
 import 'package:tinodeflutter/Constants/ImageUtils.dart';
 import 'package:tinodeflutter/Constants/utils.dart';
+import 'package:tinodeflutter/Screen/SplashScreen.dart';
 import 'package:tinodeflutter/Screen/setting_list_screen.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/components/widget/BottomProfileWidget.dart';
@@ -28,6 +31,7 @@ import 'package:tinodeflutter/tinode/tinode.dart';
 import 'package:tinodeflutter/Screen/Login/login.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:tinodeflutter/Screen/Login/login.dart' as LoignScreen;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
   Tinode tinode;
@@ -265,19 +269,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         ));
                                       },
                                       logout: () async {
-                                        tinode.logout();
-                                        Get.offAll(()=>LoignScreen.Login());
+                                        Utils.showDialogWidget(context);
+                                        tinode.jadechatLogout(); //ws 연결은 유지
+                                        await FirebaseMessaging.instance.deleteToken();                                         
+                                        SharedPreferences prefs = await SharedPreferences.getInstance();
+                                        await prefs.remove('token');
+                                        await prefs.remove('url_encoded_token');
+                                        if(FirebaseAuth.instance!=null ) await FirebaseAuth.instance.signOut();
+                                        //Get.offAll(()=>LoignScreen.Login());
+                                        Get.offAll(SplashPage());
                                         // await DioClient.deleteFCM(
                                         //     gPushKey);
-                                        // await FirebaseMessaging.instance
-                                        //     .deleteToken();
-                                        // await FirebaseAuth.instance
-                                        //     .signOut();
+                                       
                                         // ChatRoomUtils.deleteAllRooms();
                                         // PostingUtils.deleteAllPosts();
                                         // DiscoverUtils.deleteAllPosts();
                                         // Constants.localChatRooms.clear();
-                                        // Get.offAll(SplashPage());
                                         //Get.offAll(()=>Login(title: "티노드"));
                                       }));
                             },

@@ -385,6 +385,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
     return PageLayout(
         onBack: onBackPressed,
         isLoading: isLoading,
+        bgColor: ColorConstants.colorBg1,
         child: SizedBox(
           width: double.infinity,
           height: double.infinity,
