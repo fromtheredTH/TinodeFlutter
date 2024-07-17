@@ -444,6 +444,13 @@ class Tinode {
       String scheme, String secret, Map<String, dynamic>? cred) {
     return _tinodeService.login(scheme, secret, cred);
   }
+ 
+  Future<CtrlMessage> firebaseLogin(
+      String firebaseToken) {
+    var firebaseTokenBase64 = base64.encode(utf8.encode(firebaseToken));
+
+    return _tinodeService.firebaseLogin('firebase', firebaseTokenBase64, null);
+  }
 
   /// Wrapper for `login` with basic authentication
   Future<CtrlMessage> loginBasic(
