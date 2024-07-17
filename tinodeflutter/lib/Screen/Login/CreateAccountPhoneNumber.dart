@@ -1,6 +1,8 @@
 
 
 
+import 'dart:convert';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
@@ -11,14 +13,18 @@ import 'package:tinodeflutter/Screen/messageRoomListScreen.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/app_text_field.dart';
 import 'package:tinodeflutter/global/global.dart';
+import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:tinodeflutter/model/UserAuthModel.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/page/base/page_layout.dart';
+import 'package:tinodeflutter/tinode/src/models/account-params.dart';
+import 'package:tinodeflutter/tinode/src/models/credential.dart';
 import '../../../../Constants/ColorConstants.dart';
 import '../../../../Constants/Constants.dart';
 import '../../../../Constants/FontConstants.dart';
 import '../../../../Constants/ImageConstants.dart';
 import '../../../../global/DioClient.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 
@@ -85,6 +91,93 @@ class _CreateAccountPhoneNumberState extends State<CreateAccountPhoneNumber> {
     nameController.text = widget.socialInfo?.name ?? "";
     super.initState();
   }
+  String firebaseToken = "";
+  late String phoneNumberEmail;
+
+  void signUpProcess() async
+  {
+    try{
+    await signUpWithPhoneNumber();
+    await FirebaseAuth.instance.signInWithEmailAndPassword(
+           email: phoneNumberEmail,
+           password: passwordController.text,
+      );
+     var response= await FirebaseAuth.instance.currentUser?.getIdToken();
+    if(response!=null) firebaseToken = response;
+
+    // var signupResponse = await DioClient.signUp(nicknameController.text, nameController.text);
+    // UserModel user = UserModel.fromJson(signupResponse.data["result"]["user"]);
+    _submitForm();
+
+    }
+    on FirebaseAuthException catch (e) {
+      Utils.showToast(e.message ?? "");
+      print(e.code);
+      }    
+  }
+
+   void _submitForm() async{
+      
+      if(gPushKey=="") showToast('fcm token 없음');
+      final prefs = await SharedPreferences.getInstance();
+      String base64EncodedFirebaseToken = await encodeStringToBase64(firebaseToken);
+      AccountParams accountParams = AccountParams(cred: [] , public:{'fn':nameController.text} );
+      try{
+       var result = await tinode_global.createAccountFirebase(nameController.text, passwordController.text,  accountParams, firebaseToken , login: true);
+       token = result.params['token'];
+       url_encoded_token = Uri.encodeComponent(result.params['token']);
+        prefs.setString('token', token);
+        prefs.setString('url_encoded_token', url_encoded_token);
+
+       tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
+       Get.offAll(MessageRoomListScreen(
+        tinode: tinode_global,
+      ));
+      }
+      catch(err)
+      {
+        showToast('회원가입 실패 $err');
+        Get.back(); //loading off
+        return;
+      }
+
+      
+      // var signupResponse = await DioClient.signUp(nicknameController.text, nameController.text);
+      // UserModel user = UserModel.fromJson(signupResponse.data["result"]["user"]);
+      Get.back(); // loading off
+      Utils.showToast("complete_sign_up".tr());
+      
+      // if(result.code >=400 && result.code<500)
+      //   showToast("회원가입 실패 ${result.text}");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('회원가입이 완료되었습니다.')),
+      );
+    
+  }
+
+  
+  Future<UserCredential?> signUpWithPhoneNumber() async {
+    try {
+      // 전화번호를 이메일 형식으로 변환
+      phoneNumberEmail = '${phoneNumberController.text}@phoneNumber.com';
+
+      // Firebase에 회원가입
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: phoneNumberEmail,
+        password: passwordController.text,
+      );
+
+
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      print('회원가입 실패: ${e.message}');
+      return null;
+    }
+  }
+
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +203,7 @@ class _CreateAccountPhoneNumberState extends State<CreateAccountPhoneNumber> {
                           },
                           child: Icon(Icons.arrow_back_ios, color:Colors.black)),
                       AppText(
-                        text: "전화번호 회원가입",
+                        text:  "signup".tr(),
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                       ),
@@ -165,7 +258,7 @@ class _CreateAccountPhoneNumberState extends State<CreateAccountPhoneNumber> {
 
                                     }
                                   },
-                                  hintText: "전화번호",
+                                  hintText: "휴대폰 번호",
                                   textColor: Colors.black,
                                   textColorHint: ColorConstants.halfBlack,
                                 ),
@@ -571,21 +664,17 @@ class _CreateAccountPhoneNumberState extends State<CreateAccountPhoneNumber> {
                       }
 
                       isTapEmailOkBtn.value = true;
-                      isTapNicknameOkBtn.value = true;
                       isTapNameOkBtn.value = true;
                       isTapPasswordOkBtn.value = true;
                       isTapPasswordConfirmOkBtn.value = true;
 
 
                       if(widget.socialInfo != null){
-                        if(isNicknameEmpty.value || !isNicknameCorrect.value){
-                          Get.back();
-                          return;
-                        }
+                      
 
                       }else{
-                        if(!isPhoneNumberCorrect.value || isPhoneNumberEmpty.value || isNicknameEmpty.value
-                            || !isNicknameCorrect.value || isNameEmpty.value || !isNameCorrect.value
+                        if(!isPhoneNumberCorrect.value || isPhoneNumberEmpty.value 
+                            || isNameEmpty.value || !isNameCorrect.value
                             || isPasswordEmpty.value){
                           Get.back();
                           return;
@@ -616,27 +705,11 @@ class _CreateAccountPhoneNumberState extends State<CreateAccountPhoneNumber> {
                           }
 
 
-                          try {
-                            await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                              email: phoneNumberController.text,
-                              password: passwordConfirmController.text,
-                            );
-                            await FirebaseAuth.instance.signInWithEmailAndPassword(
-                              email: phoneNumberController.text,
-                              password: passwordConfirmController.text,
-                            );
-                          } on FirebaseAuthException catch (e) {
-                            Utils.showToast(e.message ?? "");
-                            print(e.code);
-                          }
                         }
                       }
+                      signUpProcess();
 
-                      var signupResponse = await DioClient.signUp(nicknameController.text, nameController.text);
-                      UserModel user = UserModel.fromJson(signupResponse.data["result"]["user"]);
-                      Get.back();
-                      Utils.showToast("complete_sign_up".tr());
-                      Get.offAll(MessageRoomListScreen(tinode: tinode_global));
+                      
 
                     },
                     child: Align(

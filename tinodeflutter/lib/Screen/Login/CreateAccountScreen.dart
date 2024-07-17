@@ -11,14 +11,18 @@ import 'package:tinodeflutter/Screen/messageRoomListScreen.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/app_text_field.dart';
 import 'package:tinodeflutter/global/global.dart';
+import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:tinodeflutter/model/UserAuthModel.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/page/base/page_layout.dart';
+import 'package:tinodeflutter/tinode/src/models/account-params.dart';
+import 'package:tinodeflutter/tinode/src/models/credential.dart';
 import '../../../../Constants/ColorConstants.dart';
 import '../../../../Constants/Constants.dart';
 import '../../../../Constants/FontConstants.dart';
 import '../../../../Constants/ImageConstants.dart';
 import '../../../../global/DioClient.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 
@@ -85,6 +89,62 @@ class _CreateAccountState extends State<CreateAccount> {
     nameController.text = widget.socialInfo?.name ?? "";
     super.initState();
   }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    emailController.dispose();
+    nameController.dispose(); 
+    nicknameController.dispose();  
+    passwordController.dispose();  
+    passwordConfirmController.dispose(); 
+  }
+  
+  String firebaseToken = "";
+
+  void _submitForm() async{
+      
+      if(gPushKey=="") showToast('fcm token 없음');
+      final prefs = await SharedPreferences.getInstance();
+
+      //Credential credential = Credential(meth: 'email', val: emailController.text);
+      AccountParams accountParams = AccountParams(cred: [] , public:{'fn':nameController.text} );
+      try{
+       var result = await tinode_global.createAccountFirebase(nameController.text, passwordController.text,  accountParams, firebaseToken , login: true);
+       token = result.params['token'];
+       url_encoded_token = Uri.encodeComponent(result.params['token']);
+        prefs.setString('token', token);
+        prefs.setString('url_encoded_token', url_encoded_token);
+
+       tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
+       Get.offAll(MessageRoomListScreen(
+        tinode: tinode_global,
+      ));
+      }
+      catch(err)
+      {
+        showToast('회원가입 실패 $err');
+        Get.back(); //loading off
+        return;
+      }
+
+      
+      // var signupResponse = await DioClient.signUp(nicknameController.text, nameController.text);
+      // UserModel user = UserModel.fromJson(signupResponse.data["result"]["user"]);
+      Get.back(); // loading off
+      Utils.showToast("complete_sign_up".tr());
+      
+      // if(result.code >=400 && result.code<500)
+      //   showToast("회원가입 실패 ${result.text}");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('회원가입이 완료되었습니다.')),
+      );
+    
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -584,19 +644,19 @@ class _CreateAccountState extends State<CreateAccount> {
                         }
 
                       }else{
-                        if(!isEmailCorrect.value || isEmailEmpty.value || isNicknameEmpty.value
-                            || !isNicknameCorrect.value || isNameEmpty.value || !isNameCorrect.value
+                        if(!isEmailCorrect.value || isEmailEmpty.value 
+                             || isNameEmpty.value || !isNameCorrect.value
                             || isPasswordEmpty.value){
                           Get.back();
                           return;
                         }else {
 
-                          var emailResponse = await DioClient.checkEmail(emailController.text);
+                         //var emailResponse = await DioClient.checkEmail(emailController.text);
                           //var nicknameResponse = await DioClient.checkNickname(nicknameController.text);
 
-                          if(emailResponse.data["result"] is bool){
-                            isEmailNotDuplicate.value = emailResponse.data["result"];
-                          }
+                          // if(emailResponse.data["result"] is bool){
+                          //   isEmailNotDuplicate.value = emailResponse.data["result"];
+                          // }
 
                           // if(nicknameResponse.data["result"]["success"]){
                           //   isNicknameNotDuplicate.value = false;
@@ -623,6 +683,8 @@ class _CreateAccountState extends State<CreateAccount> {
                               email: emailController.text,
                               password: passwordConfirmController.text,
                             );
+                             var response= await FirebaseAuth.instance.currentUser?.getIdToken();
+                             if(response!=null) firebaseToken = response;
                           } on FirebaseAuthException catch (e) {
                             Utils.showToast(e.message ?? "");
                             print(e.code);
@@ -630,11 +692,8 @@ class _CreateAccountState extends State<CreateAccount> {
                         }
                       }
 
-                      var signupResponse = await DioClient.signUp(nicknameController.text, nameController.text);
-                      UserModel user = UserModel.fromJson(signupResponse.data["result"]["user"]);
-                      Get.back();
-                      Utils.showToast("complete_sign_up".tr());
-                      Get.offAll(MessageRoomListScreen(tinode: tinode_global));
+                      _submitForm();
+                     
                     },
                     child: Align(
                       alignment: Alignment.bottomCenter,

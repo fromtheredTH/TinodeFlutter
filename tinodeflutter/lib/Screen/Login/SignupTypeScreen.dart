@@ -17,6 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tinodeflutter/Constants/utils.dart';
 import 'package:tinodeflutter/Screen/Login/CreateAccountPhoneNumber.dart';
 import 'package:tinodeflutter/Screen/Login/CreateAccountScreen.dart';
+import 'package:tinodeflutter/Screen/messageRoomListScreen.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/model/UserAuthModel.dart' ;
 import 'package:tinodeflutter/model/UserAuthModel.dart' as model;
@@ -49,7 +50,7 @@ class _SignupTypeScreen extends State<SignupTypeScreen> {
   Future<void> socialLogin(UserSocialInfo userInfo) async {
     try {
       String token =
-          "Bearer ${await FirebaseAuth.instance.currentUser?.getIdToken()}";
+          "${await FirebaseAuth.instance.currentUser?.getIdToken()}";
      // var response = await apiP.userInfo(token);
       if(isLoading) {
         Get.back();
@@ -62,7 +63,7 @@ class _SignupTypeScreen extends State<SignupTypeScreen> {
       prefs.setString('accessToken', userInfo.accessToken ?? "");
       prefs.setString('idToken', userInfo.refreshToken ?? "");
     //  Constants.getUserInfo(true, context, apiP);
-    
+      Get.offAll(MessageRoomListScreen(tinode: tinode_global));
     } catch (e) {
       print(e);
       if(isLoading) {
@@ -191,7 +192,7 @@ class _SignupTypeScreen extends State<SignupTypeScreen> {
                         const SizedBox(width: 10),
                         Flexible(
                           child: AppText(
-                            text: "signin_apple".tr(),
+                            text: "애플 계정으로 회원가입",
                             color: ColorConstants.white,
                             fontSize: 14,
                           ),
@@ -276,7 +277,7 @@ class _SignupTypeScreen extends State<SignupTypeScreen> {
                           
                       child: Center(
                         child: AppText(
-                          text: "전화번호 회원가입",
+                          text: "휴대폰 번호 회원가입",
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,

@@ -7,7 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:tinodeflutter/Screen/Login/CreateAccountScreen.dart';
-import 'package:tinodeflutter/Screen/Login/SignupScreen.dart';
+import 'package:tinodeflutter/Screen/Login/SignupScreen_id_pw.dart';
 import 'package:tinodeflutter/Screen/Login/SignupTypeScreen.dart';
 import 'package:tinodeflutter/global/global.dart';
 import 'package:tinodeflutter/model/UserAuthModel.dart';
@@ -81,6 +81,7 @@ class _LoginState extends State<Login> {
   }
 
   void id_pw_loginProcesss() async {
+    final prefs = await SharedPreferences.getInstance();
 
     id = idController.value.text == "" ? "test35" : idController.value.text;
     pw = pwController.value.text == "" ? "qwer123!" : pwController.value.text;
@@ -90,6 +91,8 @@ class _LoginState extends State<Login> {
       print('User Id: ' + result.params['user'].toString());
       token = result.params['token'];
       url_encoded_token = Uri.encodeComponent(result.params['token']);
+      prefs.setString('token', token);
+      prefs.setString('url_encoded_token', url_encoded_token);
       print("token : $token");
       print("url token : $url_encoded_token");
       showToast("login 완료");
@@ -102,83 +105,83 @@ class _LoginState extends State<Login> {
     }
   }
 
-  Future<void> onClickLogin() async {
-    try {
-      final data = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text,
-        password:emailPwController.text,
-      );
+  // Future<void> onClickLogin() async {
+  //   try {
+  //     final data = await FirebaseAuth.instance.signInWithEmailAndPassword(
+  //       email: emailController.text,
+  //       password:emailPwController.text,
+  //     );
 
-      String token =
-          "${await FirebaseAuth.instance.currentUser?.getIdToken()}";
+  //     String token =
+  //         "${await FirebaseAuth.instance.currentUser?.getIdToken()}";
 
-      String device_id = "";
-      DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  //     String device_id = "";
+  //     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
-      if (Platform.isAndroid) {
-        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-        device_id = androidInfo.id;
-        const _androidIdPlugin = AndroidId();
-        device_id = await _androidIdPlugin.getId() ?? '';
-      } else if (Platform.isIOS) {
-        IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-        device_id = iosInfo.identifierForVendor ?? '';
-      }
+  //     if (Platform.isAndroid) {
+  //       AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+  //       device_id = androidInfo.id;
+  //       const _androidIdPlugin = AndroidId();
+  //       device_id = await _androidIdPlugin.getId() ?? '';
+  //     } else if (Platform.isIOS) {
+  //       IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+  //       device_id = iosInfo.identifierForVendor ?? '';
+  //     }
 
-     // var response = await apiP.userInfo(token);
-      //UserModel user = UserModel.fromJson(response.data["result"]["user"]);
+  //    // var response = await apiP.userInfo(token);
+  //     //UserModel user = UserModel.fromJson(response.data["result"]["user"]);
 
-      if(isLoading) {
-        Get.back();
-        isLoading = false;
-      }      
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('authProvider', "email");
-      prefs.setString('id', emailController.text);
-      prefs.setString('pwd', emailPwController.text);
-      //Constants.getUserInfo(true, context, apiP);
+  //     if(isLoading) {
+  //       Get.back();
+  //       isLoading = false;
+  //     }      
+  //     final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //     prefs.setString('authProvider', "email");
+  //     prefs.setString('id', emailController.text);
+  //     prefs.setString('pwd', emailPwController.text);
+  //     //Constants.getUserInfo(true, context, apiP);
      
-    } on FirebaseAuthException catch (e) {
-      print(e.code);
-      if(isLoading) {
-        Get.back();
-        isLoading = false;
-      }
-      isLoginIng =false;
-      showToast('${e.code}:${e.message ?? ''}');
-    }
-  }
+  //   } on FirebaseAuthException catch (e) {
+  //     print(e.code);
+  //     if(isLoading) {
+  //       Get.back();
+  //       isLoading = false;
+  //     }
+  //     isLoginIng =false;
+  //     showToast('${e.code}:${e.message ?? ''}');
+  //   }
+  // }
 
-  Future<void> socialLogin(UserSocialInfo userInfo) async {
-    try {
-      String token =
-          "${await FirebaseAuth.instance.currentUser?.getIdToken()}";
-     // var response = await apiP.userInfo(token);
-      if(isLoading) {
-            Get.back();
-            isLoading = false;
-          }
-      //UserModel user = UserModel.fromJson(response.data["result"]["user"]);
+  // Future<void> socialLogin(UserSocialInfo userInfo) async {
+  //   try {
+  //     String token =
+  //         "${await FirebaseAuth.instance.currentUser?.getIdToken()}";
+  //    // var response = await apiP.userInfo(token);
+  //     if(isLoading) {
+  //           Get.back();
+  //           isLoading = false;
+  //         }
+  //     //UserModel user = UserModel.fromJson(response.data["result"]["user"]);
 
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('authProvider', userInfo.authProvider.name);
-      prefs.setString('accessToken', userInfo.accessToken ?? "");
-      prefs.setString('idToken', userInfo.refreshToken ?? "");
-    //  Constants.getUserInfo(true, context, apiP);
-     
-    } catch (e) {
-      print(e);
-      if(isLoading) {
-        Get.back();
-        isLoading = false;
-      }
-      isLoginIng = false;
+  //     final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //     prefs.setString('authProvider', userInfo.authProvider.name);
+  //     prefs.setString('accessToken', userInfo.accessToken ?? "");
+  //     prefs.setString('idToken', userInfo.refreshToken ?? "");
+  //   //  Constants.getUserInfo(true, context, apiP);
+  //     Get.offAll(MessageRoomListScreen(tinode: tinode_global));
+  //   } catch (e) {
+  //     print(e);
+  //     if(isLoading) {
+  //       Get.back();
+  //       isLoading = false;
+  //     }
+  //     isLoginIng = false;
 
-      Get.to(CreateAccount(
-        socialInfo: userInfo,
-      ));
-    }
-  }
+  //     Get.to(CreateAccount(
+  //       socialInfo: userInfo,
+  //     ));
+  //   }
+  // }
 
   Future<bool> onKeyboardHide() async {
     if (keyboardIsVisible(context)) {
