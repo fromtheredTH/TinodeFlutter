@@ -3,6 +3,7 @@
 // const String API_PLATFORM_URL = "https://api-extn-pf.zempie.com/api/v1";
 import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const String API_COMMUNITY_URL = "https://comm.jade-chat.com/api/v1";
 const String API_PLATFORM_URL = "https://api.jade-chat.com/api/v1";
@@ -45,6 +46,9 @@ String gBackgroundFcmTopic="";
     id =  "test35";
     pw = 'qwer123!';
 
+    final prefs = await SharedPreferences.getInstance();
+
+
     var loggerEnabled = true;
     tinode_global = Tinode(
       'JadeChat',
@@ -61,6 +65,9 @@ String gBackgroundFcmTopic="";
       print('User Id: ' + result.params['user'].toString());
       token = result.params['token'];
       url_encoded_token = Uri.encodeComponent(result.params['token']);
+      prefs.setString('token', token);
+      prefs.setString('url_encoded_token', url_encoded_token);
+      
       print("token : $token");
       print("url token : $url_encoded_token");
       showToast("reconnect 완료");
