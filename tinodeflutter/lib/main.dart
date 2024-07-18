@@ -137,7 +137,7 @@ Future<void> initFcm() async {
     if (event?.event == Event.actionCallAccept) {
       // 앱이 백그라운드에서 시작될 때 호출
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      
+      if(!prefs.containsKey('call')) showToast('call 데이터가 prefs에 저장되어있지 않음');
       String? jsonString = prefs.getString('call');
       Map<String, dynamic> _data = jsonDecode(jsonString ?? "");
       String roomTopicId = _data['room_id'];

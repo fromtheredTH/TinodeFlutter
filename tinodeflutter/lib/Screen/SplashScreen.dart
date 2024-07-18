@@ -99,15 +99,10 @@ class SplashPageState extends State<SplashPage> {
       return;
     }
     final prefs = await SharedPreferences.getInstance();
-    token = prefs.getString('token')!;
-    url_encoded_token = prefs.getString('url_encoded_token')!;
+    if(prefs.containsKey('token')) token = prefs.getString('token')!;
+    if(prefs.containsKey('url_encoded_token')) url_encoded_token = prefs.getString('url_encoded_token')!;
 
-    if(prefs.getString('token') !=null)
-    {
-    }
-    if( prefs.getString('url_encoded_token')!.isNotEmpty)
-    {
-    }
+  
     if (prefs.getBool('first_run') ?? true) {
       FlutterSecureStorage storage = FlutterSecureStorage();
       prefs.clear();
