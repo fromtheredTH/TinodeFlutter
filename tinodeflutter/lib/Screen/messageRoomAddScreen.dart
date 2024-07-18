@@ -77,6 +77,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
     _focusNode = FocusNode();
     roomTopic = widget.roomTopic;
     me = tinode.getMeTopic();
+    isInit = true;
 
     mainScrollController = ScrollController()..addListener(onScroll);
     searchTextController.addListener(searchUser);
@@ -166,6 +167,8 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
   }
 
   Future<void> _searchUsers(String query) async {
+    isInit = false;
+
     try {
       // SetParams 객체를 생성하여 검색 쿼리 설정
       SetParams setParams = SetParams(
@@ -213,7 +216,6 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
     );
     try {
       var data = await me.getMeta(getQuery);
-      isInit = true;
 
       if (data.fri != null) {
         friendList.clear();
@@ -380,18 +382,8 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
     return false;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return PageLayout(
-        onBack: onBackPressed,
-        isLoading: isLoading,
-        bgColor: ColorConstants.colorBg1,
-        child: SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-          child: Column(
-            children: [
-              Container(
+  Widget topBar() {
+    return Container(
                 height: 64,
                 child: Row(
                   children: [
@@ -452,8 +444,11 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
                     )
                   ],
                 ),
-              ),
-              Container(
+              );
+  }
+
+  Widget searchUserBox(){
+    return Container(
                 height: 65,
                 decoration:
                     BoxDecoration(borderRadius: BorderRadius.circular(4)),
@@ -516,7 +511,23 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
                     ],
                   ),
                 ),
-              ),
+              );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PageLayout(
+        onBack: onBackPressed,
+        isLoading: isLoading,
+        bgColor: ColorConstants.colorBg1,
+        child: SizedBox(
+          width: double.infinity,
+          height: double.infinity,
+          child: Column(
+            children: [
+              topBar(),
+              searchUserBox(),
+              
               selectList.length >= 1
                   ? Container(
                       height: 25,
@@ -588,12 +599,14 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
                           ),
                         ],
                       ),
-                    )
-                  : Container(),
+                    )//select list >=1 이상일때
+                  : Container(),  //select list ==0 일때
+
               searchTextController.text.isEmpty
                   ? Expanded(
-                      child: isInit
-                          ? SingleChildScrollView(
+                      child: 
+                      // isInit?
+                           SingleChildScrollView(
                               controller: mainScrollController,
                               child: Column(
                                 children: [
@@ -694,18 +707,18 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
                                 ],
                               ),
                             )
-                          : Expanded(
-                              child: Center(
-                                child: SizedBox(
-                                  child: Center(
-                                      child: CircularProgressIndicator(
-                                          color: ColorConstants.colorMain)),
-                                  height: 20.0,
-                                  width: 20.0,
-                                ),
-                              ),
-                            ),
-                    )
+                          // : Expanded(  //isInit이 false일때
+                          //     child: Center(
+                          //       child: SizedBox(
+                          //         child: Center(
+                          //             child: CircularProgressIndicator(
+                          //                 color: ColorConstants.colorMain)),
+                          //         height: 20.0,
+                          //         width: 20.0,
+                          //       ),
+                          //     ),
+                          //   ),
+                    ) // 여기까지 searchTextController is empty : true , 여기 밑에는 false
                   : Expanded(
                       child: isSearchingLoading
                           ? Center(
