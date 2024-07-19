@@ -21,6 +21,7 @@ import 'package:tinodeflutter/app_text.dart';
 
 
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/page/base/base_state.dart';
 import 'package:tinodeflutter/page/base/page_layout.dart';
 import 'package:tinodeflutter/services/social_service.dart';
 import '../../../Constants/ColorConstants.dart';
@@ -37,7 +38,7 @@ class DefaultScreen extends StatefulWidget {
   _DefaultScreen createState() => _DefaultScreen();
 }
 
-class _DefaultScreen extends State<DefaultScreen> {
+class _DefaultScreen extends BaseState<DefaultScreen> {
 
 
   Future<bool> onKeyboardHide() async {

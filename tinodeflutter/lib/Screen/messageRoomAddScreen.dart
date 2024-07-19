@@ -15,6 +15,7 @@ import 'package:tinodeflutter/global/global.dart';
 import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/page/base/base_state.dart';
 import 'package:tinodeflutter/page/base/page_layout.dart';
 
 import '../components/item/PositionRetainedScrollPhysics.dart';
@@ -28,8 +29,7 @@ import 'messageRoomScreen.dart';
 
 class MessageRoomAddScreen extends StatefulWidget {
   MessageRoomAddScreen(
-      {super.key, required this.tinode, this.roomTopic, this.existUserList});
-  Tinode tinode;
+      {super.key,  this.roomTopic, this.existUserList});
   Topic? roomTopic;
   late TopicFnd _fndTopic;
 
@@ -39,8 +39,7 @@ class MessageRoomAddScreen extends StatefulWidget {
   State<MessageRoomAddScreen> createState() => _MessageRoomAddScreenState();
 }
 
-class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
-  late Tinode tinode;
+class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
   Topic? roomTopic;
   late Topic me;
   late TopicFnd _fndTopic;
@@ -73,10 +72,9 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
   @override
   void initState() {
     super.initState();
-    tinode = widget.tinode;
     _focusNode = FocusNode();
     roomTopic = widget.roomTopic;
-    me = tinode.getMeTopic();
+    me = tinode_global.getMeTopic();
     isInit = true;
 
     mainScrollController = ScrollController()..addListener(onScroll);
@@ -95,6 +93,14 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
     _fndTopic.leave(true); 
     super.dispose();
   }
+
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+    return super.didChangeAppLifecycleState(state);
+  }
+
+  
 
   void searchUser() {
     if (!isSearchComplete) {
@@ -125,7 +131,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
   }
 
   void _initializeFndTopic() async {
-    _fndTopic = tinode.getTopic('fnd') as TopicFnd;
+    _fndTopic = tinode_global.getTopic('fnd') as TopicFnd;
     _metaSubscription = _fndTopic.onMeta.listen((value) {
       _handleMetaMessage(value);
     });
@@ -207,7 +213,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
       showToast("내용입력");
       return;
     }
-    tinode.getFndTopic();
+    tinode_global.getFndTopic();
   }
 
   Future<void> _getFriendList() async {
@@ -241,7 +247,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
 
   void _1to1Room() {
     Get.off(
-        () => MessageRoomScreen(tinode: tinode, clickTopic: selectList[0].id));
+        () => MessageRoomScreen(clickTopic: selectList[0].id));
   }
 
   Future<void> onClickMakeRoom() async {
@@ -262,7 +268,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
 
   void createGroupChat() async {
     // 새로운 그룹 토픽을 생성
-    var newTopic = tinode.newTopic();
+    var newTopic = tinode_global.newTopic();
     // 토픽의 메타데이터 설정
     var setParams = SetParams(
       desc: TopicDescription(
@@ -273,7 +279,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
     );
 
     // 토픽 구독 요청
-    await tinode.subscribe(newTopic.name.toString(), GetQuery(), setParams);
+    await tinode_global.subscribe(newTopic.name.toString(), GetQuery(), setParams);
 
     // 구독 성공 후 추가 작업 (예: 초기 메시지 보내기)
   }
@@ -282,10 +288,10 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
     String groupName = "MyGroup"; // 예시 그룹 이름
     try {
       // 새로운 그룹 토픽 이름 생성
-      tinode.newGroupTopicName(true);
+      tinode_global.newGroupTopicName(true);
 
       // 새로운 토픽 인스턴스 생성
-      _groupTopic = tinode.newTopic();
+      _groupTopic = tinode_global.newTopic();
 
       // 구독 요청
       await _groupTopic?.subscribe(
@@ -340,7 +346,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
       }
       _groupTopic.leave(true);
       Get.off(() => MessageRoomScreen(
-          tinode: tinode, clickTopic: _groupTopic.name ?? ""));
+           clickTopic: _groupTopic.name ?? ""));
       print('User  invited to group chat');
     } catch (e) {
       print('Failed to invite user to group chat: $e');

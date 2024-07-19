@@ -12,6 +12,7 @@ import 'package:tinodeflutter/Screen/Login/SignupTypeScreen.dart';
 import 'package:tinodeflutter/global/global.dart';
 import 'package:tinodeflutter/model/UserAuthModel.dart';
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/page/base/base_state.dart';
 import '../messageRoomListScreen.dart';
 import '../../tinode/tinode.dart';
 import '../../tinode/src/models/message.dart';
@@ -37,8 +38,7 @@ class Login extends StatefulWidget {
   State<Login> createState() => _LoginState();
 }
 
-class _LoginState extends State<Login> {
-  late Tinode tinode;
+class _LoginState extends BaseState<Login> {
 
   TextEditingController idController = TextEditingController();
   TextEditingController pwController = TextEditingController();
@@ -60,25 +60,25 @@ class _LoginState extends State<Login> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    connectWsTinode();
+  //  connectWsTinode();
   }
 
-  void connectWsTinode() async{
-   var key = apiKey;
-    var host = hostAddres;
-    var loggerEnabled = true;
-    tinode = Tinode(
-      'JadeChat',
-      ConnectionOptions(host, key, secure: true),
-      loggerEnabled,
-      versionApp: versionApp,
-      deviceLocale: deviceLocale,
-    );
-    await tinode.connect();
-    tinode_global = tinode;
-    print('Is Connected:' + tinode.isConnected.toString());
+  // void connectWsTinode() async{
+  //  var key = apiKey;
+  //   var host = hostAddres;
+  //   var loggerEnabled = true;
+  //   tinode = Tinode(
+  //     'JadeChat',
+  //     ConnectionOptions(host, key, secure: true),
+  //     loggerEnabled,
+  //     versionApp: versionApp,
+  //     deviceLocale: deviceLocale,
+  //   );
+  //   await tinode.connect();
+  //   tinode_global = tinode;
+  //   print('Is Connected:' + tinode.isConnected.toString());
 
-  }
+  // }
 
   void id_pw_loginProcesss() async {
     final prefs = await SharedPreferences.getInstance();
@@ -87,7 +87,7 @@ class _LoginState extends State<Login> {
     pw = pwController.value.text == "" ? "qwer123!" : pwController.value.text;
  
   try {
-      var result = await tinode.loginBasic(id, pw, null);
+      var result = await tinode_global.loginBasic(id, pw, null);
       print('User Id: ' + result.params['user'].toString());
       token = result.params['token'];
       url_encoded_token = Uri.encodeComponent(result.params['token']);
@@ -96,9 +96,8 @@ class _LoginState extends State<Login> {
       print("token : $token");
       print("url token : $url_encoded_token");
       showToast("login 완료");
-      tinode.setDeviceToken(gPushKey); //fcm push token 던지기
+      tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
       Get.offAll(MessageRoomListScreen(
-        tinode: tinode,
       ));
     } catch (err) {
       showToast("잘못 입력했습니다");

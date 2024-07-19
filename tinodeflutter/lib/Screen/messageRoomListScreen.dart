@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:tinodeflutter/Constants/Constants.dart';
+import 'package:tinodeflutter/InAppPurchase/purchaseScreen.dart';
 import 'package:tinodeflutter/Screen/FriendListScreen.dart';
 import 'package:tinodeflutter/Screen/ProfileScreen.dart';
 
@@ -13,6 +14,7 @@ import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:get/get_core/src/get_main.dart';
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/page/base/base_state.dart';
 
 import '../components/item/PositionRetainedScrollPhysics.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -27,15 +29,13 @@ import 'messageRoomAddScreen.dart';
 import 'messageRoomScreen.dart';
 
 class MessageRoomListScreen extends StatefulWidget {
-  Tinode tinode;
-  MessageRoomListScreen({super.key, required this.tinode});
+  MessageRoomListScreen({super.key, });
 
   @override
   State<MessageRoomListScreen> createState() => _MessageRoomListScreenState();
 }
 
-class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
-  late Tinode tinode;
+class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
   //late Topic roomTopic;
   late Topic me;
   AutoScrollController mainController = AutoScrollController();
@@ -47,9 +47,10 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
   @override
   void initState() {
     super.initState();
-    tinode = widget.tinode;
-    me = widget.tinode.getMeTopic();
+    me = tinode_global.getMeTopic();
     _setupListeners();
+    PurchaseScreen.instance.initPurchaseState();
+
   //  _initializeTopic();
     // getMsgRoomList();
   }
@@ -58,9 +59,14 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
     // TODO: implement dispose
     super.dispose();
   }
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+    return super.didChangeAppLifecycleState(state);
+  }
 
    void _initializeTopic() async {
-    me = tinode.getMeTopic();
+    me = tinode_global.getMeTopic();
     var result = await me.subscribe(MetaGetBuilder(me).withLaterSub(null).build(), null);
     //_loadRooms();
     _setupListeners();
@@ -128,7 +134,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
          
         break;
         case 'acs': // 방 생성
-          Topic roomTopic = tinode.getTopic(topic);
+          Topic roomTopic = tinode_global.getTopic(topic);
          if(!roomTopic.isSubscribed)
          {
           await roomTopic.subscribe(MetaGetBuilder(roomTopic).withData(null, null, null).withSub(null, null, null).withDesc(null).build(), null);
@@ -189,7 +195,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
     var meta = await me.getMeta(getQuery);
     var membershipMeta = await me.getMeta(getMembershipQuery);
 
-    var userId = tinode.getCurrentUserId();
+    var userId = tinode_global.getCurrentUserId();
     String pictureUrl = meta.desc?.public['photo']?['ref'] != null ? changePathToLink(meta.desc?.public['photo']['ref']) : "";
     Constants.user = UserModel(id: userId, name: meta.desc.public['fn'], membership: membershipMeta.membership, picture: pictureUrl, isFreind: false);
 
@@ -197,7 +203,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
 
 
   Future<void> getMsgRoomList() async {
-    // me = tinode.getMeTopic();
+    // me = tinode_global.getMeTopic();
     try {
       // me.onSubsUpdated.listen((value) {
       //   // for (var item in value) {
@@ -232,7 +238,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
   void onClickMsgRoom(String clickTopic) {
     this.clickTopic = clickTopic;
     Get.to(()=>MessageRoomScreen(
-      tinode: tinode,
+  
       clickTopic: this.clickTopic,
     ));
   }
@@ -251,7 +257,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
           Row(
             children: [
               InkWell(
-                onTap: () => {Get.to(SerachUserScreen(tinode: tinode))},
+                onTap: () => {Get.to(SerachUserScreen(tinode: tinode_global))},
                 child: Container(
                   width: 80,
                   height: 50,
@@ -273,7 +279,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
               ),
            
               InkWell(
-                onTap: () => {Get.to(MessageRoomAddScreen(tinode: tinode))},
+                onTap: () => {Get.to(MessageRoomAddScreen())},
                 child: Container(
                   width: 80,
                   height: 50,
@@ -294,7 +300,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
                 ),
               ),
               InkWell(
-                onTap: () => {Get.to(ProfileScreen(tinode: tinode, user: Constants.user))},
+                onTap: () => {Get.to(ProfileScreen( user: Constants.user))},
                 child: Container(
                   width: 80,
                   height: 50,
@@ -317,7 +323,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
             ],
           ),
            InkWell(
-                onTap: () => {Get.to(FriendListScreen(tinode: tinode,))},
+                onTap: () => {Get.to(FriendListScreen())},
                 child: Container(
                   width: 70,
                   height: 50,

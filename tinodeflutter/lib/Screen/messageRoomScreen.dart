@@ -23,6 +23,7 @@ import 'package:tinodeflutter/dto/file_dto.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
 import 'package:tinodeflutter/global/global.dart';
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/page/base/base_state.dart';
 import 'package:tinodeflutter/setting/setting_chat_expiration_screen.dart';
 import 'package:tinodeflutter/tinode/src/models/del-range.dart';
 import 'package:tinodeflutter/tinode/src/models/message.dart';
@@ -50,18 +51,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class MessageRoomScreen extends StatefulWidget {
-  Tinode tinode;
   String clickTopic;
   Topic? roomTopic;
   MessageRoomScreen(
-      {super.key, required this.tinode, required this.clickTopic, this.roomTopic});
+      {super.key, required this.clickTopic, this.roomTopic});
 
   @override
   State<MessageRoomScreen> createState() => _MessageRoomScreenState();
 }
 
-class _MessageRoomScreenState extends State<MessageRoomScreen> with WidgetsBindingObserver {
-  late Tinode tinode;
+class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
   late Topic roomTopic;
   late Topic me;
   String clickTopic = "";
@@ -81,9 +80,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> with WidgetsBindi
   @override
   void initState() {
     super.initState();
-    tinode = widget.tinode;
     clickTopic = widget.clickTopic;
-    WidgetsBinding.instance.addObserver(this);
     // if(widget.roomTopic!=null) roomTopic = widget.roomTopic!;
     getMsgList();
   }
@@ -91,50 +88,19 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> with WidgetsBindi
   @override
   void dispose() {
     super.dispose();
+    
     roomTopic.leave(false);
     if(_metaDescSubscription!=null)_metaDescSubscription?.cancel();
     if(_dataSubscription!=null)_dataSubscription?.cancel();
   }
-  
-  @override
-  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
-    super.didChangeAppLifecycleState(state);
-
-
-    switch (state) {
-      // case AppLifecycleState.detached:	// (5)
-      //   print("## detached");
-      //   break;
-      // case AppLifecycleState.inactive:	// (6)
-      //   print("## inactive");
-      //   break;
-      // case AppLifecycleState.paused:	// (7)
-      //   print("## paused");
-      //   break;
-       case AppLifecycleState.resumed:	// (8)
-       // showToast("forground resumed");
-        try{
-          if(!tinode.isConnected)
-            {
-              showToast('connecting ws ...');
-              Utils.showDialogWidget(context);
-              await tinode.connect();
-              Get.back();
-            }
-          }
-          catch(err){
-            showToast('fail to connect');
-          }
-        break;
-      default:
-        break;
-    }
-    
-   
+    @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+    return super.didChangeAppLifecycleState(state);
   }
 
   Future<void> getMsgList() async {
-   roomTopic = tinode.getTopic(clickTopic);
+   roomTopic = tinode_global.getTopic(clickTopic);
    
     _dataSubscription = roomTopic.onData.listen((data) {
       try {
@@ -1084,7 +1050,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> with WidgetsBindi
     var voiceMsg = roomTopic.createMessage(data, false, head: head);
     try{
       await roomTopic.publishMessage(voiceMsg);
-     Get.to(CallScreen(tinode: tinode, roomTopic: roomTopic, joinUserList: joinUserList, chatType: eChatType.VOICE_CALL,));
+     Get.to(CallScreen(tinode: tinode_global, roomTopic: roomTopic, joinUserList: joinUserList, chatType: eChatType.VOICE_CALL,));
       // Get.to(AgoraVoiceCallController(channelName: roomTopic?.name ?? ""));
 
     }
@@ -1114,7 +1080,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> with WidgetsBindi
     var videoCallMsg = roomTopic.createMessage(data, false, head: head);
     try{
       await roomTopic.publishMessage(videoCallMsg);
-     Get.to(CallScreen(tinode: tinode, roomTopic: roomTopic, joinUserList: joinUserList, chatType: eChatType.VIDEO_CALL,));
+     Get.to(CallScreen(tinode: tinode_global, roomTopic: roomTopic, joinUserList: joinUserList, chatType: eChatType.VIDEO_CALL,));
       // Get.to(AgoraVoiceCallController(channelName: roomTopic?.name ?? ""));
 
     }
@@ -1335,7 +1301,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> with WidgetsBindi
                         height: 30,
                         child: FilledButton(
                           onPressed: () {
-                            Get.to(SettingChatExpirationeScreen(tinode: tinode, roomTopic: roomTopic));
+                            Get.to(SettingChatExpirationeScreen(tinode: tinode_global, roomTopic: roomTopic));
                           },
                           child: Text('자동삭제조정 설정'),
                         ),

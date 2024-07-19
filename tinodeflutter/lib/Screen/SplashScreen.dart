@@ -24,6 +24,7 @@ import 'package:tinodeflutter/components/widget/dialog.dart';
 import 'package:tinodeflutter/global/global.dart';
 import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/page/base/base_state.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
 
 import '../../Constants/ColorConstants.dart';
@@ -39,8 +40,7 @@ class SplashPage extends StatefulWidget {
   SplashPageState createState() => SplashPageState();
 }
 
-class SplashPageState extends State<SplashPage> {
-  late Tinode tinode;
+class SplashPageState extends BaseState<SplashPage> {
 
   @override
   void initState() {
@@ -54,26 +54,33 @@ class SplashPageState extends State<SplashPage> {
   }
   void init() async
   {
-    await connectWsTinode();
+    //await connectWsTinode();
     load();
   }
 
   Future<bool> connectWsTinode() async{
-  
-   var key = apiKey;
+  try{
+    var key = apiKey;
     var host = hostAddres;
     var loggerEnabled = true;
-    tinode = Tinode(
+    Tinode tinodeInstance = Tinode(
       'JadeChat',
       ConnectionOptions(host, key, secure: true),
       loggerEnabled,
       versionApp: versionApp,
       deviceLocale: deviceLocale,
     );
-    await tinode.connect();
-    tinode_global = tinode;
-    print('Is Connected:' + tinode.isConnected.toString());
+    await tinodeInstance.connect();
+    tinode_global = tinodeInstance;
+    print('Is Connected:' + tinode_global.isConnected.toString());
     return true;
+  }
+  catch(err)
+  {
+    print("$err");
+    return false;
+  }
+  
   }
   
 
@@ -131,10 +138,10 @@ class SplashPageState extends State<SplashPage> {
         url_encoded_token = Uri.encodeComponent(reponse.params['token']);
         prefs.setString('token', token);
         prefs.setString('url_encoded_token', url_encoded_token);
-        tinode.setDeviceToken(gPushKey); //fcm push token 던지기
+        tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
 
         print("ddd");
-        Get.offAll(MessageRoomListScreen);
+        Get.offAll(MessageRoomListScreen());
        }
        else{
           print("일로 오면 안돼");
@@ -149,7 +156,11 @@ class SplashPageState extends State<SplashPage> {
           Get.offAll(DefaultScreen(),transition: Transition.rightToLeft);
       }
     }else{
-          Get.offAll(DefaultScreen(),transition: Transition.rightToLeft);
+
+      // 파이어베이스 관련 설정 초기화 시키고 들어가야함. 만약 파이어베이스 토큰이 만료되어서 갱신하려는데 인터넷연결이 안되어있으면 갱신이 안됨, 
+      //그럼 로그인화면으로 보내면서 파이어베이스 세팅 초기화해야함
+
+      Get.offAll(DefaultScreen(),transition: Transition.rightToLeft);
     }
   }
 

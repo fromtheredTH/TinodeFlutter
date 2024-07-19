@@ -231,6 +231,38 @@ class PushNotificationService {
       //if(tinode_global==null) isTinodeConnect = await reConnectTinode();
      // if(message.data['xfrom'] == Constants.user.id) return;  // 내 메시지
 
+      try{
+        // 백그라운드 api 테스트 
+
+        var responseGet = await DioClient.getCheck();
+        var responsePost = await DioClient.postCheck();
+        flutterLocalNotificationsPlugin.show(
+              message.hashCode,
+              "API test push",
+              "Background API test push",
+              NotificationDetails(
+                  android: AndroidNotificationDetails(
+                    channel.id,
+                    channel.name,
+                    priority: Priority.high,
+                    importance: Importance.high,
+                    channelDescription: channel.description,
+                  //  tag: (meta['room']['id']).toString(),
+                    // icons: message.notification?.android?.smallIcon,
+                    playSound: true,
+                  ),
+                  iOS: DarwinNotificationDetails(
+                      presentAlert: true,
+                      presentBadge: true,
+                      presentSound: true)),
+              payload: jsonEncode(message.data));
+      print("get post");
+      }
+      catch(err)
+      {
+        print("push api err : $err");
+      }
+      
       String _fcmType =  message.data['what'];
       int seq =  int.parse(message.data['seq']);
       String topic = message.data['topic'];
@@ -444,17 +476,12 @@ class PushNotificationService {
       //RemoteNotification? notification = message!.notification;
    
       //String body = notification?.body ?? '';
-        bool isTinodeConnect = false;
         if(message ==null)
         {
           return;
         }
-        if(!tinode_global.isConnected)
-        {
-        isTinodeConnect = await reConnectTinode();
-        }else isTinodeConnect=true;
-
-        if(isTinodeConnect && message.data['xfrom'] == tinode_global.userId) return;  // 내 메시지
+        
+        if(message.data['xfrom'] == tinode_global.userId) return;  // 내 메시지
         if(message.data['seq']==null) return; // 메시지 번호가 없는 의미 없는 데이터
         String _fcmType =  message.data['what'];
         int seq =  int.parse(message.data['seq']);
@@ -504,11 +531,7 @@ class PushNotificationService {
         }
         
         if(chatType==eChatType.VOICE_CALL || chatType==eChatType.VIDEO_CALL)
-        {
-
-          
-          if(isTinodeConnect)
-          {
+        {       
             if(chatType ==eChatType.VOICE_CALL)
             CallService.instance.chatType = eChatType.VOICE_CALL;
             else
@@ -519,8 +542,6 @@ class PushNotificationService {
             CallService.instance.roomTopicName = topic;
             CallService.instance.initCallService();
             CallService.instance.showIncomingCall(roomTopicId: topic, callerName : topic ,callerNumber: '', callerAvatar: "");
-            
-          }
         }
         }
         catch(err)

@@ -37,7 +37,7 @@ String gBackgroundFcmTopic="";
   String pw = "";
 
   String versionApp = '1.0.0';
-  String deviceLocale = 'en-US';
+  String deviceLocale = 'ko_KR';
 
   Future<bool> reConnectTinode({Function? afterConnectFunc}) async {
     var key = apiKey;

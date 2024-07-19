@@ -18,6 +18,7 @@ import 'package:tinodeflutter/Constants/ImageUtils.dart';
 import 'package:tinodeflutter/InAppPurchase/purchaseScreen.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/page/base/base_state.dart';
 import 'package:tinodeflutter/setting/setting_account_screen.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
 import '../../../Constants/ColorConstants.dart';
@@ -27,22 +28,25 @@ import '../../../Constants/utils.dart';
 
 
 class SettingListScreen extends StatefulWidget {
-  SettingListScreen({super.key, required this.tinode, required this.onChangedUser });
+  SettingListScreen({super.key,required this.onChangedUser });
   Function(UserModel) onChangedUser;
-  Tinode tinode;
 
   @override
   State<SettingListScreen> createState() => _SettingListScreen();
 }
 
-class _SettingListScreen extends State<SettingListScreen> {
+class _SettingListScreen extends BaseState<SettingListScreen> {
 
   late Tinode tinode;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    tinode = widget.tinode;
+  }
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+    return super.didChangeAppLifecycleState(state);
   }
 
   @override
@@ -89,7 +93,7 @@ class _SettingListScreen extends State<SettingListScreen> {
                       children: [
                         GestureDetector(
                           onTap: (){
-                            Get.to(SettingAccountScreen(tinode: tinode, onChangedUser: (user){
+                            Get.to(SettingAccountScreen( onChangedUser: (user){
                               widget.onChangedUser(user);
                             },));
                           },

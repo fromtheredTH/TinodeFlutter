@@ -72,7 +72,7 @@ class _SignupTypeScreen extends State<SignupTypeScreen> {
 
       //await createAccount(userName);
 
-      Get.offAll(MessageRoomListScreen(tinode: tinode_global));
+      Get.offAll(MessageRoomListScreen());
     } catch (e) {
       print(e);
       if(isLoading) {

@@ -61,7 +61,6 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
   Future<void> onClickMsgRoom(String clickTopic) async {
     this.clickTopic = clickTopic;
     Get.to(MessageRoomScreen(
-      tinode: tinode,
       clickTopic: this.clickTopic,
     ));
   }
@@ -257,7 +256,7 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
                           children: [
                             InkWell(
                               onTap: () {
-                                Get.to(()=>ProfileScreen(tinode: tinode, user: _searchResults[index]));
+                                Get.to(()=>ProfileScreen( user: _searchResults[index]));
                               },
                               child: Container(
                                 height: 40,

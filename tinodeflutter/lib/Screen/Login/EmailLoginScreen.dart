@@ -53,7 +53,11 @@ class _EmailLoginScreen extends State<EmailLoginScreen> {
       );
 
       firebaseToken ="${await FirebaseAuth.instance.currentUser?.getIdToken()}";
-
+      
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('authProvider', "email");
+      prefs.setString('id', controller.emailController.text);
+      prefs.setString('pwd', controller.passwordController.text);
       // String device_id = "";
       // DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
@@ -77,11 +81,9 @@ class _EmailLoginScreen extends State<EmailLoginScreen> {
         Get.back();
         isLoading = false;
       }
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('authProvider', "email");
-      prefs.setString('id', controller.emailController.text);
-      prefs.setString('pwd', controller.passwordController.text);
+    
       //Constants.getUserInfo(true, context, apiP);
+      Get.offAll(MessageRoomListScreen());
 
     } on FirebaseAuthException catch (e) {
       print(e.code);
@@ -112,7 +114,7 @@ class _EmailLoginScreen extends State<EmailLoginScreen> {
         
       //await createAccount(userName);
 
-      Get.offAll(MessageRoomListScreen(tinode: tinode_global));
+      Get.offAll(MessageRoomListScreen());
     } catch (e) {
       print(e);
       if(isLoading) {

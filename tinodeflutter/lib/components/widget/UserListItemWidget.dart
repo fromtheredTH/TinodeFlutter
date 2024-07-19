@@ -65,7 +65,7 @@ class _UserListItemWidget extends State<UserListItemWidget> {
                 onTap: (){
                   if(widget.isGoProfile){
                     if(user.id != "") {
-                      Get.to(ProfileScreen(user: user, tinode: tinode,));
+                      Get.to(ProfileScreen(user: user, ));
                     }
                   }
                 },
@@ -80,7 +80,7 @@ class _UserListItemWidget extends State<UserListItemWidget> {
                         onTap: (){
                           if(widget.isGoProfile){
                             if(user.id != "") {
-                              Get.to(ProfileScreen(user: user, tinode: tinode,));
+                              Get.to(ProfileScreen(user: user, ));
                             }
                           }
                         },
@@ -114,7 +114,7 @@ class _UserListItemWidget extends State<UserListItemWidget> {
                                       onTap: (){
                                         if(widget.isGoProfile){
                                           if(user.id!="") {
-                                            Get.to(ProfileScreen(user: user, tinode: tinode,));
+                                            Get.to(ProfileScreen(user: user, ));
                                           }
                                         }
                                       },
@@ -150,7 +150,7 @@ class _UserListItemWidget extends State<UserListItemWidget> {
                                           onTap: (){
                                             if(widget.isGoProfile){
                                               if(user.id!="") {
-                                                Get.to(ProfileScreen(user: user, tinode: tinode,));
+                                                Get.to(ProfileScreen(user: user, ));
                                               }
                                             }
                                           },

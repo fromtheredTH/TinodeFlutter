@@ -15,7 +15,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tinodeflutter/Constants/utils.dart';
 import 'package:tinodeflutter/Screen/Login/CreateAccountScreen.dart';
 import 'package:tinodeflutter/Screen/Login/EmailLoginScreen.dart';
-import 'package:tinodeflutter/Screen/Login/login_controller.dart';
 import 'package:tinodeflutter/Screen/messageRoomListScreen.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/model/UserAuthModel.dart';
@@ -49,7 +48,7 @@ class _LoginScreen extends State<LoginScreen> {
   late String firebaseToken;
   late String phoneNumberEmail;
 
-  Future<void> onClickLogin() async {
+  Future<void> onClickPhoneNumberLogin() async {
     try {
       phoneNumberEmail = '${phoneNumberController.text}@phoneNumber.com';
 
@@ -85,6 +84,7 @@ class _LoginScreen extends State<LoginScreen> {
       prefs.setString('id', phoneNumberController.text);
       prefs.setString('pwd', passwordController.text);
       //Constants.getUserInfo(true, context, apiP);
+      Get.offAll(MessageRoomListScreen());
 
     } on FirebaseAuthException catch (e) {
       print(e.code);
@@ -412,7 +412,7 @@ class _LoginScreen extends State<LoginScreen> {
                               Get.back();
                               isLoading = false;
                             }
-                          onClickLogin();
+                          onClickPhoneNumberLogin();
                         }
                       },
                       child: Container(

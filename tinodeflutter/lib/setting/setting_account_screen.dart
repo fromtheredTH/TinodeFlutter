@@ -12,6 +12,7 @@ import 'package:tinodeflutter/Constants/ImageUtils.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/page/base/base_state.dart';
 import 'package:tinodeflutter/page/base/page_layout.dart';
 import 'package:tinodeflutter/setting/setting_remove_account.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
@@ -24,15 +25,14 @@ import '../../components/MyAssetPicker.dart';
 
 class SettingAccountScreen extends StatefulWidget {
   SettingAccountScreen(
-      {super.key, required this.tinode, required this.onChangedUser});
+      {super.key, required this.onChangedUser});
   Function(UserModel) onChangedUser;
-  Tinode tinode;
 
   @override
   State<SettingAccountScreen> createState() => _SettingAccountScreen();
 }
 
-class _SettingAccountScreen extends State<SettingAccountScreen> {
+class _SettingAccountScreen extends BaseState<SettingAccountScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController idController = TextEditingController();
@@ -46,16 +46,22 @@ class _SettingAccountScreen extends State<SettingAccountScreen> {
   RxBool isNameEmpty = false.obs;
   RxBool isNameCorrect = true.obs;
 
-  late Tinode tinode;
 
   @override
   void initState() {
     super.initState();
-    tinode = widget.tinode;
     emailController.text = Constants.user.email ?? "";
     nameController.text = Constants.user.name;
     idController.text = Constants.user.id;
   }
+
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+    return super.didChangeAppLifecycleState(state);
+  }
+  
+  
 
   Future<void> onClickSaveButton() async {
     isTapIdOkBtn.value = true;

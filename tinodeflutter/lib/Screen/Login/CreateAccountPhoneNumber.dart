@@ -131,7 +131,6 @@ class _CreateAccountPhoneNumberState extends State<CreateAccountPhoneNumber> {
 
        tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
        Get.offAll(MessageRoomListScreen(
-        tinode: tinode_global,
       ));
       }
       catch(err)

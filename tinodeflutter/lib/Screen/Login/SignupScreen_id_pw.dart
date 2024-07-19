@@ -47,7 +47,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
        url_encoded_token = Uri.encodeComponent(result.params['token']);
        tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
        Get.offAll(MessageRoomListScreen(
-        tinode: tinode_global,
       ));
       }
       catch(err)
