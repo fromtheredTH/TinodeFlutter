@@ -88,11 +88,15 @@ class _LoginState extends BaseState<Login> {
  
   try {
       var result = await tinode_global.loginBasic(id, pw, null);
+      prefs.setString('basic_id', id);
+      prefs.setString('basic_pw', pw);
+      
       print('User Id: ' + result.params['user'].toString());
       token = result.params['token'];
       url_encoded_token = Uri.encodeComponent(result.params['token']);
       prefs.setString('token', token);
       prefs.setString('url_encoded_token', url_encoded_token);
+      prefs.setInt('login_type',0); // 0 : id , pw  // 1: firebase
       print("token : $token");
       print("url token : $url_encoded_token");
       showToast("login 완료");

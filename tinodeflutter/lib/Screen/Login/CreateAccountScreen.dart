@@ -112,11 +112,12 @@ class _CreateAccountState extends State<CreateAccount> {
       //Credential credential = Credential(meth: 'email', val: emailController.text);
       AccountParams accountParams = AccountParams(cred: [] , public:{'fn':nameController.text} );
       try{
-       var result = await tinode_global.createAccountFirebase(nameController.text, passwordController.text,  accountParams, firebaseToken , login: true);
-       token = result.params['token'];
-       url_encoded_token = Uri.encodeComponent(result.params['token']);
+        var result = await tinode_global.createAccountFirebase(nameController.text, passwordController.text,  accountParams, firebaseToken , login: true);
+        token = result.params['token'];
+        url_encoded_token = Uri.encodeComponent(result.params['token']);
         prefs.setString('token', token);
         prefs.setString('url_encoded_token', url_encoded_token);
+        prefs.setInt('login_type', 1); // 0 : id , pw  // 1: firebase
 
        tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
        Get.offAll(MessageRoomListScreen(

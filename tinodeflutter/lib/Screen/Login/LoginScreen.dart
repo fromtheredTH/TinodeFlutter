@@ -81,9 +81,11 @@ class _LoginScreen extends State<LoginScreen> {
       }
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString('authProvider', "email");
-      prefs.setString('id', phoneNumberController.text);
-      prefs.setString('pwd', passwordController.text);
+      prefs.setString('token', token);
+      prefs.setString('url_encoded_token', url_encoded_token);
+      prefs.setInt('login_type', 1); // 0 : id , pw  // 1: firebase
       //Constants.getUserInfo(true, context, apiP);
+
       Get.offAll(MessageRoomListScreen());
 
     } on FirebaseAuthException catch (e) {

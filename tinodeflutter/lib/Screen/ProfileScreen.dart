@@ -279,8 +279,11 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
                                         tinode_global.jadechatLogout(); //ws 연결은 유지
                                         await FirebaseMessaging.instance.deleteToken();                                         
                                         SharedPreferences prefs = await SharedPreferences.getInstance();
-                                        await prefs.remove('token');
-                                        await prefs.remove('url_encoded_token');
+                                        prefs.remove('login_type');
+                                        prefs.remove('basic_id');
+                                        prefs.remove('basic_pw');
+                                        prefs.remove('token');
+                                        prefs.remove('url_encoded_token');
                                         if(FirebaseAuth.instance!=null ) await FirebaseAuth.instance.signOut();
                                         //Get.offAll(()=>LoignScreen.Login());
                                         Get.offAll(SplashPage());

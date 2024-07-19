@@ -81,6 +81,13 @@ class _EmailLoginScreen extends State<EmailLoginScreen> {
         Get.back();
         isLoading = false;
       }
+      prefs.setInt('login_type', 1); // 0 : id , pw  // 1: firebase
+      token = response.params['token'];
+      url_encoded_token = Uri.encodeComponent(response.params['token']);
+      prefs.setString('token', token);
+      prefs.setString('url_encoded_token', url_encoded_token);
+      prefs.setInt('login_type', 1); // 0 : id , pw  // 1: firebase
+      tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
     
       //Constants.getUserInfo(true, context, apiP);
       Get.offAll(MessageRoomListScreen());
@@ -111,9 +118,13 @@ class _EmailLoginScreen extends State<EmailLoginScreen> {
       }     
       var response = await tinode_global.firebaseLogin(firebaseToken);
       print('User Id: ' + response.toString());
-        
-      //await createAccount(userName);
-
+      token = response.params['token'];
+      url_encoded_token = Uri.encodeComponent(response.params['token']);
+      prefs.setString('token', token);
+      prefs.setString('url_encoded_token', url_encoded_token);
+      prefs.setInt('login_type', 1); // 0 : id , pw  // 1: firebase
+      tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
+      
       Get.offAll(MessageRoomListScreen());
     } catch (e) {
       print(e);

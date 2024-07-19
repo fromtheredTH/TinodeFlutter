@@ -118,6 +118,20 @@ class SplashPageState extends BaseState<SplashPage> {
 
       prefs.setBool('first_run', false);
     }
+    if(prefs.containsKey('login_type'))
+    {
+      if(prefs.getInt('login_type')==0) // 0 : id , pw  // 1: firebase 
+      {
+        // id pw
+        id_pw_loginProcesss();
+        return;
+      }
+      else if(prefs.getInt('login_type')==1)
+      {
+        // firebase
+        //밑으로 가서 파이어베이스 자동로그인
+      }
+    }
 
     //  Get.offAll(DefaultScreen(),transition: Transition.rightToLeft);
     //  return;
@@ -126,16 +140,17 @@ class SplashPageState extends BaseState<SplashPage> {
     if(user != null){
       try {
 
-        String firebaseToken = " ${await FirebaseAuth.instance.currentUser?.getIdToken()}";
+        String firebaseToken = "${await FirebaseAuth.instance.currentUser?.getIdToken()}";
         print("firebase login token : $firebaseToken ");
         //var response = await apiP.userInfo(token);
        // UserModel user = UserModel.fromJson(response.data["result"]["user"]);
         
        if(token!="")
        {
-        var reponse = await tinode_global.loginWithAccessToken(token);
-        token = reponse.params['token'];
-        url_encoded_token = Uri.encodeComponent(reponse.params['token']);
+        //var response = await tinode_global.loginWithAccessToken(token);
+        var response = await tinode_global.firebaseLogin(firebaseToken);
+        token = response.params['token'];
+        url_encoded_token = Uri.encodeComponent(response.params['token']);
         prefs.setString('token', token);
         prefs.setString('url_encoded_token', url_encoded_token);
         tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
@@ -163,6 +178,37 @@ class SplashPageState extends BaseState<SplashPage> {
       Get.offAll(DefaultScreen(),transition: Transition.rightToLeft);
     }
   }
+
+  void id_pw_loginProcesss() async {
+    final prefs = await SharedPreferences.getInstance();
+    if(prefs.containsKey('basic_id')) {
+      id = prefs.getString('basic_id')!;
+    }
+    
+    if(prefs.containsKey('basic_pw')) {
+      pw = prefs.getString('basic_pw')!;
+    }
+    
+
+  try {
+      var result = await tinode_global.loginBasic(id, pw, null);
+      print('User Id: ' + result.params['user'].toString());
+      token = result.params['token'];
+      url_encoded_token = Uri.encodeComponent(result.params['token']);
+      prefs.setString('token', token);
+      prefs.setString('url_encoded_token', url_encoded_token);
+      prefs.setInt('login_type',0); // 0 : id , pw  // 1: firebase
+      print("token : $token");
+      print("url token : $url_encoded_token");
+      showToast("login 완료");
+      tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
+      Get.offAll(MessageRoomListScreen(
+      ));
+    } catch (err) {
+      showToast("잘못 입력했습니다");
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
