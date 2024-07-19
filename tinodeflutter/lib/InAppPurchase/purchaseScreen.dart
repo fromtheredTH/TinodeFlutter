@@ -7,14 +7,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tinodeflutter/Constants/ColorConstants.dart';
+import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:tinodeflutter/Constants/utils.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/components/widget/app_button.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
+import 'package:tinodeflutter/global/global.dart';
 import 'package:tinodeflutter/helpers/common_util.dart';
+import 'package:tinodeflutter/page/base/base_state.dart';
+import 'package:tinodeflutter/tinode/src/models/get-query.dart';
+import 'package:tinodeflutter/tinode/src/topic.dart';
 
 
-import 'in_app_purchase.dart';
+import 'PurchaseManager.dart';
 
 enum eStoreType {
   None,
@@ -53,7 +58,7 @@ class PurchaseScreen extends StatefulWidget {
   }
 }
 
-class purchaseScreen extends State<PurchaseScreen>  {
+class purchaseScreen extends BaseState<PurchaseScreen>  {
 // 웹 프론트 + flutter
    dynamic membership ;
 
@@ -67,11 +72,18 @@ class purchaseScreen extends State<PurchaseScreen>  {
     eStoreType storeType =
         Platform.isAndroid ? eStoreType.Play : eStoreType.App;
     print("storetype : ${storeType.index}");
-    var itemListResponse = await DioClient.getItemList(storeType.index);
+    try{
+         var itemListResponse = await DioClient.getItemList(storeType.index);
     // print("item list ")
     print("getitemlist");
-    itemListRes = itemListResponse.data["result"]["shopitems"] ?? [];
+    itemListRes = itemListResponse.data["ctrl"]['params']["shopitems"] ?? [];
     await initPurchaseItem(itemListRes);
+ 
+    }
+    catch(err)
+    {
+      print("err getitemList");
+    }
   }
 
 // 상품초기화 flutter
@@ -118,12 +130,12 @@ class purchaseScreen extends State<PurchaseScreen>  {
   }
 
 // 구매 성공 후 처리  웹
-  Future<void> purchasingProcess(dynamic jsonDataReceipt) async {
+  Future<void> purchasingProcess(String receipt, String product_id, bool subscription) async {
     // var response = await DioClient.sendIapReceipt(receipt);
 
-    print("purchasingProcess receipt ${jsonDataReceipt.toString()}");
+    print("purchasingProcess receipt ${receipt.toString()}");
 
-    // Map<String, dynamic> jsonDataReceipt = {
+    // Map<String, dynamic> receipt = {
     //   //'receipt': json.encode(receipt),
     //   'receipt': receipt,
     //   'product_id': productItem.productID,
@@ -134,16 +146,16 @@ class purchaseScreen extends State<PurchaseScreen>  {
     //   "receipt": receipt,
     //   "product_id" : receipt.Payload.product_id,
     // };
-    Map<String, dynamic> body = jsonDataReceipt;
+   // Map<String, dynamic> receiptMap = receipt;
     try {
-      var response = await DioClient.postIapReceipt(body);
+      var response = await DioClient.postIapReceipt(receipt, product_id, subscription);
       print("response : $response");
       print("response  data : ${response.data}");
       print("response  data  result: ${response.data['result']}");
 
-      if (response.data['result']['data']['state'] == 'OK') {
+      if (response.data['ctrl']['text'] == 'ok') {
         errorState = eReceiptErrorState.OK;
-      } else if (response.data['result']['data']['state'] == 'PendingReceipt') {
+      } else if (response.data['result']['data']['state'] == ' ') {
         errorState = eReceiptErrorState.PendingReceipt;
       } else if (response.data['result']['data']['state'] ==
           'AbnormalReceipt') {
@@ -232,6 +244,13 @@ class purchaseScreen extends State<PurchaseScreen>  {
     // Pending consume and reauthorization
     // Badreceipt X   해킹되었을가능성 /  무시 처리
 
+    Map<String, dynamic> jsonDataReceipt = {
+      // 'receipt': json.encode(receipt),
+      'receipt': receipt,
+      'product_id':product_id,
+      'subscription': false,
+    };
+
     print("errorState : ${errorState.toString()}");
     print("jsonDataReceipt : ${jsonDataReceipt['receipt'].toString()}");
     try {
@@ -270,18 +289,34 @@ class purchaseScreen extends State<PurchaseScreen>  {
     }
   }
 
+  late Topic me;
+
+
   Future<void> getMembershipData() async {
+    me = tinode_global.getMeTopic();
+
+     GetQuery getMembershipQuery = GetQuery(
+      what: 'membership',
+    );
+    var membershipMeta = await me.getMeta(getMembershipQuery);
+    if(membershipMeta.membership!=null) Constants.user.membership = membershipMeta.membership;
+
    print("before api getMebershipData");
-    var mem = await DioClient.getMembershipData();
-    print("mem end at : ${mem!.data['result']['end_at']}");
-    membership= mem;
-    print("mounted: ${mounted.toString()}");
-    if(mounted)
-    { 
-    setState(() {
-      membership = mem;
-    });
-    }
+
+   setState(() {
+    if(membershipMeta.membership !=null) membership = membershipMeta.membership;
+
+   });
+    // var mem = await DioClient.getMembershipData();
+    // print("mem end at : ${mem!.data['result']['end_at']}");
+    // membership= mem;
+    // print("mounted: ${mounted.toString()}");
+    // if(mounted)
+    // { 
+    // setState(() {
+    //   membership = mem;
+    // });
+    // }
   }
 
   @override
@@ -291,6 +326,12 @@ class purchaseScreen extends State<PurchaseScreen>  {
     setState(() {
       
     });
+  }
+
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+    return super.didChangeAppLifecycleState(state);
   }
 
   // Timer? membershipTimer;
@@ -351,9 +392,10 @@ class purchaseScreen extends State<PurchaseScreen>  {
   Widget build(BuildContext context) {
     
     return Scaffold(
-        backgroundColor: ColorConstants.colorBg1,
+        backgroundColor: Colors.grey,
         resizeToAvoidBottomInset: true,
-        body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        body: Column(crossAxisAlignment: CrossAxisAlignment.start, 
+        children: [
           SizedBox(height: Get.height * 0.07),
           Padding(
             padding: const EdgeInsets.only(left: 15, right: 15),
@@ -408,10 +450,9 @@ class purchaseScreen extends State<PurchaseScreen>  {
                 width: 10,
               ),
               
-              if (membership != null &&
-                  membership!.data['result']['has_membership'])
+              if (membership != null &&  membership!['level'] != 0)
                 AppText(
-                  text: "${membership!.data['result']['end_at']}",
+                  text: "${membership!['endat']}",
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
                   color: ColorConstants.colorMain,
