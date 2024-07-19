@@ -272,7 +272,7 @@ class PurchaseManager {
       'subscription': false,
     };
 
-    PurchaseScreen.instance.purchasingProcess(jsonDataReceipt);
+    PurchaseScreen.instance.purchasingProcess(json.encode(receipt), productItem.productID, false);
 
     // if (Platform.isIOS) showLoadingDialog(tempContext, false);
 
