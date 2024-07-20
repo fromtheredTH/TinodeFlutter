@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -15,31 +17,34 @@ import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:tinodeflutter/Constants/ImageConstants.dart';
 import 'package:tinodeflutter/Constants/ImageUtils.dart';
 import 'package:tinodeflutter/Constants/utils.dart';
+import 'package:tinodeflutter/Screen/SplashScreen.dart';
 import 'package:tinodeflutter/Screen/setting_list_screen.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/components/widget/BottomProfileWidget.dart';
 import 'package:tinodeflutter/components/widget/BtnBottomSheetWidget.dart';
 import 'package:tinodeflutter/components/widget/GalleryBottomSheet.dart';
 import 'package:tinodeflutter/components/MyAssetPicker.dart';
+import 'package:tinodeflutter/global/global.dart';
 import 'package:tinodeflutter/model/btn_bottom_sheet_model.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/page/base/base_state.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
-import 'package:tinodeflutter/Screen/login.dart';
+import 'package:tinodeflutter/Screen/Login/login.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
+import 'package:tinodeflutter/Screen/Login/login.dart' as LoignScreen;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
-  Tinode tinode;
   UserModel user;
 
-  ProfileScreen({super.key, required this.tinode, required this.user});
+  ProfileScreen({super.key,  required this.user});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
-  late Tinode tinode;
+class _ProfileScreenState extends BaseState<ProfileScreen> {
   late Topic roomTopic;
   late Topic me;
   //late TopicSubscription userTopicSub;
@@ -48,17 +53,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    tinode = widget.tinode;
     user = widget.user;
   }
 
+  
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+    return super.didChangeAppLifecycleState(state);
+  }
+  
+
   Future<void> _delFriend(String userid) async {
-    var data = await tinode.friMeta(userid, 'del');
+    var data = await tinode_global.friMeta(userid, 'del');
   }
 
   Future<void> _addFriend(String userid) async {
     try {
-      var data = await tinode.friMeta(userid, 'add');
+      var data = await tinode_global.friMeta(userid, 'add');
       print("ddd");
       if (data.code == 200) {
         setState(() {
@@ -231,7 +243,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Icon(Icons.arrow_back_ios, color: Colors.white)),
 
                     AppText(
-                      text: user.id == tinode.userId //Constants.user.id
+                      text: user.id == tinode_global.userId //Constants.user.id
                           ? "my_page"
                           : user.id != 0
                               ? user.name
@@ -255,7 +267,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       user: user,
                                       setting: () {
                                         Get.to(SettingListScreen(
-                                          tinode: tinode,
                                           onChangedUser: (user) {
                                             setState(() {
                                               this.user = user;
@@ -264,17 +275,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         ));
                                       },
                                       logout: () async {
+                                        Utils.showDialogWidget(context);
+                                        tinode_global.jadechatLogout(); //ws 연결은 유지
+                                        await FirebaseMessaging.instance.deleteToken();                                         
+                                        SharedPreferences prefs = await SharedPreferences.getInstance();
+                                        prefs.remove('login_type');
+                                        prefs.remove('basic_id');
+                                        prefs.remove('basic_pw');
+                                        prefs.remove('token');
+                                        prefs.remove('url_encoded_token');
+                                        if(FirebaseAuth.instance!=null ) await FirebaseAuth.instance.signOut();
+                                        //Get.offAll(()=>LoignScreen.Login());
+                                        Get.offAll(SplashPage());
                                         // await DioClient.deleteFCM(
                                         //     gPushKey);
-                                        // await FirebaseMessaging.instance
-                                        //     .deleteToken();
-                                        // await FirebaseAuth.instance
-                                        //     .signOut();
+                                       
                                         // ChatRoomUtils.deleteAllRooms();
                                         // PostingUtils.deleteAllPosts();
                                         // DiscoverUtils.deleteAllPosts();
                                         // Constants.localChatRooms.clear();
-                                        // Get.offAll(SplashPage());
                                         //Get.offAll(()=>Login(title: "티노드"));
                                       }));
                             },
@@ -381,11 +400,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              AppText(text: tinode.userId),
+              AppText(text: tinode_global.userId),
               SizedBox(
                 width: 20,
               ),
-              QrWidget(),
+              if(user.id == Constants.user.id) QrWidget(),
             ],
           )),
           SizedBox(
@@ -416,26 +435,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(children: [
                 
                 AppText(text: "멤버십 정보", fontSize: 25,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    AppText(text: 'level :'),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    AppText(text: Constants.user.membership['level'].toString()),
-                  ],
-                ),
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.center,
+                //   crossAxisAlignment: CrossAxisAlignment.center,
+                //   children: [
+                //     AppText(text: 'level :'),
+                //     SizedBox(
+                //       width: 10,
+                //     ),
+                //     AppText(text: Constants.user.membership['level'].toString()),
+                //   ],
+                // ),
                  Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    AppText(text: 'end at :'),
-                    SizedBox(
-                      width: 10,
+                      AppText(
+                    text: "서비스 이용기간",
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    //color: ColorConstants.white,
                     ),
-                    AppText(text: Constants.user.membership['endat'].toString()),
+                       const SizedBox(
+                        width: 10,
+                      ),
+              
+                    if (Constants.user.membership != null &&  Constants.user.membership!['level'] != 0)
+                      AppText(
+                        text: "${Constants.user.membership!['endat']}",
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: ColorConstants.colorMain,
+                      )
                   ],
                 )
               ]),

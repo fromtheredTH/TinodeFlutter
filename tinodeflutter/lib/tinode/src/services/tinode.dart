@@ -257,6 +257,26 @@ class TinodeService {
     return ctrl;
   }
 
+  Future<CtrlMessage> firebaseLogin(
+      String scheme, String secret, Map<String, dynamic>? cred) async {
+    var packet = _packetGenerator.generate(packet_types.Login, null);
+    var data = packet.data as LoginPacketData;
+    data.scheme = scheme;
+    data.secret = secret;
+    data.cred = [if (cred != null) cred];
+
+    packet.data = data;
+    try{
+      CtrlMessage ctrl = await _send(packet);
+      _authService.onLoginSuccessful(ctrl);
+      return ctrl;
+    }
+    catch(err){
+      throw Exception('nedd acc first');
+    }
+   
+  }
+
   /// Send a topic subscription request
   Future subscribe(String? topicName, GetQuery getParams, SetParams? setParams,
       {String? roomId}) {

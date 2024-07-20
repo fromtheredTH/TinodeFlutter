@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -22,6 +23,7 @@ import 'package:tinodeflutter/dto/file_dto.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
 import 'package:tinodeflutter/global/global.dart';
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/page/base/base_state.dart';
 import 'package:tinodeflutter/setting/setting_chat_expiration_screen.dart';
 import 'package:tinodeflutter/tinode/src/models/del-range.dart';
 import 'package:tinodeflutter/tinode/src/models/message.dart';
@@ -49,17 +51,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class MessageRoomScreen extends StatefulWidget {
-  Tinode tinode;
   String clickTopic;
+  Topic? roomTopic;
   MessageRoomScreen(
-      {super.key, required this.tinode, required this.clickTopic});
+      {super.key, required this.clickTopic, this.roomTopic});
 
   @override
   State<MessageRoomScreen> createState() => _MessageRoomScreenState();
 }
 
-class _MessageRoomScreenState extends State<MessageRoomScreen> {
-  late Tinode tinode;
+class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
   late Topic roomTopic;
   late Topic me;
   String clickTopic = "";
@@ -72,24 +73,36 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
   late TopicSubscription roomMetaSubData;
   late Topic roomTopicData;
 
+  StreamSubscription? _metaDescSubscription;
+  StreamSubscription? _dataSubscription;
+
+
   @override
   void initState() {
     super.initState();
-    tinode = widget.tinode;
     clickTopic = widget.clickTopic;
+    // if(widget.roomTopic!=null) roomTopic = widget.roomTopic!;
     getMsgList();
   }
 
   @override
   void dispose() {
     super.dispose();
+    
     roomTopic.leave(false);
+    if(_metaDescSubscription!=null)_metaDescSubscription?.cancel();
+    if(_dataSubscription!=null)_dataSubscription?.cancel();
+  }
+    @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+    return super.didChangeAppLifecycleState(state);
   }
 
   Future<void> getMsgList() async {
-    roomTopic = tinode.getTopic(clickTopic);
+   roomTopic = tinode_global.getTopic(clickTopic);
    
-    roomTopic.onData.listen((data) {
+    _dataSubscription = roomTopic.onData.listen((data) {
       try {
         if (data != null) {
           if(data.content is String)
@@ -110,7 +123,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
       }
     });
  
-     roomTopic.onMetaDesc.listen((onMetaDesc){
+    _metaDescSubscription= roomTopic.onMetaDesc.listen((onMetaDesc){
       try{
         roomTopicData = onMetaDesc;
         for(int i = 0 ; i<onMetaDesc.subscribers.length;i++)
@@ -197,7 +210,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
       case eChatType.VOICE_CALL:
       case eChatType.VIDEO_CALL:
         //Get.to(CallScreen(tinode: tinode, roomTopic: roomTopic, joinUserList: joinUserList,));
-        if(isDifferenceDateTimeLessOneMinute(DateTime.now(),dataMessage.ts)) checkCallState(dataMessage);
+       // if(isDifferenceDateTimeLessOneMinute(DateTime.now(),dataMessage.ts)) checkCallState(dataMessage);
         return callTile(index,dataMessage);
 
       default:
@@ -315,13 +328,17 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
 
   String fileUrl = "";
 
-  String getFileUrl(DataMessage dataMessage, eChatType fileType) {
+  String getFileUrl(DataMessage dataMessage, eChatType fileType, {bool getVideoThumbnail =false}) {
     switch(fileType)
     { case eChatType.IMAGE:
-        fileUrl ="http://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+        fileUrl ="https://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
         break;
       case eChatType.VIDEO:
-        fileUrl ="http://$hostAddres/${dataMessage.content['ent'][0]['data']['preref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+        if(getVideoThumbnail)
+        fileUrl ="https://$hostAddres/${dataMessage.content['ent'][0]['data']['preref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+        else{
+          fileUrl ="https://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+        }
         break;
       default:
         break;
@@ -371,8 +388,13 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
         children: [
           GestureDetector(
             onTap: () {
-              fullView(
-                  context, 0, dataMessage.content['ent'][0]['data']['ref']);
+               isBase64
+                ?fullView(
+                  context, 0,  Base64Decoder().convert(dataMessage.content['ent'][0]['data']['val']) as String)
+                : fullView(
+                  context, 0,   getFileUrl(dataMessage,eChatType.IMAGE) );
+
+                  ;
             },
             onLongPress: () {
               deleteMsgForAllPerson(msgList[index].seq ?? -1);
@@ -442,7 +464,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
             MaterialPageRoute(
                 builder: (context) => ImageViewer(
                       // images: (info.contents ?? '').split(","),
-                      images: [getFileUrl(dataMessage, eChatType.VIDEO)], // video url
+                      images: [getFileUrl(dataMessage, eChatType.VIDEO, getVideoThumbnail: false),], // video url
                       selected: 0,
                       isVideo: true,
                       // user: getUser(),
@@ -462,7 +484,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
               isBase64
                 ? getImageBase64Decoder(
                     dataMessage.content['ent'][0]['data']['preview'])
-                : getUrltoImage(getFileUrl(dataMessage, eChatType.VIDEO)),
+                : getUrltoImage(getFileUrl(dataMessage, eChatType.VIDEO, getVideoThumbnail: true)),
               // info.file.isNotEmpty
               //     ? Image.file(
               //         info.file[0],
@@ -1028,7 +1050,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     var voiceMsg = roomTopic.createMessage(data, false, head: head);
     try{
       await roomTopic.publishMessage(voiceMsg);
-     Get.to(CallScreen(tinode: tinode, roomTopic: roomTopic, joinUserList: joinUserList, chatType: eChatType.VOICE_CALL,));
+     Get.to(CallScreen(tinode: tinode_global, roomTopic: roomTopic, joinUserList: joinUserList, chatType: eChatType.VOICE_CALL,));
       // Get.to(AgoraVoiceCallController(channelName: roomTopic?.name ?? ""));
 
     }
@@ -1058,7 +1080,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
     var videoCallMsg = roomTopic.createMessage(data, false, head: head);
     try{
       await roomTopic.publishMessage(videoCallMsg);
-     Get.to(CallScreen(tinode: tinode, roomTopic: roomTopic, joinUserList: joinUserList, chatType: eChatType.VIDEO_CALL,));
+     Get.to(CallScreen(tinode: tinode_global, roomTopic: roomTopic, joinUserList: joinUserList, chatType: eChatType.VIDEO_CALL,));
       // Get.to(AgoraVoiceCallController(channelName: roomTopic?.name ?? ""));
 
     }
@@ -1279,7 +1301,7 @@ class _MessageRoomScreenState extends State<MessageRoomScreen> {
                         height: 30,
                         child: FilledButton(
                           onPressed: () {
-                            Get.to(SettingChatExpirationeScreen(tinode: tinode, roomTopic: roomTopic));
+                            Get.to(SettingChatExpirationeScreen(tinode: tinode_global, roomTopic: roomTopic));
                           },
                           child: Text('자동삭제조정 설정'),
                         ),

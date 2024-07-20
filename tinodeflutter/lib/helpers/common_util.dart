@@ -201,7 +201,7 @@ String pad2(int i) {
 
   String changePathToLink(String path)
   {
-    String link = "http://$hostAddres/$path?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+    String link = "https://$hostAddres/$path?apikey=$apiKey&auth=token&secret=$url_encoded_token";
     return link;
   }
 
@@ -254,5 +254,9 @@ bool stringToBool(String value) {
 Future<void> saveData(String key, Map<String, dynamic> data) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString(key, json.encode(data));
-  }
+}
   
+Future<String> encodeStringToBase64(String originStr) async {
+  String base64String = base64.encode(utf8.encode(originStr));
+  return base64String;
+}

@@ -33,6 +33,7 @@ class CallService {
   final FlutterCallkitIncoming _callKit = FlutterCallkitIncoming();
   final Uuid _uuid = Uuid();
   late Topic roomTopic;
+  String callId = "";
 
   bool isInit = false;
 
@@ -164,15 +165,15 @@ class CallService {
     String? callerNumber,
     String? callerAvatar,
   }) async {
-    final String callId = _uuid.v4();
+    callId = _uuid.v4();
     final params = CallKitParams(
-      id: roomTopicId,
+      id: callId,
       nameCaller: callerName,
       appName: 'JadeChat',
       avatar: callerAvatar,
       handle: callerNumber,
       type: 0, // 0 : 오디오 1: 비디오
-      duration: 15000,
+      duration: 60000,  //miliseconds
       textAccept: 'Accept',
       textDecline: 'Decline',
       missedCallNotification: NotificationParams(

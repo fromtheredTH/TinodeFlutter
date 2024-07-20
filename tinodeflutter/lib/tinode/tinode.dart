@@ -356,6 +356,11 @@ class Tinode {
     // clear db
     _tinodeService.clearDb();
   }
+  void jadechatLogout()
+  {
+    _authService.reset();
+    _tinodeService.clearDb();
+  }
 
   /// Current user token
   AuthToken? get token {
@@ -420,6 +425,13 @@ class Tinode {
     return createAccount('basic', secret, login, params);
   }
 
+
+   Future createAccountFirebase(
+      String username, String password, AccountParams? params , String firebaseToken, {bool login =true}) {
+    var secret = base64.encode(utf8.encode(firebaseToken)); //firebase toekn encoded base64 
+    return createAccount('firebase', secret, login, params);
+  }
+
   /// Update account with basic
   Future updateAccountBasic(
       String userId, String username, String password, AccountParams? params) {
@@ -431,6 +443,13 @@ class Tinode {
   Future<CtrlMessage> login(
       String scheme, String secret, Map<String, dynamic>? cred) {
     return _tinodeService.login(scheme, secret, cred);
+  }
+ 
+  Future<CtrlMessage> firebaseLogin(
+      String firebaseToken) {
+    var firebaseTokenBase64 = base64.encode(utf8.encode(firebaseToken));
+
+    return _tinodeService.firebaseLogin('firebase', firebaseTokenBase64, null);
   }
 
   /// Wrapper for `login` with basic authentication

@@ -20,7 +20,7 @@ class DioClient {
   static const String communityBaseUrl = "https://comm.jade-chat.com/api/v1"; // 커뮤니티 실서버
   static const String platformBaseUrl = "https://api.jade-chat.com/api/v1"; // 플랫폼 실서버
 
-  static const String tinodeUrl = "http://$hostAddres";
+  static const String tinodeUrl = "https://$hostAddres";
 
   static Dio getInstance(String baseUrl) {
     Dio dio = Dio(
@@ -383,22 +383,7 @@ static Future<Response> deleteFCM(String token) async {
     };
     return getInstance(communityBaseUrl).delete("/fcm", queryParameters: queryData);
   }
-  static Future<Response> getItemList(int storeType) {
-    Map<String, int> queryData = {
-      "store_type": storeType
-    };
-    return getInstance(platformBaseUrl).get("/items", queryParameters: queryData);
-  }
-
-  static Future<Response> postIapReceipt(dynamic receipt) {
-    // final formDataMap = {
-    //   "receipt": receipt
-    // };
-    // FormData formData = FormData.fromMap(formDataMap);
-
-    return getInstance(platformBaseUrl).post("/payment/iap", data: receipt);
-  }
-  
+ 
   static Future<Response> getMembershipData() {
     return getInstance(platformBaseUrl).get("/user/membership");
   }
@@ -480,6 +465,40 @@ static Future<Response> getAgoraToken(String channelName, String token ) {
     return getInstance(tinodeUrl).get("/v0/agora/token", queryParameters : queryData);
   }
 
+  
+  static Future<Response> postIapReceipt(String receipt, String product_id, bool subscription) {
+    final formDataMap = {
+      "receipt": receipt,
+      'product_id': product_id,
+      'subscription': subscription,
+    };
+    FormData formData = FormData.fromMap(formDataMap);
+
+    return getInstance(tinodeUrl).post("/v0/payment/iap", data: formData);
+  }
+
+  static Future<Response> getItemList(int storeType) {
+    Map<String, int> queryData = {
+      "store_type": storeType
+    };
+    return getInstance(tinodeUrl).get("/v0/payment/items", queryParameters: queryData);
+  }
+
+   static Future<Response> getCheck() {
+    Map<String, int> queryData = {
+      "test": 1
+    };
+    return getInstance(tinodeUrl).get("/v0/health", queryParameters: queryData);
+  }
+  
+   static Future<Response> postCheck() {
+    Map<String, int> formDataMap = {
+      "test": 1
+    };
+    FormData formData = FormData.fromMap(formDataMap);
+
+    return getInstance(tinodeUrl).post("/v0/health",  data: formData);
+  }
 
 
 }

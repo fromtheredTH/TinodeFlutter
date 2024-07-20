@@ -38,6 +38,8 @@ class ColorConstants {
   static Color white20Percent = Color(0x33ffffff);
   static Color white30Percent = Color(0x4cffffff);
 
+  static Color black10Percent = Color.fromARGB(26, 0, 0, 0);
+
   static Color backGryText = Color(0xffa0a1a8);
   static Color descriptionBox = Color(0xff9f9da3);
   static Color searchBackColor = Color(0xff31333e);

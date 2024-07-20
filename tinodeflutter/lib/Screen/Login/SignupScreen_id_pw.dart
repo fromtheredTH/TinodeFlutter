@@ -29,6 +29,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
+
   void _submitForm() async{
     if (_formKey.currentState!.validate()) {
       // 여기서 회원가입 로직을 추가하세요.
@@ -46,7 +47,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
        url_encoded_token = Uri.encodeComponent(result.params['token']);
        tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
        Get.offAll(MessageRoomListScreen(
-        tinode: tinode_global,
       ));
       }
       catch(err)

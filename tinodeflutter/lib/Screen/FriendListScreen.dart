@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
 
@@ -15,8 +16,10 @@ import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/components/widget/UserListItemWidget.dart';
 import 'package:tinodeflutter/components/focus_detector.dart';
 import 'package:tinodeflutter/components/widget/loading_widget.dart';
+import 'package:tinodeflutter/global/global.dart';
 import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/page/base/base_state.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
 import '../../../Constants/ColorConstants.dart';
 import '../../../Constants/FontConstants.dart';
@@ -26,7 +29,6 @@ import '../../../global/DioClient.dart';
 class FriendListScreen extends StatefulWidget {
   FriendListScreen({
     Key? key,
-    required this.tinode,
     // required this.changePage, required this.onTapLogo,
     // required this.discoverController
   });
@@ -34,14 +36,13 @@ class FriendListScreen extends StatefulWidget {
   // String? hashTag;
   // Function() onTapLogo;
   // HomeController discoverController;
-  Tinode tinode;
   @override
   State<FriendListScreen> createState() => _FriendListScreenState();
   // State<FriendListScreen> createState() => _FriendListScreen(discoverController);
 }
 
 // class _FriendListScreen extends BaseState<FriendListScreen> {
-class _FriendListScreenState extends State<FriendListScreen> {
+class _FriendListScreenState extends BaseState<FriendListScreen> {
   // _FriendListScreen(HomeController discoverController){
   //   discoverController.initHome = initHome;
   // }
@@ -54,7 +55,6 @@ class _FriendListScreenState extends State<FriendListScreen> {
     });
   }
 
-  late Tinode tinode;
   late Topic me;
 
   bool isShowKeyboard = false;
@@ -73,22 +73,32 @@ class _FriendListScreenState extends State<FriendListScreen> {
   List<UserModel> userList = <UserModel>[];
   List<UserModel> friendList = <UserModel>[];
   List<TopicSubscription> userTopicSubList = <TopicSubscription>[];
+  StreamSubscription? _metaSubscription;
 
   @override
   void initState() {
     // hashTag = widget.hashTag;
     super.initState();
-    tinode = widget.tinode;
-    me = tinode.getMeTopic();
+    me = tinode_global.getMeTopic();
     _getFriendList();
     _initializeFndTopic();
+  }
+      @override
+  void dispose() {
+    if(_metaSubscription!=null) _metaSubscription?.cancel();
+    _fndTopic.leave(true); 
+    super.dispose();
+  }
 
-
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+    return super.didChangeAppLifecycleState(state);
   }
 
    void _initializeFndTopic() async{
-    _fndTopic = tinode.getTopic('fnd') as TopicFnd;
-    _fndTopic.onMeta.listen((value) {
+    _fndTopic = tinode_global.getTopic('fnd') as TopicFnd;
+    _metaSubscription= _fndTopic.onMeta.listen((value) {
       _handleMetaMessage(value);
     });
     if(!_fndTopic.isSubscribed) await _fndTopic.subscribe(MetaGetBuilder(_fndTopic).withData(null, null, null).build(), null);
@@ -96,7 +106,6 @@ class _FriendListScreenState extends State<FriendListScreen> {
 
   void _handleMetaMessage(MetaMessage msg) {
     if (msg.sub != null) {
-      setState(() {
         try{
         print("search list :");
         for(int i = 0 ; i<msg.sub!.length ;i++)
@@ -113,7 +122,6 @@ class _FriendListScreenState extends State<FriendListScreen> {
         {
           print("err : $err");
         }
-      });
     }
   }
 
@@ -172,7 +180,7 @@ class _FriendListScreenState extends State<FriendListScreen> {
   }
 
   Future<void> _delFriend(String userid) async {
-    var data = await tinode.friMeta(userid, 'del');
+    var data = await tinode_global.friMeta(userid, 'del');
   }
 
   @override
@@ -380,7 +388,7 @@ class _FriendListScreenState extends State<FriendListScreen> {
                                                                       .toString());
                                                               return UserListItemWidget(
                                                                 key: key,
-                                                                tinode: tinode,
+                                                                tinode: tinode_global,
                                                                 user:
                                                                     friendList[
                                                                         index],
@@ -490,7 +498,7 @@ class _FriendListScreenState extends State<FriendListScreen> {
                                                                       .toString());
                                                               return UserListItemWidget(
                                                                 key: key,
-                                                                tinode: tinode,
+                                                                tinode: tinode_global,
                                                                 user: friendList[
                                                                     index],
                                                                 isShowAction:

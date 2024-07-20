@@ -85,7 +85,7 @@ class AppTextField extends StatelessWidget {
           borderSide: BorderSide(color: Colors.grey),
         ),
         focusedBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.white),
+          borderSide: BorderSide(color: Colors.black),
         ),
         hintText: hintText,
         hintStyle: TextStyle(

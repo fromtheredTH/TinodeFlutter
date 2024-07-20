@@ -96,7 +96,7 @@ class _BlockUserListItemWidget extends State<BlockUserListItemWidget> {
                   GestureDetector(
                     onTap: (){
                       if(user.id != "") {
-                        Get.to(ProfileScreen(user: user, tinode: tinode,));
+                        Get.to(ProfileScreen(user: user,));
                       }
                     },
                     child: ClipOval(

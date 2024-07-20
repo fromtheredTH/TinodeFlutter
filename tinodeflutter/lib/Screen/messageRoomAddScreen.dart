@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -14,6 +15,7 @@ import 'package:tinodeflutter/global/global.dart';
 import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/page/base/base_state.dart';
 import 'package:tinodeflutter/page/base/page_layout.dart';
 
 import '../components/item/PositionRetainedScrollPhysics.dart';
@@ -27,8 +29,7 @@ import 'messageRoomScreen.dart';
 
 class MessageRoomAddScreen extends StatefulWidget {
   MessageRoomAddScreen(
-      {super.key, required this.tinode, this.roomTopic, this.existUserList});
-  Tinode tinode;
+      {super.key,  this.roomTopic, this.existUserList});
   Topic? roomTopic;
   late TopicFnd _fndTopic;
 
@@ -38,8 +39,7 @@ class MessageRoomAddScreen extends StatefulWidget {
   State<MessageRoomAddScreen> createState() => _MessageRoomAddScreenState();
 }
 
-class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
-  late Tinode tinode;
+class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
   Topic? roomTopic;
   late Topic me;
   late TopicFnd _fndTopic;
@@ -57,6 +57,8 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
 
   ScrollController userScrollController = ScrollController();
   ScrollController mainScrollController = ScrollController();
+  
+  StreamSubscription? _metaSubscription;
 
   bool hasNextPage = false;
 
@@ -70,10 +72,10 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
   @override
   void initState() {
     super.initState();
-    tinode = widget.tinode;
     _focusNode = FocusNode();
     roomTopic = widget.roomTopic;
-    me = tinode.getMeTopic();
+    me = tinode_global.getMeTopic();
+    isInit = true;
 
     mainScrollController = ScrollController()..addListener(onScroll);
     searchTextController.addListener(searchUser);
@@ -87,8 +89,18 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
 
   @override
   void dispose() {
+    if(_metaSubscription!=null) _metaSubscription?.cancel();
+    _fndTopic.leave(true); 
     super.dispose();
   }
+
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+    return super.didChangeAppLifecycleState(state);
+  }
+
+  
 
   void searchUser() {
     if (!isSearchComplete) {
@@ -119,8 +131,8 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
   }
 
   void _initializeFndTopic() async {
-    _fndTopic = tinode.getTopic('fnd') as TopicFnd;
-    _fndTopic.onMeta.listen((value) {
+    _fndTopic = tinode_global.getTopic('fnd') as TopicFnd;
+    _metaSubscription = _fndTopic.onMeta.listen((value) {
       _handleMetaMessage(value);
     });
     if (!_fndTopic.isSubscribed)
@@ -161,6 +173,8 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
   }
 
   Future<void> _searchUsers(String query) async {
+    isInit = false;
+
     try {
       // SetParams 객체를 생성하여 검색 쿼리 설정
       SetParams setParams = SetParams(
@@ -199,7 +213,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
       showToast("내용입력");
       return;
     }
-    tinode.getFndTopic();
+    tinode_global.getFndTopic();
   }
 
   Future<void> _getFriendList() async {
@@ -208,7 +222,6 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
     );
     try {
       var data = await me.getMeta(getQuery);
-      isInit = true;
 
       if (data.fri != null) {
         friendList.clear();
@@ -234,7 +247,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
 
   void _1to1Room() {
     Get.off(
-        () => MessageRoomScreen(tinode: tinode, clickTopic: selectList[0].id));
+        () => MessageRoomScreen(clickTopic: selectList[0].id));
   }
 
   Future<void> onClickMakeRoom() async {
@@ -255,7 +268,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
 
   void createGroupChat() async {
     // 새로운 그룹 토픽을 생성
-    var newTopic = tinode.newTopic();
+    var newTopic = tinode_global.newTopic();
     // 토픽의 메타데이터 설정
     var setParams = SetParams(
       desc: TopicDescription(
@@ -266,7 +279,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
     );
 
     // 토픽 구독 요청
-    await tinode.subscribe(newTopic.name.toString(), GetQuery(), setParams);
+    await tinode_global.subscribe(newTopic.name.toString(), GetQuery(), setParams);
 
     // 구독 성공 후 추가 작업 (예: 초기 메시지 보내기)
   }
@@ -275,10 +288,10 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
     String groupName = "MyGroup"; // 예시 그룹 이름
     try {
       // 새로운 그룹 토픽 이름 생성
-      tinode.newGroupTopicName(true);
+      tinode_global.newGroupTopicName(true);
 
       // 새로운 토픽 인스턴스 생성
-      _groupTopic = tinode.newTopic();
+      _groupTopic = tinode_global.newTopic();
 
       // 구독 요청
       await _groupTopic?.subscribe(
@@ -333,7 +346,7 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
       }
       _groupTopic.leave(true);
       Get.off(() => MessageRoomScreen(
-          tinode: tinode, clickTopic: _groupTopic.name ?? ""));
+           clickTopic: _groupTopic.name ?? ""));
       print('User  invited to group chat');
     } catch (e) {
       print('Failed to invite user to group chat: $e');
@@ -375,17 +388,8 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
     return false;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return PageLayout(
-        onBack: onBackPressed,
-        isLoading: isLoading,
-        child: SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-          child: Column(
-            children: [
-              Container(
+  Widget topBar() {
+    return Container(
                 height: 64,
                 child: Row(
                   children: [
@@ -446,8 +450,11 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
                     )
                   ],
                 ),
-              ),
-              Container(
+              );
+  }
+
+  Widget searchUserBox(){
+    return Container(
                 height: 65,
                 decoration:
                     BoxDecoration(borderRadius: BorderRadius.circular(4)),
@@ -510,7 +517,23 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
                     ],
                   ),
                 ),
-              ),
+              );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PageLayout(
+        onBack: onBackPressed,
+        isLoading: isLoading,
+        bgColor: ColorConstants.colorBg1,
+        child: SizedBox(
+          width: double.infinity,
+          height: double.infinity,
+          child: Column(
+            children: [
+              topBar(),
+              searchUserBox(),
+              
               selectList.length >= 1
                   ? Container(
                       height: 25,
@@ -582,12 +605,14 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
                           ),
                         ],
                       ),
-                    )
-                  : Container(),
+                    )//select list >=1 이상일때
+                  : Container(),  //select list ==0 일때
+
               searchTextController.text.isEmpty
                   ? Expanded(
-                      child: isInit
-                          ? SingleChildScrollView(
+                      child: 
+                      // isInit?
+                           SingleChildScrollView(
                               controller: mainScrollController,
                               child: Column(
                                 children: [
@@ -688,18 +713,18 @@ class _MessageRoomAddScreenState extends State<MessageRoomAddScreen> {
                                 ],
                               ),
                             )
-                          : Expanded(
-                              child: Center(
-                                child: SizedBox(
-                                  child: Center(
-                                      child: CircularProgressIndicator(
-                                          color: ColorConstants.colorMain)),
-                                  height: 20.0,
-                                  width: 20.0,
-                                ),
-                              ),
-                            ),
-                    )
+                          // : Expanded(  //isInit이 false일때
+                          //     child: Center(
+                          //       child: SizedBox(
+                          //         child: Center(
+                          //             child: CircularProgressIndicator(
+                          //                 color: ColorConstants.colorMain)),
+                          //         height: 20.0,
+                          //         width: 20.0,
+                          //       ),
+                          //     ),
+                          //   ),
+                    ) // 여기까지 searchTextController is empty : true , 여기 밑에는 false
                   : Expanded(
                       child: isSearchingLoading
                           ? Center(

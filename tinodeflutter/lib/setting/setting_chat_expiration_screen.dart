@@ -18,6 +18,7 @@ import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/page/base/base_state.dart';
 import 'package:tinodeflutter/tinode/src/topic.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
@@ -49,7 +50,7 @@ class SettingChatExpirationeScreen extends StatefulWidget {
 }
 
 class _SettingChatExpirationeScreen
-    extends State<SettingChatExpirationeScreen> {
+    extends BaseState<SettingChatExpirationeScreen> {
   UserModel user = Constants.user;
   int selectedIndex = 0;
 
@@ -128,6 +129,13 @@ class _SettingChatExpirationeScreen
     });
     super.initState();
   }
+  
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+    return super.didChangeAppLifecycleState(state);
+  }
+  
 
   @override
   Widget build(BuildContext context) {

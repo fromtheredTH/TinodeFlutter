@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:tinodeflutter/Constants/Constants.dart';
+import 'package:tinodeflutter/InAppPurchase/purchaseScreen.dart';
 import 'package:tinodeflutter/Screen/FriendListScreen.dart';
 import 'package:tinodeflutter/Screen/ProfileScreen.dart';
 
@@ -13,6 +14,7 @@ import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:get/get_core/src/get_main.dart';
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/page/base/base_state.dart';
 
 import '../components/item/PositionRetainedScrollPhysics.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -27,15 +29,13 @@ import 'messageRoomAddScreen.dart';
 import 'messageRoomScreen.dart';
 
 class MessageRoomListScreen extends StatefulWidget {
-  Tinode tinode;
-  MessageRoomListScreen({super.key, required this.tinode});
+  MessageRoomListScreen({super.key, });
 
   @override
   State<MessageRoomListScreen> createState() => _MessageRoomListScreenState();
 }
 
-class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
-  late Tinode tinode;
+class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
   //late Topic roomTopic;
   late Topic me;
   AutoScrollController mainController = AutoScrollController();
@@ -47,17 +47,28 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
   @override
   void initState() {
     super.initState();
-    tinode = widget.tinode;
-    me = widget.tinode.getMeTopic();
+    me = tinode_global.getMeTopic();
     _setupListeners();
+    PurchaseScreen.instance.initPurchaseState();
+
   //  _initializeTopic();
     // getMsgRoomList();
   }
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+    return super.didChangeAppLifecycleState(state);
+  }
 
    void _initializeTopic() async {
-    me = tinode.getMeTopic();
+    me = tinode_global.getMeTopic();
     var result = await me.subscribe(MetaGetBuilder(me).withLaterSub(null).build(), null);
-    _loadRooms();
+    //_loadRooms();
     _setupListeners();
   }
 
@@ -65,31 +76,110 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
     var subs = me.subscribers;
     setState(() {
       roomList = subs.values.toList();
-       roomList.sort((a, b) => b.updated!.compareTo(a.updated!));
+       roomList.sort((a, b) => b.touched!.compareTo(a.touched!));
     });
   }
-  
-  void _setupListeners() async{
+  int count = 0;
+  int compareRoomList(TopicSubscription a, TopicSubscription b)
+  {
+    
+    if(a.public?['fn'] == null)
+    {
+       Map<String,dynamic> publicData = {
+        'fn' : "New Room",
+        'description' :"New  Room"
+      };
+      a.public = publicData;
+    }
+    if(b.public?['fn'] == null)
+    {
+      Map<String,dynamic> publicData = {
+        'fn' : "New Room",
+        'description' :"New Room"
+      };
+      b.public = publicData;
+    }
+    if(a.touched ==null)
+    {
+      a.touched= DateTime.now();
+    }
+    if(b.touched ==null)
+    {
+      b.touched= DateTime.now();
+    }
+    print("${a.topic} : ${a.touched} , ${b.topic} : ${b.touched}     count : ${count++}   , a fn : ${a.public?['fn']?? "null"} , b fn : ${b.public?['fn']??"null"}");
+    return b.touched!.compareTo(a.touched!);    
+  }
 
+  void _setupListeners() async{
+    try{
     me.onSubsUpdated.listen((value) {
       print("Subs updated: $value");
+      count = 0; 
       setState(() {
         roomList = value;
-        roomList.sort((a, b) => b.updated!.compareTo(a.updated!));
+        roomList.sort(compareRoomList);
       });
     });
 
-    me.onPres.listen((event) {
+    me.onPres.listen((event) async{
       print("Presence event: $event");
-      if (event.what == 'acs') {
-       // getMsgRoomList();
-       print("come acs");
+      String topic = event.src ?? "";
+      int seq = event.seq ?? -1;
+      String sender = event.act?? "";
+      bool isExistRoom = roomList.any((subscription) => subscription.topic!. contains(topic));
+      switch(event.what)
+      {
+        case 'msg':
+         
+        break;
+        case 'acs': // 방 생성
+          Topic roomTopic = tinode_global.getTopic(topic);
+         if(!roomTopic.isSubscribed)
+         {
+          await roomTopic.subscribe(MetaGetBuilder(roomTopic).withData(null, null, null).withSub(null, null, null).withDesc(null).build(), null);
+          TopicSubscription topicSubscription = TopicSubscription(topic: roomTopic.name, acs: roomTopic.acs, public: roomTopic.public, seq: roomTopic.maxSeq,created: roomTopic.created, updated: roomTopic.updated, touched: roomTopic.touched );
+          roomList.insert(0,topicSubscription);
+          setState(() {
+            
+             roomList.sort(compareRoomList);
+          });
+         }
+          
+        break;
+
+        case 'on':
+        return;
+
+        default:
+        break;
       }
+      print("ddd");
+
+      // if(isExistRoom)
+      // {
+      //   //update
+      // }
+      // else if(src != "") //새로운 방
+      // {
+      //   TopicSubscription topicSubscription = TopicSubscription(topic: src, seq: seq, );
+      //   roomList.add(topicSubscription);
+      //   setState(() {
+          
+      //   });
+      // }
+
     });
     
-    await me.subscribe(MetaGetBuilder(me).withLaterSub(null).build(), null);
+    await me.subscribe(MetaGetBuilder(me).withSub(null,null,null).build(), null);
 
     getMyInfo();
+    }
+    catch(err)
+    {
+      print("err");
+    }
+    
   }
 
   Future<void> getMyInfo() async
@@ -105,7 +195,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
     var meta = await me.getMeta(getQuery);
     var membershipMeta = await me.getMeta(getMembershipQuery);
 
-    var userId = tinode.getCurrentUserId();
+    var userId = tinode_global.getCurrentUserId();
     String pictureUrl = meta.desc?.public['photo']?['ref'] != null ? changePathToLink(meta.desc?.public['photo']['ref']) : "";
     Constants.user = UserModel(id: userId, name: meta.desc.public['fn'], membership: membershipMeta.membership, picture: pictureUrl, isFreind: false);
 
@@ -113,7 +203,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
 
 
   Future<void> getMsgRoomList() async {
-    // me = tinode.getMeTopic();
+    // me = tinode_global.getMeTopic();
     try {
       // me.onSubsUpdated.listen((value) {
       //   // for (var item in value) {
@@ -148,7 +238,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
   void onClickMsgRoom(String clickTopic) {
     this.clickTopic = clickTopic;
     Get.to(()=>MessageRoomScreen(
-      tinode: tinode,
+  
       clickTopic: this.clickTopic,
     ));
   }
@@ -167,7 +257,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
           Row(
             children: [
               InkWell(
-                onTap: () => {Get.to(SerachUserScreen(tinode: tinode))},
+                onTap: () => {Get.to(SerachUserScreen(tinode: tinode_global))},
                 child: Container(
                   width: 80,
                   height: 50,
@@ -189,7 +279,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
               ),
            
               InkWell(
-                onTap: () => {Get.to(MessageRoomAddScreen(tinode: tinode))},
+                onTap: () => {Get.to(MessageRoomAddScreen())},
                 child: Container(
                   width: 80,
                   height: 50,
@@ -210,7 +300,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
                 ),
               ),
               InkWell(
-                onTap: () => {Get.to(ProfileScreen(tinode: tinode, user: Constants.user))},
+                onTap: () => {Get.to(ProfileScreen( user: Constants.user))},
                 child: Container(
                   width: 80,
                   height: 50,
@@ -233,7 +323,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
             ],
           ),
            InkWell(
-                onTap: () => {Get.to(FriendListScreen(tinode: tinode,))},
+                onTap: () => {Get.to(FriendListScreen())},
                 child: Container(
                   width: 70,
                   height: 50,
@@ -262,7 +352,7 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
               alignment: Alignment.center,
               width: double.maxFinite,
               height: double.maxFinite,
-              child: AppText(text: "채팅방이 없습니다.", fontSize: 25,),))
+              child: AppText(text: "채팅방이 없습니다.", fontSize: 20,),))
           else
           Expanded(
             child: ListView.builder(
@@ -292,17 +382,17 @@ class _MessageRoomListScreenState extends State<MessageRoomListScreen> {
                                   height: 40,
                                   child: Row(children: [
                                     AppText(
-                                      text: roomList[index].public !=null ? roomList[index].public['fn'] : "혼자인 방",
+                                      text: roomList[index].public !=null ? roomList[index].public['fn'] : (roomList[index].topic ?? "혼자인 방"),
                                       fontSize: 12,
                                       color: Colors.black,
                                     ),
                                     SizedBox(
                                       width: 10,
                                     ),
-                                    if (roomList[index].updated != null)
+                                    if (roomList[index].touched != null)
                                       AppText(
                                         text: (roomList[index]
-                                            .updated
+                                            .touched
                                             .toString()),
                                         fontSize: 12,
                                         color: Colors.black,

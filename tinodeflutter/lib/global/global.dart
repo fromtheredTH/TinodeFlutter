@@ -3,6 +3,7 @@
 // const String API_PLATFORM_URL = "https://api-extn-pf.zempie.com/api/v1";
 import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const String API_COMMUNITY_URL = "https://comm.jade-chat.com/api/v1";
 const String API_PLATFORM_URL = "https://api.jade-chat.com/api/v1";
@@ -15,7 +16,8 @@ int gCurrentId = 0;
 bool gPushClick = false;
 
 const apiKey = "AQAAAAABAAC5Ym2pu9wKC_cbu2omxbD6";
-const hostAddres = "3.37.226.251:6060";
+const hostAddres = "api.jade-chat.com";
+// const hostAddres = "3.37.226.251:6060";
 
 const String agoraAppId = "895be24bd60746d381158b444eb4902c";
 
@@ -35,19 +37,22 @@ String gBackgroundFcmTopic="";
   String pw = "";
 
   String versionApp = '1.0.0';
-  String deviceLocale = 'en-US';
+  String deviceLocale = 'ko_KR';
 
   Future<bool> reConnectTinode({Function? afterConnectFunc}) async {
     var key = apiKey;
     // var host = 'sandbox.tinode.co';
     var host = hostAddres;
-    id =  "test3";
+    id =  "test35";
     pw = 'qwer123!';
+
+    final prefs = await SharedPreferences.getInstance();
+
 
     var loggerEnabled = true;
     tinode_global = Tinode(
       'JadeChat',
-      ConnectionOptions(host, key, secure: false),
+      ConnectionOptions(host, key, secure: true),
       loggerEnabled,
       versionApp: versionApp,
       deviceLocale: deviceLocale,
@@ -60,6 +65,9 @@ String gBackgroundFcmTopic="";
       print('User Id: ' + result.params['user'].toString());
       token = result.params['token'];
       url_encoded_token = Uri.encodeComponent(result.params['token']);
+      prefs.setString('token', token);
+      prefs.setString('url_encoded_token', url_encoded_token);
+      
       print("token : $token");
       print("url token : $url_encoded_token");
       showToast("reconnect 완료");
@@ -71,6 +79,8 @@ String gBackgroundFcmTopic="";
       return false;
     }
   }
+
+  
 
 
 enum eChatType {
