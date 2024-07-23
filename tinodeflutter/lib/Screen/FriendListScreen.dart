@@ -11,6 +11,7 @@ import 'package:http/http.dart';
 import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:tinodeflutter/Constants/ImageUtils.dart';
 import 'package:tinodeflutter/Constants/RouteString.dart';
+import 'package:tinodeflutter/Screen/BottomNavBarScreen.dart';
 import 'package:tinodeflutter/Screen/ProfileScreen.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/components/widget/UserListItemWidget.dart';
@@ -30,22 +31,21 @@ class FriendListScreen extends StatefulWidget {
   FriendListScreen({
     Key? key,
     // required this.changePage, required this.onTapLogo,
-    // required this.discoverController
+     required this.friendScreenInitController
   });
   // Function(String, String) changePage;
   // String? hashTag;
   // Function() onTapLogo;
-  // HomeController discoverController;
+   InitController friendScreenInitController;
   @override
-  State<FriendListScreen> createState() => _FriendListScreenState();
-  // State<FriendListScreen> createState() => _FriendListScreen(discoverController);
+  State<FriendListScreen> createState() => _FriendListScreenState(friendScreenInitController);
 }
 
 // class _FriendListScreen extends BaseState<FriendListScreen> {
 class _FriendListScreenState extends BaseState<FriendListScreen> {
-  // _FriendListScreen(HomeController discoverController){
-  //   discoverController.initHome = initHome;
-  // }
+  _FriendListScreenState(InitController friendScreenInitController){
+    friendScreenInitController.initHome = initHome;
+  }
   late TopicFnd _fndTopic;
 
   void initHome() {

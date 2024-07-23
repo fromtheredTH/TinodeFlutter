@@ -13,6 +13,7 @@ import 'package:get/get.dart' hide Trans;
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tinodeflutter/Constants/utils.dart';
+import 'package:tinodeflutter/Screen/BottomNavBarScreen.dart';
 import 'package:tinodeflutter/Screen/Login/CreateAccountScreen.dart';
 import 'package:tinodeflutter/Screen/Login/login_controller.dart';
 import 'package:tinodeflutter/Screen/messageRoomListScreen.dart';
@@ -90,7 +91,7 @@ class _EmailLoginScreen extends State<EmailLoginScreen> {
       tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
     
       //Constants.getUserInfo(true, context, apiP);
-      Get.offAll(MessageRoomListScreen());
+      Get.offAll(BottomNavBarScreen());
 
     } on FirebaseAuthException catch (e) {
       print(e.code);
@@ -125,7 +126,7 @@ class _EmailLoginScreen extends State<EmailLoginScreen> {
       prefs.setInt('login_type', 1); // 0 : id , pw  // 1: firebase
       tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
       
-      Get.offAll(MessageRoomListScreen());
+      Get.offAll(BottomNavBarScreen());
     } catch (e) {
       print(e);
       if(isLoading) {

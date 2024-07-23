@@ -1,12 +1,15 @@
 
 
 
+import 'dart:math';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:tinodeflutter/Constants/utils.dart';
+import 'package:tinodeflutter/Screen/BottomNavBarScreen.dart';
 import 'package:tinodeflutter/Screen/messageRoomListScreen.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/app_text_field.dart';
@@ -110,6 +113,11 @@ class _CreateAccountState extends State<CreateAccount> {
       final prefs = await SharedPreferences.getInstance();
 
       //Credential credential = Credential(meth: 'email', val: emailController.text);
+
+      if(widget.socialInfo != null && nameController.text==""){
+        int randomNumber = Random().nextInt(100000000);
+        nameController.text = "user${randomNumber}";
+       }
       AccountParams accountParams = AccountParams(cred: [] , public:{'fn':nameController.text} );
       try{
         var result = await tinode_global.createAccountFirebase(nameController.text, passwordController.text,  accountParams, firebaseToken , login: true);
@@ -120,8 +128,7 @@ class _CreateAccountState extends State<CreateAccount> {
         prefs.setInt('login_type', 1); // 0 : id , pw  // 1: firebase
 
        tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
-       Get.offAll(MessageRoomListScreen(
-      ));
+       Get.offAll(BottomNavBarScreen( ));
       }
       catch(err)
       {

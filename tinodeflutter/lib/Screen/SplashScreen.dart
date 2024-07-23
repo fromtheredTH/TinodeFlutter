@@ -17,6 +17,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tinodeflutter/InAppPurchase/purchaseScreen.dart';
+import 'package:tinodeflutter/Screen/BottomNavBarScreen.dart';
 import 'package:tinodeflutter/Screen/Login/DefaultScreen.dart';
 import 'package:tinodeflutter/Screen/Login/login.dart' as login;
 import 'package:tinodeflutter/Screen/messageRoomListScreen.dart';
@@ -121,6 +122,8 @@ class SplashPageState extends BaseState<SplashPage> {
 
       prefs.setBool('first_run', false);
     }
+    Constants.user = UserModel(id: 'id', name: 'name', picture: 'picture', isFreind: false);
+
     if(prefs.containsKey('login_type'))
     {
       if(prefs.getInt('login_type')==0) // 0 : id , pw  // 1: firebase 
@@ -158,9 +161,8 @@ class SplashPageState extends BaseState<SplashPage> {
         prefs.setString('url_encoded_token', url_encoded_token);
         tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
         PurchaseScreen.instance.initPurchaseState(); // purchase item init
-
         print("ddd");
-        Get.offAll(MessageRoomListScreen());
+        Get.offAll(BottomNavBarScreen());
        }
        else{
           print("일로 오면 안돼");
@@ -207,7 +209,7 @@ class SplashPageState extends BaseState<SplashPage> {
       showToast("login 완료");
       tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
       PurchaseScreen.instance.initPurchaseState(); // purchase item init
-      Get.offAll(MessageRoomListScreen(
+      Get.offAll(BottomNavBarScreen(
       ));
     } catch (err) {
       showToast("잘못 입력했습니다");

@@ -25,6 +25,7 @@ import '../../../../Constants/FontConstants.dart';
 import '../../../../Constants/ImageConstants.dart';
 import '../../../../global/DioClient.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tinodeflutter/Screen/BottomNavBarScreen.dart';
 
 
 
@@ -131,8 +132,7 @@ class _CreateAccountPhoneNumberState extends State<CreateAccountPhoneNumber> {
         prefs.setInt('login_type', 1); // 0 : id , pw  // 1: firebase
         tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
 
-       Get.offAll(MessageRoomListScreen(
-      ));
+       Get.offAll(BottomNavBarScreen());
       }
       catch(err)
       {

@@ -15,6 +15,7 @@ import 'package:get/get.dart' hide Trans;
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tinodeflutter/Constants/utils.dart';
+import 'package:tinodeflutter/Screen/BottomNavBarScreen.dart';
 import 'package:tinodeflutter/Screen/Login/CreateAccountPhoneNumber.dart';
 import 'package:tinodeflutter/Screen/Login/CreateAccountScreen.dart';
 import 'package:tinodeflutter/Screen/messageRoomListScreen.dart';
@@ -72,7 +73,7 @@ class _SignupTypeScreen extends State<SignupTypeScreen> {
 
       //await createAccount(userName);
 
-      Get.offAll(MessageRoomListScreen());
+      Get.offAll(BottomNavBarScreen());
     } catch (e) {
       print(e);
       if(isLoading) {

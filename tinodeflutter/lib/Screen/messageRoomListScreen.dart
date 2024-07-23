@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:tinodeflutter/InAppPurchase/purchaseScreen.dart';
+import 'package:tinodeflutter/Screen/BottomNavBarScreen.dart';
 import 'package:tinodeflutter/Screen/FriendListScreen.dart';
 import 'package:tinodeflutter/Screen/ProfileScreen.dart';
 
@@ -29,13 +30,17 @@ import 'messageRoomAddScreen.dart';
 import 'messageRoomScreen.dart';
 
 class MessageRoomListScreen extends StatefulWidget {
-  MessageRoomListScreen({super.key, });
-
+  MessageRoomListScreen({super.key, required this.messageListScreenInitController});
+  InitController messageListScreenInitController;
   @override
-  State<MessageRoomListScreen> createState() => _MessageRoomListScreenState();
+  State<MessageRoomListScreen> createState() => _MessageRoomListScreenState(messageListScreenInitController);
 }
 
 class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
+
+   _MessageRoomListScreenState(InitController _messageRoomListScreenController){
+    _messageRoomListScreenController.initHome = initHome;
+  }
   //late Topic roomTopic;
   late Topic me;
   AutoScrollController mainController = AutoScrollController();
@@ -44,6 +49,12 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
   List<TopicSubscription> roomList = [];
   late TopicDescription topicDescription;
 
+
+ //ScrollController scrollController = ScrollController();
+
+  void initHome() {
+    mainController.jumpTo(0);
+  }
   @override
   void pingListen() {
     // TODO: implement pingListen
@@ -250,14 +261,17 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("방 리스트  ping :  ${pingMiliSeconds}ms"),
-      ),
+    
       body: SizedBox(
         width: double.infinity,
         height: double.infinity,
         child: Column(children: [
+          SizedBox(height: Get.height * 0.04),
+          Obx(() => AppText(text: "ping: ${base_pingMiliSeconds.value}ms")),
+
+          // SizedBox(height: Get.height * 0.07),
+          Center(child: AppText(text: "방리스트", fontSize: 20,)),
+
           Row(
             children: [
               InkWell(
@@ -326,27 +340,27 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
               ),
             ],
           ),
-           InkWell(
-                onTap: () => {Get.to(FriendListScreen())},
-                child: Container(
-                  width: 70,
-                  height: 50,
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.black,
-                        width: 2.0,
-                      ),
-                      borderRadius: const BorderRadius.all(Radius.circular(4))),
-                  child: AppText(
-                    text: "친구",
-                    color: Colors.black,
-                  ),
-                ),
-              ),
+          //  InkWell(
+          //       onTap: () => {Get.to(FriendListScreen())},
+          //       child: Container(
+          //         width: 70,
+          //         height: 50,
+          //         margin:
+          //             const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+          //         padding:
+          //             const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          //         decoration: BoxDecoration(
+          //             border: Border.all(
+          //               color: Colors.black,
+          //               width: 2.0,
+          //             ),
+          //             borderRadius: const BorderRadius.all(Radius.circular(4))),
+          //         child: AppText(
+          //           text: "친구",
+          //           color: Colors.black,
+          //         ),
+          //       ),
+          //     ),
           SizedBox(
             height: 10,
           ),

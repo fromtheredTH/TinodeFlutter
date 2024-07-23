@@ -85,7 +85,7 @@ class _DefaultScreen extends BaseState<DefaultScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              AppText(text: "${pingMiliSeconds}ms"),
+              Obx(() => AppText(text: "방 리스트 ping: ${base_pingMiliSeconds.value}ms")),
               Expanded(
               child: Container(
                 child: Column(
