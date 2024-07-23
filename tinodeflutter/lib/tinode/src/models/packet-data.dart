@@ -185,7 +185,7 @@ class SetPacketData extends PacketData {
     };
   }
 }
-class FriPacketData extends PacketData {
+class FriPacketData extends PacketData {// only for jadechat
   String? topic;
   String? what;
 
@@ -200,6 +200,31 @@ class FriPacketData extends PacketData {
     };
   }
 }
+class BloPacketData extends PacketData {// only for jadechat
+  String? topic;
+  String? what;
+
+
+  BloPacketData({this.topic, this.what });
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'topic': topic,
+      'what': what,
+    };
+  }
+}
+class PingPacketData extends PacketData { // only for jadechat
+  PingPacketData();
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+    };
+  }
+}
+
+
 
 class DelPacketData extends PacketData {
   String? topic;

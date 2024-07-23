@@ -27,6 +27,9 @@ const String agoraAppId = "895be24bd60746d381158b444eb4902c";
 String token ="";
 String url_encoded_token ="";
 
+bool isConnectProcessing_global = false;
+int pingMiliSeconds = 0;
+
 bool isLoading=false;
 
 late Tinode tinode_global;
@@ -38,6 +41,7 @@ String gBackgroundFcmTopic="";
 
   String versionApp = '1.0.0';
   String deviceLocale = 'ko_KR';
+
 
   Future<bool> reConnectTinode({Function? afterConnectFunc}) async {
     var key = apiKey;

@@ -9,4 +9,6 @@ const String Set = 'set';
 const String Del = 'del';
 const String Note = 'note';
 const String Fri = 'fri'; //제이드챗만 추가된 내용
+const String Ping = 'ping'; //제이드챗만 추가된 내용
+const String Blo = 'blo'; //제이드챗만 추가된 내용
 

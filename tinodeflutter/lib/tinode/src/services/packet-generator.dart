@@ -101,6 +101,18 @@ class PacketGenerator {
           what: null,
         );
         break;
+      // only for jadechat
+      case packet_types.Blo:
+        packetData = FriPacketData(
+          topic: topicName,
+          what: null,
+        );
+        break;
+      // only for jadechat
+      case packet_types.Ping:
+        packetData = FriPacketData(
+        );
+        break;
 
       case packet_types.Del:
         packetData = DelPacketData(
@@ -122,6 +134,8 @@ class PacketGenerator {
         );
         skipId = true;
         break;
+
+      
       default:
         packetData = null as dynamic;
     }

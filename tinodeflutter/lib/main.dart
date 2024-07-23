@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:flutter_callkit_incoming/entities/call_event.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:intl/date_time_patterns.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app_links/app_links.dart';
@@ -149,6 +150,25 @@ Future<void> main() async {
   Constants.translationCode = translationCode;
   Constants.translationName = translationName;
 
+  Timer? _timer;
+  
+
+    // 이미 실행 중인 타이머가 있다면 취소
+    // _timer?.cancel();
+    
+    // 5초마다 반복하는 새 타이머 시작
+    _timer = Timer.periodic(Duration(seconds: 5), (timer) async {
+      DateTime beforeTime = DateTime.now();
+      var response = await tinode_global.ping();
+      DateTime afterTime = DateTime.now();
+      Duration difference = afterTime.difference(beforeTime);
+      pingMiliSeconds = difference.inMilliseconds;
+
+      print("pingMiliSeconds : $pingMiliSeconds");
+    });
+  
+
+
 }
 
   Future<bool> connectWsTinode() async{
@@ -270,7 +290,7 @@ Future<void> execute(
         //   ));
 
         try{
-          if(!tinode_global.isConnected)
+          if(!tinode_global.isOpen || !tinode_global.isConnected)
             {
               showToast('웹 소켓 연결 시도 중 ...');
               // Utils.showDialogWidget(context);
@@ -288,7 +308,7 @@ Future<void> execute(
             Get.offAll(SplashPage());
           }
 
-          Utils.showToast("네트워크 연결을 확인해 주세요");
+          showToast("네트워크 연결을 확인해 주세요");
           break;
       }
     },

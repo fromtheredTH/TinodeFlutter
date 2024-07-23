@@ -217,6 +217,11 @@ class TinodeService {
     return _send(packet);
   }
 
+  Future ping(){
+    var packet = _packetGenerator.generate(packet_types.Ping, null);
+    return _send(packet);
+  }
+
   /// Create or update an account
   Future account(String userId, String scheme, String secret, bool login,
       AccountParams? params) {
@@ -251,7 +256,6 @@ class TinodeService {
     data.cred = [if (cred != null) cred];
 
     packet.data = data;
-
     CtrlMessage ctrl = await _send(packet);
     _authService.onLoginSuccessful(ctrl);
     return ctrl;
