@@ -25,15 +25,17 @@ abstract class BaseState<T extends StatefulWidget> extends State<T>
   // final dio = getIt<Dio>();
 
   late StreamSubscription<int> pingSubscription;
+  RxInt base_pingMiliSeconds =0.obs;
 
   void pingListen()
   {
       pingSubscription = pingSubject.listen((pingMilliseconds) {
-      setState(() {
-        
-      });
       print('SomeOtherClass received ping: $pingMilliseconds ms');
+      base_pingMiliSeconds.value = pingMilliseconds;
       // 여기서 필요한 작업을 수행합니다.
+      // setState(() {
+        
+      // });
     });
   }
 
@@ -71,41 +73,53 @@ abstract class BaseState<T extends StatefulWidget> extends State<T>
     WidgetsBinding.instance.removeObserver(this);
   }
 
+  DateTime? _lastPausedTime;
 
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
     switch (state) {
+      case AppLifecycleState.paused:
+        _lastPausedTime = DateTime.now();
+        break;
+
       case AppLifecycleState.resumed:
       //  showToast("forground resumed");
-        try {
-          if (!tinode_global.isConnected && !isConnectProcessing_global) {
-       //     showToast('웹 소켓 연결 시도 중 ...');
-            isConnectProcessing_global = true;
-            Utils.showDialogWidget(context);
-            await tinode_global.connect();
-            isConnectProcessing_global=false;
-            try {
-          //    showToast('re login 중 ...');
-              var response = await tinode_global.loginWithAccessToken(token);
-              final prefs = await SharedPreferences.getInstance();
-              token = response.params['token'];
-              url_encoded_token = Uri.encodeComponent(response.params['token']);
-              prefs.setString('token', token);
-              prefs.setString('url_encoded_token', url_encoded_token);
-        //      showToast('re login 완료...');
+        if (_lastPausedTime != null) {
+          final difference = DateTime.now().difference(_lastPausedTime!);
+          if(difference.inSeconds>10) // 10초 이상 백그라운드 상태일 때
+          {
+          try {
+              if (!tinode_global.isConnected && !isConnectProcessing_global) {
+          //     showToast('웹 소켓 연결 시도 중 ...');
+                isConnectProcessing_global = true;
+                Utils.showDialogWidget(context);
+                await tinode_global.connect();
+                isConnectProcessing_global=false;
+                try {
+              //    showToast('re login 중 ...');
+                  var response = await tinode_global.loginWithAccessToken(token);
+                  final prefs = await SharedPreferences.getInstance();
+                  token = response.params['token'];
+                  url_encoded_token = Uri.encodeComponent(response.params['token']);
+                  prefs.setString('token', token);
+                  prefs.setString('url_encoded_token', url_encoded_token);
+            //      showToast('re login 완료...');
+                } catch (err) {
+                  showToast('기존 토큰 만료 최초 로그인 프로세스 relogin');
+                  reLogin();
+                }
+                Get.back();
+                showToast('웹 소켓 연결 완료!');
+              } else {
+                showToast('웹소켓 연결 OK 상태...');
+              }
             } catch (err) {
-              showToast('기존 토큰 만료 최초 로그인 프로세스 relogin');
-              reLogin();
+              showToast('fail to connect');
+              Get.offAll(SplashPage());
             }
-            Get.back();
-            showToast('웹 소켓 연결 완료!');
-          } else {
-            showToast('웹소켓 연결 OK 상태...');
           }
-        } catch (err) {
-          showToast('fail to connect');
-          Get.offAll(SplashPage());
+          _lastPausedTime=null;
         }
         break;
       default:

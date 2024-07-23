@@ -156,23 +156,37 @@ Future<void> main() async {
 
 void startPingTimer() async
 {
+
     Timer? _timer;
-    // 이미 실행 중인 타이머가 있다면 취소
-    // _timer?.cancel();
+    // 10초마다 반복하는 타이머 시작
      
-     // 10초마다 반복하는 타이머 시작
     _timer = Timer.periodic(Duration(seconds: 10), (timer) async {
       DateTime beforeTime = DateTime.now();
-      var response = await tinode_global.ping();
+      Timer _pongTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+          showToast('1000ms over 통신 속도가 느립니다.');
+          print("overover ping");
+       });
+      try{
+        var response = await tinode_global.ping();
+      }
+      catch(err)
+      {
+        showToast('Timeout $err');
+        print("ping timer err $err");
+      }
+      _pongTimer.cancel();
       DateTime afterTime = DateTime.now();
       Duration difference = afterTime.difference(beforeTime);
-      pingMiliSeconds = difference.inMilliseconds;
+      pingMiliSeconds = (difference.inMilliseconds);
       pingSubject.add(pingMiliSeconds);
 
       print("pingMiliSeconds : $pingMiliSeconds");
     });
+  }
+    
+    
 
-}
+
 
   Future<bool> connectWsTinode() async{
   try{

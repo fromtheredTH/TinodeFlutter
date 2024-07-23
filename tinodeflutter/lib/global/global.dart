@@ -1,6 +1,7 @@
 //user level
 // const String API_COMMUNITY_URL = "https://api-extn-com.zempie.com/api/v1";
 // const String API_PLATFORM_URL = "https://api-extn-pf.zempie.com/api/v1";
+import 'package:get/get_rx/get_rx.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
