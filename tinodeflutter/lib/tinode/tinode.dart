@@ -325,6 +325,11 @@ class Tinode {
     _disconnectedManually = false;
     return hello(deviceToken: deviceToken);
   }
+  ConnectionService getConnectionService()
+  {
+    if(_connectionService!=null)  return _connectionService;
+    else throw Exception('_connectionService not initialized'); 
+  }
 
   /// Close the current connection
   Future<void> disconnect({bool isDisconnectManually = true}) async {
@@ -341,6 +346,9 @@ class Tinode {
   /// Is current connection open
   bool get isConnected {
     return _connectionService.isConnected;
+  }
+  bool get isOpen{
+        return _connectionService.isOpen;
   }
 
   /// Specifies if user is authenticated
@@ -389,6 +397,11 @@ class Tinode {
       _configService.setServerConfiguration(ctrl.params);
     }
     return ctrl;
+  }
+
+   // only for jadechat , ping check
+  Future ping() {
+    return _tinodeService.ping();
   }
 
   /// Wrapper for `hello`, sends hi packet again containing device token
@@ -441,7 +454,7 @@ class Tinode {
 
   /// Authenticate current session
   Future<CtrlMessage> login(
-      String scheme, String secret, Map<String, dynamic>? cred) {
+      String scheme,String secret,  Map<String, dynamic>? cred, ) {
     return _tinodeService.login(scheme, secret, cred);
   }
  
@@ -464,8 +477,9 @@ class Tinode {
   Future<CtrlMessage> loginWithAccessToken(String accessToken) async {
     print('TinodeService#isAuthenticated# loginWithAccessToken: $accessToken');
 
-    var secret = base64.encode(utf8.encode(accessToken));
-    var ctrl = await login('basic', secret, null);
+   // var secret = base64.encode(utf8.encode(accessToken));
+    var ctrl = await login('token', accessToken, null,);
+    // var ctrl = await login('token', secret, null);
     print('TinodeService#isAuthenticated# loginWithAccessToken# User Id: ' +
         ctrl.toString());
 

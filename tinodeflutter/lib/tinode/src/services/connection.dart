@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get_it/get_it.dart';
 import 'package:rxdart/rxdart.dart';
 import 'dart:io';
@@ -28,6 +30,9 @@ class ConnectionService {
   /// This callback will be called when connection is closed
   PublishSubject<void> onDisconnect = PublishSubject<void>();
 
+  // This callback will be called when connection is losted
+  PublishSubject<void> onConnectionLost = PublishSubject<void>();
+
   /// This callback will be called when we receive a message from server
   PublishSubject<String> onMessage = PublishSubject<String>();
 
@@ -35,19 +40,31 @@ class ConnectionService {
 
   bool _connecting = false;
 
+
+  // 나중에 구독을 취소하려면:
+  // await subscription.cancel();
+
+  // 다른 WebSocket 관련 코드...
+
+
   /// Connection options is required. Defining callbacks is not necessary
   ConnectionService(this._options) {
     _loggerService = GetIt.I.get<LoggerService>();
   }
 
-  bool get isConnected {
+  bool get isOpen {
     return _ws != null && _ws?.readyState == WebSocket.open;
   }
+  
+  bool get isConnected {
+    return _ws != null && _ws?.readyState == WebSocket.connecting;
+  }
+  
 
   /// Start opening websocket connection
   Future connect() async {
     _loggerService.log('Connecting to ' + Tools.makeBaseURL(_options));
-    if (isConnected) {
+    if (isOpen) {
       _loggerService.warn('Reconnecting...');
     }
     try {
@@ -59,7 +76,18 @@ class ConnectionService {
       _channel = IOWebSocketChannel(_ws!);
       _channel?.stream.listen((message) {
         onMessage.add(message);
-      });
+      },onDone: () {
+          _loggerService.log('WebSocket connection closed.');
+          onDisconnect.add(null);
+          // 연결이 끊어졌을 때 onConnectionLost 이벤트 발생
+          onConnectionLost.add(null);
+        },
+        onError: (error) {
+          _loggerService.error('WebSocket error: $error');
+          // 에러 발생 시에도 onConnectionLost 이벤트 발생
+          onConnectionLost.add(null);
+        },
+      );
     } catch (error) {
       _loggerService.error('Tinode chat - connecting with error: $error');
       rethrow;
@@ -70,7 +98,7 @@ class ConnectionService {
 
   /// Send a message through websocket websocket connection
   void sendText(String str) {
-    if (!isConnected || _connecting) {
+    if (!isOpen || _connecting) {
       throw Exception('503 - Tried sending data but you are disconnect.');
     }
     _channel?.sink.add(str);
@@ -84,6 +112,16 @@ class ConnectionService {
     onDisconnect.add(null);
     await _ws?.close(status.goingAway);
   }
+
+
+ void dispose() {
+    onOpen.close();
+    onDisconnect.close();
+    onMessage.close();
+    onConnectionLost.close();
+  }
+
+
 
   /// Send network probe to check if connection is indeed live
   void probe() {
