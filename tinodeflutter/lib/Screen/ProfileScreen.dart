@@ -55,8 +55,12 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
     super.initState();
     user = widget.user;
   }
+    @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
 
-  
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) {
     // TODO: implement didChangeAppLifecycleState

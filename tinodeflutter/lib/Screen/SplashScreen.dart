@@ -16,6 +16,7 @@ import 'package:get/get.dart' hide Trans;
 import 'package:get/get_core/src/get_main.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tinodeflutter/InAppPurchase/purchaseScreen.dart';
 import 'package:tinodeflutter/Screen/Login/DefaultScreen.dart';
 import 'package:tinodeflutter/Screen/Login/login.dart' as login;
 import 'package:tinodeflutter/Screen/messageRoomListScreen.dart';
@@ -154,6 +155,7 @@ class SplashPageState extends BaseState<SplashPage> {
         prefs.setString('token', token);
         prefs.setString('url_encoded_token', url_encoded_token);
         tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
+        PurchaseScreen.instance.initPurchaseState(); // purchase item init
 
         print("ddd");
         Get.offAll(MessageRoomListScreen());
@@ -202,6 +204,7 @@ class SplashPageState extends BaseState<SplashPage> {
       print("url token : $url_encoded_token");
       showToast("login 완료");
       tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
+      PurchaseScreen.instance.initPurchaseState(); // purchase item init
       Get.offAll(MessageRoomListScreen(
       ));
     } catch (err) {

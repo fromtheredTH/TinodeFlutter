@@ -49,7 +49,6 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
     super.initState();
     me = tinode_global.getMeTopic();
     _setupListeners();
-    PurchaseScreen.instance.initPurchaseState();
 
   //  _initializeTopic();
     // getMsgRoomList();
