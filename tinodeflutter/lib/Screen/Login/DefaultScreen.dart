@@ -47,6 +47,25 @@ class _DefaultScreen extends BaseState<DefaultScreen> {
     }
     return false;
   }
+  @override
+  void initState() {
+    super.initState();
+    // pingListen();
+  }
+
+  @override
+  void pingListen() {
+    super.pingListen();
+  }
+
+  @override
+  void dispose() {
+  //  pingSubscription.cancel();
+    super.dispose();
+  }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +85,7 @@ class _DefaultScreen extends BaseState<DefaultScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              AppText(text: "${pingMiliSeconds}ms"),
               Expanded(
               child: Container(
                 child: Column(

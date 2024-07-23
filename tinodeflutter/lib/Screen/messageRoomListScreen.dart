@@ -45,17 +45,22 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
   late TopicDescription topicDescription;
 
   @override
+  void pingListen() {
+    // TODO: implement pingListen
+    super.pingListen();
+  }
+  @override
   void initState() {
     super.initState();
     me = tinode_global.getMeTopic();
     _setupListeners();
-
+    // pingListen();
   //  _initializeTopic();
     // getMsgRoomList();
   }
   @override
   void dispose() {
-    // TODO: implement dispose
+    // pingSubscription.cancel();
     super.dispose();
   }
   @override
@@ -247,7 +252,7 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("방 리스트"),
+        title: Text("방 리스트  ping :  ${pingMiliSeconds}ms"),
       ),
       body: SizedBox(
         width: double.infinity,

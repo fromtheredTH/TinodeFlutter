@@ -59,6 +59,8 @@ class SplashPageState extends BaseState<SplashPage> {
     load();
   }
 
+   
+
   Future<bool> connectWsTinode() async{
   try{
     var key = apiKey;

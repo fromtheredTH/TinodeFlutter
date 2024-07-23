@@ -7,6 +7,7 @@ import 'package:flutter_callkit_incoming/entities/call_event.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/date_time_patterns.dart';
+import 'package:rxdart/rxdart.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app_links/app_links.dart';
@@ -120,6 +121,8 @@ Future<void> main() async {
         child: MyApp()),
   );
 
+  startPingTimer();
+
   AndroidOptions _getAndroidOptions() => const AndroidOptions(
     encryptedSharedPreferences: true,
   );
@@ -149,25 +152,25 @@ Future<void> main() async {
   Constants.languageCode = language;
   Constants.translationCode = translationCode;
   Constants.translationName = translationName;
+}
 
-  Timer? _timer;
-  
-
+void startPingTimer() async
+{
+    Timer? _timer;
     // 이미 실행 중인 타이머가 있다면 취소
     // _timer?.cancel();
-    
-    // 5초마다 반복하는 새 타이머 시작
-    _timer = Timer.periodic(Duration(seconds: 5), (timer) async {
+     
+     // 10초마다 반복하는 타이머 시작
+    _timer = Timer.periodic(Duration(seconds: 10), (timer) async {
       DateTime beforeTime = DateTime.now();
       var response = await tinode_global.ping();
       DateTime afterTime = DateTime.now();
       Duration difference = afterTime.difference(beforeTime);
       pingMiliSeconds = difference.inMilliseconds;
+      pingSubject.add(pingMiliSeconds);
 
       print("pingMiliSeconds : $pingMiliSeconds");
     });
-  
-
 
 }
 

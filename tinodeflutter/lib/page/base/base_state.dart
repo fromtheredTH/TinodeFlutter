@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:event_bus_plus/event_bus_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,6 +24,19 @@ abstract class BaseState<T extends StatefulWidget> extends State<T>
   // final event = getIt<EventBus>();
   // final dio = getIt<Dio>();
 
+  late StreamSubscription<int> pingSubscription;
+
+  void pingListen()
+  {
+      pingSubscription = pingSubject.listen((pingMilliseconds) {
+      setState(() {
+        
+      });
+      print('SomeOtherClass received ping: $pingMilliseconds ms');
+      // 여기서 필요한 작업을 수행합니다.
+    });
+  }
+
   void showLoading() {
     Utils.showDialogWidget(context);
     isLoading = true;
@@ -33,6 +48,7 @@ abstract class BaseState<T extends StatefulWidget> extends State<T>
       Get.back();
     }
   }
+  
 
   void hideKeyboard() {
     if (keyboardIsVisible(context)) {
@@ -45,11 +61,12 @@ abstract class BaseState<T extends StatefulWidget> extends State<T>
     // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    pingListen();
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
+    pingSubscription.cancel();
     super.dispose();
     WidgetsBinding.instance.removeObserver(this);
   }

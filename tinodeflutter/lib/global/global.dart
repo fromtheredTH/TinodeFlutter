@@ -1,6 +1,7 @@
 //user level
 // const String API_COMMUNITY_URL = "https://api-extn-com.zempie.com/api/v1";
 // const String API_PLATFORM_URL = "https://api-extn-pf.zempie.com/api/v1";
+import 'package:rxdart/rxdart.dart';
 import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,6 +30,8 @@ String url_encoded_token ="";
 
 bool isConnectProcessing_global = false;
 int pingMiliSeconds = 0;
+PublishSubject<int> pingSubject = PublishSubject<int>();
+
 
 bool isLoading=false;
 
