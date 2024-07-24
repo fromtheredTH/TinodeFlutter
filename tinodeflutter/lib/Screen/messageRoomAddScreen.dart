@@ -285,7 +285,7 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
   }
 
   Future<void> makeGroupRoom() async {
-    String groupName = "MyGroup"; // 예시 그룹 이름
+    String groupName =nameTextController.text; // 예시 그룹 이름
     try {
       // 새로운 그룹 토픽 이름 생성
       tinode_global.newGroupTopicName(true);

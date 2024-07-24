@@ -20,6 +20,7 @@ import 'package:tinodeflutter/Screen/Login/CreateAccountPhoneNumber.dart';
 import 'package:tinodeflutter/Screen/Login/CreateAccountScreen.dart';
 import 'package:tinodeflutter/Screen/messageRoomListScreen.dart';
 import 'package:tinodeflutter/app_text.dart';
+import 'package:tinodeflutter/global/global.dart';
 import 'package:tinodeflutter/model/UserAuthModel.dart' ;
 import 'package:tinodeflutter/model/UserAuthModel.dart' as model;
 
@@ -32,7 +33,6 @@ import '../../../Constants/ColorConstants.dart';
 import '../../../Constants/Constants.dart';
 import '../../../Constants/FontConstants.dart';
 import '../../../Constants/ImageConstants.dart';
-import '../../../global/global.dart';
 import '../../../helpers/common_util.dart';
 
 class SignupTypeScreen extends StatefulWidget {
@@ -73,7 +73,7 @@ class _SignupTypeScreen extends State<SignupTypeScreen> {
 
       //await createAccount(userName);
 
-      Get.offAll(BottomNavBarScreen());
+        Constants.initSetting();
     } catch (e) {
       print(e);
       if(isLoading) {

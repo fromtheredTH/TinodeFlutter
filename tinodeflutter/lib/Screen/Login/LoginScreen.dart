@@ -87,7 +87,7 @@ class _LoginScreen extends State<LoginScreen> {
       prefs.setInt('login_type', 1); // 0 : id , pw  // 1: firebase
       //Constants.getUserInfo(true, context, apiP);
 
-      Get.offAll(BottomNavBarScreen());
+        Constants.initSetting();
 
     } on FirebaseAuthException catch (e) {
       print(e.code);

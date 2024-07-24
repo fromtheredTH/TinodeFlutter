@@ -14,7 +14,7 @@ int gLang = 0; //Overall language: if isLogin user.lang else local_service.lang
 String gPushKey = "";
 int gPushClickMsgId=-1;
 int gChatRoomUid = 0;
-int gCurrentId = 0;
+String gCurrentId = "";
 bool gPushClick = false;
 
 const apiKey = "AQAAAAABAAC5Ym2pu9wKC_cbu2omxbD6";

@@ -1,27 +1,21 @@
 import 'dart:typed_data';
 import 'dart:convert';
 
-import 'package:app/Constants/ColorConstants.dart';
-import 'package:app/Constants/Constants.dart';
-import 'package:app/Constants/ImageConstants.dart';
-import 'package:app/Constants/ImageUtils.dart';
-import 'package:app/models/dto/user_dto.dart';
+
 import 'package:image/image.dart' as img;
-import 'package:app/global/global.dart';
 import 'package:get/get.dart' hide Trans;
-import 'package:app/models/dto/unread_dto.dart';
-import 'package:app/pages/components/fucus_detector.dart';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:app/global/app_colors.dart';
-import 'package:app/helpers/common_util.dart';
-import 'package:app/helpers/transition.dart';
-import 'package:app/models/dto/chat_msg_dto.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sound/flutter_sound.dart';
-import 'package:app/write_log.dart';
+
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:tinodeflutter/Constants/Constants.dart';
+import 'package:tinodeflutter/global/global.dart';
+import 'package:tinodeflutter/model/MessageModel.dart';
+import 'package:tinodeflutter/model/userModel.dart';
 
 import '../../Constants/ColorConstants.dart';
 import '../../Constants/ImageConstants.dart';
@@ -31,11 +25,11 @@ import '../../helpers/common_util.dart';
 import '../widget/image_viewer.dart';
 
 class ItemChatMsg extends StatelessWidget {
-  List<UserDto> users;
-  ChatMsgDto info;
+  List<UserModel> users;
+  MessageModel info;
   List<UnreadDto> unread;
-  ChatMsgDto? before;
-  ChatMsgDto? next;
+  MessageModel? before;
+  MessageModel? next;
   String? parentNick;
   bool? bNewMsg;
   final setState;
@@ -45,7 +39,7 @@ class ItemChatMsg extends StatelessWidget {
   final onReply;
   final onLongPress;
 
-  UserDto me;
+  UserModel me;
   bool mine = true;
   bool isNewDate = false;
   bool paragraphStart = false;
@@ -74,7 +68,7 @@ class ItemChatMsg extends StatelessWidget {
     //info.id: -1 실패, -2 전송중,
 
     bNewMsg ??= false;
-    mine = info.sender_id == gCurrentId;
+    mine = info.sender_id == Constants.user.id;
     paragraphStart = chatTime2(info.created_at ?? '') !=
             chatTime2(before?.created_at ?? '') ||
         info.sender_id != before?.sender_id;
@@ -148,8 +142,8 @@ class ItemChatMsg extends StatelessWidget {
     setState();
   }
 
-  UserDto? getUser() {
-    List<UserDto> list =
+  UserModel? getUser() {
+    List<UserModel> list =
         users.where((element) => element.id == info.sender_id).toList();
     if (list.isEmpty && me.id == info.sender_id) {
       return me;
@@ -169,7 +163,7 @@ class ItemChatMsg extends StatelessWidget {
                   images: (info.contents ?? '').split(","),
                   selected: index,
                   isVideo: false,
-                  user: getUser(),
+                 // user: getUser(),
                 ))).then((value) {
       if (value == "delete") {
         onDelete();
@@ -229,35 +223,35 @@ class ItemChatMsg extends StatelessWidget {
       String msg = "";
       String users = "";
       print("system info : ${info.contents}");
-      print("user nicks ${content['user_nicknames']}");
+      print("user nicks ${content['name']}");
 
-      if (systemType=='invite' && content['user_nicknames'] == null) {
+      if (systemType=='invite' && content['name'] == null) {
         msg = "과거에 생성된 시스템 초대 메시지 입니다.";
       } else {
         switch (systemType) {
           case "invite":
-            if (content['user_nicknames']?.length >= 2) {
-              for (int i = 0; i < content['user_nicknames']?.length; i++) {
-                if (i == (content['user_nicknames'].length - 1)) {
-                  users += "${content['user_nicknames'][i]}";
+            if (content['name']?.length >= 2) {
+              for (int i = 0; i < content['name']?.length; i++) {
+                if (i == (content['name'].length - 1)) {
+                  users += "${content['name'][i]}";
                 } else {
-                  users += "${content['user_nicknames'][i]}, ";
+                  users += "${content['name'][i]}, ";
                 }
               }
             } else {
-              users += "${content['user_nicknames'][0]}";
+              users += "${content['name'][0]}";
             }
-            msg = "${info.sender?.nickname}님이 $users을 그룹에 초대했습니다.";
+            msg = "${info.sender?.name}님이 $users을 그룹에 초대했습니다.";
             break;
 
           case "leave":
-            msg = "${info.sender?.nickname}님이 그룹에서 나갔습니다.";
+            msg = "${info.sender?.name}님이 그룹에서 나갔습니다.";
             break;
 
           case "update_expire":
             print("update-expire");
             msg =
-                "${info.sender?.nickname}님이 메시지가 ${timerTranslation(content['minute'])} 후 자동 삭제되도록 설정했습니다.";
+                "${info.sender?.name}님이 메시지가 ${timerTranslation(content['minute'])} 후 자동 삭제되도록 설정했습니다.";
             break;
 
           default:
@@ -450,7 +444,7 @@ class ItemChatMsg extends StatelessWidget {
                       images: (info.contents ?? '').split(","),
                       selected: 0,
                       isVideo: true,
-                      user: getUser(),
+                      //user: getUser(),
                     ))).then((value) {
           if (value == "delete") {
             onDelete();
@@ -520,26 +514,26 @@ class ItemChatMsg extends StatelessWidget {
   Widget audioTile() {
     return GestureDetector(
       onTap: () async {
-        if (playerModule?.isPlaying ?? false) {
-          await playerModule?.stopPlayer();
-          info.isPlayAudio = false;
-          setState();
-        } else {
-          await playerModule?.closePlayer();
-          await playerModule?.openPlayer();
+        // if (playerModule?.isPlaying ?? false) {
+        //   await playerModule?.stopPlayer();
+        //   info.isPlayAudio = false;
+        //   setState();
+        // } else {
+        //   await playerModule?.closePlayer();
+        //   await playerModule?.openPlayer();
 
-          await playerModule?.startPlayer(
-                  fromURI: info.contents ?? '',
-                  codec: Codec.pcm16WAV,
-                  sampleRate: 44000,
-                  whenFinished: () {
-                    info.isPlayAudio = false;
-                    setState();
-                  }) ??
-              const Duration();
-          info.isPlayAudio = true;
-          setState();
-        }
+        //   await playerModule?.startPlayer(
+        //           fromURI: info.contents ?? '',
+        //           codec: Codec.pcm16WAV,
+        //           sampleRate: 44000,
+        //           whenFinished: () {
+        //             info.isPlayAudio = false;
+        //             setState();
+        //           }) ??
+        //       const Duration();
+        //   info.isPlayAudio = true;
+        //   setState();
+        // }
       },
       child: Container(
         height: 36,
@@ -663,7 +657,7 @@ class ItemChatMsg extends StatelessWidget {
                                             : chatContent(
                                                 info.parent_chat?.contents ??
                                                     '',
-                                                info.parent_chat?.type ?? 0),
+                                                (info.parent_chat?.type ?? 0) as eChatType),
                                         fontWeight: FontWeight.w400,
                                         fontSize: 12,
                                       ),
@@ -765,7 +759,7 @@ class ItemChatMsg extends StatelessWidget {
                                                 child: AppText(
                                                   text: "reply_from_other".tr(
                                                       args: [
-                                                        getUser()?.nickname ??
+                                                        getUser()?.name ??
                                                             "unknown".tr(),
                                                         parentNick ?? ''
                                                       ]),
@@ -789,8 +783,7 @@ class ItemChatMsg extends StatelessWidget {
                                                       info.parent_chat
                                                               ?.contents ??
                                                           '',
-                                                      info.parent_chat?.type ??
-                                                          0),
+                                                      (info.parent_chat?.type ?? 0) as eChatType),
                                                   fontSize: 12,
                                                 ),
                                               )
@@ -804,7 +797,7 @@ class ItemChatMsg extends StatelessWidget {
                                                 child: InkWell(
                                                   onTap: onProfile,
                                                   child: AppText(
-                                                    text: getUser()?.nickname ??
+                                                    text: getUser()?.name ??
                                                         "unknown".tr(),
                                                     fontSize: 13,
                                                     color: ColorConstants

@@ -11,8 +11,14 @@ import 'package:persistent_bottom_nav_bar_v2/persistent-tab-view.dart';
 import 'package:tinodeflutter/Screen/FriendListScreen.dart';
 import 'package:tinodeflutter/Screen/ProfileScreen.dart';
 import 'package:tinodeflutter/Screen/messageRoomListScreen.dart';
+import 'package:tinodeflutter/global/global.dart';
+import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/page/base/base_state.dart';
+import 'package:tinodeflutter/tinode/src/meta-get-builder.dart';
+import 'package:tinodeflutter/tinode/src/models/get-query.dart';
+import 'package:tinodeflutter/tinode/src/models/topic-subscription.dart';
+import 'package:tinodeflutter/tinode/src/topic.dart';
 import '../../../Constants/ColorConstants.dart';
 import '../../../Constants/Constants.dart';
 import '../../../Constants/FontConstants.dart';
@@ -44,7 +50,7 @@ class _BottomNavBarScreen extends BaseState<BottomNavBarScreen> {
    final GlobalKey _globalKey = GlobalKey();
    PersistentTabController controller = PersistentTabController();
 
-  ProfileScreen profileScreen = ProfileScreen(user: Constants.user,);
+  late ProfileScreen profileScreen ;
   late MessageRoomListScreen messageRoomListScreen;
   late FriendListScreen friendListScreen;
       // ChatPage chatPage = ChatPage();
@@ -73,9 +79,7 @@ class _BottomNavBarScreen extends BaseState<BottomNavBarScreen> {
 
    }
 
-  //  void communityInit(){
-
-  //  }
+ 
 
    List<PersistentBottomNavBarItem> _navBarsItems() {
      return [
@@ -101,29 +105,6 @@ class _BottomNavBarScreen extends BaseState<BottomNavBarScreen> {
            inactiveColorPrimary: ColorConstants.bottomGrey,
            inactiveIcon: Image.asset(ImageConstants.profileIcon, color: ColorConstants.bottomGrey, height: Constants.navBarIconSize, width: Constants.navBarIconSize)
        ),
-
-      //  PersistentBottomNavBarItem(
-      //      icon: Image.asset(ImageConstants.bottomCommunity, color: ColorConstants.colorMain, height: Constants.navBarIconSize, width: Constants.navBarIconSize),
-      //      title: "Community",
-      //      activeColorPrimary: ColorConstants.colorMain,
-      //      inactiveColorPrimary: ColorConstants.bottomGrey,
-      //      inactiveIcon: Image.asset(ImageConstants.bottomCommunityUnselect,color: ColorConstants.bottomGrey, height: Constants.navBarIconSize, width: Constants.navBarIconSize)
-      //  ),
-      //  // PersistentBottomNavBarItem(
-      //  //   icon: SvgPicture.asset(ImageConstants.zemtownIcon, color: ColorConstants.colorMain, height: Constants.navBarIconSize, width: Constants.navBarIconSize),
-      //  //     //SvgPicture.asset(ImageString.educationIcon),
-      //  //     title: "Zemtown",
-      //  //     activeColorPrimary: ColorConstants.colorMain,
-      //  //     inactiveColorPrimary: ColorConstants.bottomGrey,
-      //  //     inactiveIcon: SvgPicture.asset(ImageConstants.zemtownIcon,color: ColorConstants.bottomGrey, height: Constants.navBarIconSize, width: Constants.navBarIconSize)
-      //  // ),
-      //  PersistentBottomNavBarItem(
-      //      icon: Image.asset(ImageConstants.bottomNotification, color: ColorConstants.colorMain, height: Constants.navBarIconSize, width: Constants.navBarIconSize),
-      //      title: "Notification",
-      //      activeColorPrimary: ColorConstants.colorMain,
-      //      inactiveColorPrimary: ColorConstants.bottomGrey,
-      //      inactiveIcon: Image.asset(ImageConstants.bottomNotificationUnselect, color: ColorConstants.bottomGrey)
-      //  ),
      ];
    }
 
@@ -138,35 +119,13 @@ class _BottomNavBarScreen extends BaseState<BottomNavBarScreen> {
   //    throw Exception("Unknown route : ${settings.name}");
   //  }
 
-   @override
-  void initState() {
-     //hashTag = widget.tagString;
-    //  
-    //homeScreen = HomeScreen(homeController: homeController,);
-     messageRoomListScreen = MessageRoomListScreen(messageListScreenInitController: messageListScreenInitController,);
-     friendListScreen = FriendListScreen(friendScreenInitController: friendScreenInitController,);
-    // discoverScreen = DiscoverScreen(discoverController: discoverController, hashTag: hashTag, changePage: (route, searchStr){
-    //    _discoverNavigatorKey.currentState?.pushNamed(
-    //        route, arguments: searchStr
-    //    );
-    //  }, onTapLogo: (){
-    //   controller.jumpToTab(0);
-    // },);
-    
-    // communityScreen = CommunityScreen(communityController: communityController, onTapLogo: (){
-    //   controller.jumpToTab(0);
-    // },);
-    // notificationScreen = NotificationScreen(onTapLogo: (){
-    //   controller.jumpToTab(0);
-    // },);
-    super.initState();
-    if(widget.tagString != null){
-      controller.jumpToTab(1);
-      previousIndex = 1;
-    }
+  void initProcess() async
+  {
+    messageRoomListScreen = MessageRoomListScreen(messageListScreenInitController: messageListScreenInitController,);
+    friendListScreen = FriendListScreen(friendScreenInitController: friendScreenInitController,);
+    profileScreen = ProfileScreen(user: Constants.user,);
 
-     
-     final _appLinks = AppLinks();
+    final _appLinks = AppLinks();
 
      _appLinks.allUriLinkStream.listen((uri) async {
        String? path;
@@ -207,9 +166,16 @@ class _BottomNavBarScreen extends BaseState<BottomNavBarScreen> {
        }
      });
 
-
-
   }
+
+   @override
+  void initState() {
+    super.initState();
+    initProcess();
+  }
+
+
+
 
   @override
   Widget build(BuildContext context) {

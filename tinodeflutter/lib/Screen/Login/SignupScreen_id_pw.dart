@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:tinodeflutter/Screen/BottomNavBarScreen.dart';
 import 'package:tinodeflutter/Screen/messageRoomListScreen.dart';
 import 'package:tinodeflutter/global/global.dart';
@@ -47,7 +48,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
        token = result.params['token'];
        url_encoded_token = Uri.encodeComponent(result.params['token']);
        tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
-       Get.offAll(BottomNavBarScreen( ));
+       Constants.initSetting();
       }
       catch(err)
       {

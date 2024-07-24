@@ -13,9 +13,16 @@ import 'package:get/get.dart' hide Trans;
 import 'package:get/get_core/src/get_main.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tinodeflutter/InAppPurchase/purchaseScreen.dart';
+import 'package:tinodeflutter/Screen/BottomNavBarScreen.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
+import 'package:tinodeflutter/global/global.dart';
+import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/tinode/src/meta-get-builder.dart';
+import 'package:tinodeflutter/tinode/src/models/get-query.dart';
 import 'package:tinodeflutter/tinode/src/models/topic-subscription.dart';
+import 'package:tinodeflutter/tinode/src/topic.dart';
 
 
 import 'ImageConstants.dart';
@@ -54,6 +61,48 @@ class Constants {
   ];
 
   static String versionName = "";
+
+  static Future<void> initSetting() async
+  {
+    Topic me = tinode_global.getMeTopic();
+    await setMyTopicSubscribe(me);
+    await getMyInfo(me);
+    PurchaseScreen.instance.initPurchaseState(); // purchase item init
+    gCurrentId = Constants.user.id;
+    Get.offAll(BottomNavBarScreen(),transition: Transition.rightToLeft);
+  }
+
+
+  static Future<void> setMyTopicSubscribe(Topic me) async{
+    try{
+      await me.subscribe(MetaGetBuilder(me).build(), null);
+    }
+    catch(err)
+    {
+      print("err");
+    }
+    
+  }
+
+  static Future<void> getMyInfo(Topic me) async
+  {
+    //내 data 받아오기
+    GetQuery getQuery = GetQuery(
+      what: 'sub desc tags cred',
+    );
+    GetQuery getMembershipQuery = GetQuery(
+      what: 'membership',
+    );
+    // fnd 토픽에 메타데이터 요청 보내기
+    var meta = await me.getMeta(getQuery);
+    var membershipMeta = await me.getMeta(getMembershipQuery);
+
+    var userId = tinode_global.getCurrentUserId();
+    String pictureUrl = meta.desc?.public['photo']?['ref'] != null ? changePathToLink(meta.desc?.public['photo']['ref']) : "";
+    Constants.user = UserModel(id: userId, name: meta.desc.public['fn'], membership: membershipMeta.membership, picture: pictureUrl, isFreind: false);
+
+  }
+
 
 
 

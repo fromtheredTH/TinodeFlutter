@@ -128,7 +128,7 @@ class _CreateAccountState extends State<CreateAccount> {
         prefs.setInt('login_type', 1); // 0 : id , pw  // 1: firebase
 
        tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
-       Get.offAll(BottomNavBarScreen( ));
+        Constants.initSetting();
       }
       catch(err)
       {

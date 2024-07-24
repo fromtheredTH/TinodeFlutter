@@ -122,7 +122,6 @@ class SplashPageState extends BaseState<SplashPage> {
 
       prefs.setBool('first_run', false);
     }
-    Constants.user = UserModel(id: 'id', name: 'name', picture: 'picture', isFreind: false);
 
     if(prefs.containsKey('login_type'))
     {
@@ -160,9 +159,7 @@ class SplashPageState extends BaseState<SplashPage> {
         prefs.setString('token', token);
         prefs.setString('url_encoded_token', url_encoded_token);
         tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
-        PurchaseScreen.instance.initPurchaseState(); // purchase item init
-        print("ddd");
-        Get.offAll(BottomNavBarScreen());
+        Constants.initSetting();
        }
        else{
           print("일로 오면 안돼");
@@ -184,6 +181,7 @@ class SplashPageState extends BaseState<SplashPage> {
       Get.offAll(DefaultScreen(),transition: Transition.rightToLeft);
     }
   }
+ 
 
   void id_pw_loginProcesss() async {
     final prefs = await SharedPreferences.getInstance();
@@ -208,9 +206,7 @@ class SplashPageState extends BaseState<SplashPage> {
       print("url token : $url_encoded_token");
       showToast("login 완료");
       tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
-      PurchaseScreen.instance.initPurchaseState(); // purchase item init
-      Get.offAll(BottomNavBarScreen(
-      ));
+      Constants.initSetting();
     } catch (err) {
       showToast("잘못 입력했습니다");
     }

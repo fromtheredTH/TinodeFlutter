@@ -91,7 +91,7 @@ class _EmailLoginScreen extends State<EmailLoginScreen> {
       tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
     
       //Constants.getUserInfo(true, context, apiP);
-      Get.offAll(BottomNavBarScreen());
+        Constants.initSetting();
 
     } on FirebaseAuthException catch (e) {
       print(e.code);
@@ -126,7 +126,7 @@ class _EmailLoginScreen extends State<EmailLoginScreen> {
       prefs.setInt('login_type', 1); // 0 : id , pw  // 1: firebase
       tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
       
-      Get.offAll(BottomNavBarScreen());
+        Constants.initSetting();
     } catch (e) {
       print(e);
       if(isLoading) {

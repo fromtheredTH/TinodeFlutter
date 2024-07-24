@@ -102,7 +102,7 @@ class _LoginState extends BaseState<Login> {
       print("url token : $url_encoded_token");
       showToast("login 완료");
       tinode_global.setDeviceToken(gPushKey); //fcm push token 던지기
-      Get.offAll(BottomNavBarScreen());
+        Constants.initSetting();
     } catch (err) {
       showToast("잘못 입력했습니다");
     }
