@@ -568,6 +568,7 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
                             //     }
                             // )
                             ),
+                    SizedBox(height: Constants.navBarHeight,),
                     // SizedBox(height: Get.height*0.05,)
                   ],
                 ),

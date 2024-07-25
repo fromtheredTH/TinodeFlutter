@@ -8,8 +8,8 @@ import 'package:tinodeflutter/model/userModel.dart';
 
 class MessageRoomModel {
   late String id; 
-  late String creator_id;
-  late String name;
+  late String? creator_id;
+  late String? name;
   late String description;
   late List<UserModel>? userList;
   late bool is_group_room;
@@ -17,31 +17,40 @@ class MessageRoomModel {
   late String? created_at;
   late String? updated_at;
   late String? deleted_at;
+  late String? touched_at;
   late MessageModel? last_message;
   String? last_chat_at;
   late int unread_count;
+  int? read;
+  int? recv;
+  int? seq;
 
    MessageRoomModel(
       {required this.id,
-      required this.creator_id,
       required this.is_group_room,
       required this.is_my_room,
       required this.unread_count,
+      this.name,
+      this.creator_id,
       this.created_at,
       this.updated_at,
       this.deleted_at,
       this.last_message,
       this.last_chat_at,
+      this.touched_at,
+      this.read,
+      this.recv,
+      this.seq,
       this.userList});
 
 
   MessageRoomModel.fromJson(Map<String, dynamic> json)
       : id = json['id'] ?? "",
+        creator_id = json['creator_id'] ?? "",
         name = json['name'] ?? "",
         unread_count = json['unread_count'] ?? 0,
         is_group_room = json['is_group_room']?? false,
         is_my_room = json['is_my_room']?? false,
-        creator_id = json['creator_id'] ?? "",
         description = json['description'] ?? "",
         created_at = json['created_at'] ?? "",
         updated_at = json['updated_at'] ?? "",

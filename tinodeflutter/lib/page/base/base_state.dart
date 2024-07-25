@@ -23,10 +23,11 @@ abstract class BaseState<T extends StatefulWidget> extends State<T>
   bool isLoading = false;
   // final event = getIt<EventBus>();
   // final dio = getIt<Dio>();
+  
 
   late StreamSubscription<int> pingSubscription;
   RxInt base_pingMiliSeconds =0.obs;
-
+ 
   void pingListen()
   {
       pingSubscription = pingSubject.listen((pingMilliseconds) {

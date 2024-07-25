@@ -30,6 +30,7 @@ import 'package:tinodeflutter/model/MessageRoomModel.dart';
 import 'package:tinodeflutter/model/btn_bottom_sheet_model.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/page/base/base_state.dart';
+import 'package:tinodeflutter/page/base/page_layout.dart';
 
 import '../components/item/PositionRetainedScrollPhysics.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -153,8 +154,37 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
       print("Subs updated: $value");
       count = 0; 
       setState(() {
-        roomList = value;
-        roomList.sort(compareRoomList);
+        //roomList = value;
+        value.forEach((item){
+          try{
+            bool hasPublic=true;
+          if(item.public ==null) hasPublic=false;
+          UserModel p2pUserData = item.topic?[0] == 'u' ? UserModel(id: item.topic ?? '', name: hasPublic? (item.public['fn'] ?? "") : "", picture: hasPublic? item.public['photo'] ?? "" : "", isFreind: item.isFriend ?? false) : UserModel(id: "", name: "", picture: "", isFreind: false);
+          
+          MessageRoomModel messageRoomModel = 
+            MessageRoomModel(id: item.topic??"",
+            name: hasPublic ? (item.public['fn']?? "") : "",
+             created_at: item.created.toString() ?? "",  
+             updated_at: item.updated.toString() ?? "",  
+             deleted_at: item.deleted.toString() ?? "",  
+             touched_at: item.touched.toString() ?? "",  
+            is_group_room: item.topic?[0] == 'g' , 
+            is_my_room: item.topic == tinode_global.userId,
+            read : item.read??0,
+            recv : item.recv ?? 0,
+            seq : item.seq??0,
+            userList: [p2pUserData],
+            unread_count: item.unread ?? 0);
+            roomAllList.add(messageRoomModel);
+          }
+          catch(err)
+          {
+            print("err");
+          }
+        
+        });
+        roomFilterList = roomAllList;
+        //roomList.sort(compareRoomList);
       });
     });
 
@@ -176,6 +206,7 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
           await roomTopic.subscribe(MetaGetBuilder(roomTopic).withData(null, null, null).withSub(null, null, null).withDesc(null).build(), null);
           TopicSubscription topicSubscription = TopicSubscription(topic: roomTopic.name, acs: roomTopic.acs, public: roomTopic.public, seq: roomTopic.maxSeq,created: roomTopic.created, updated: roomTopic.updated, touched: roomTopic.touched );
           roomList.insert(0,topicSubscription);
+          
           setState(() {
             
              roomList.sort(compareRoomList);
@@ -207,7 +238,7 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
 
     });
      GetQuery getQuery = GetQuery(
-      what: 'data',
+      what: 'sub',
     );
     var meta = await me.getMeta(getQuery);
     print("ee");
@@ -357,7 +388,7 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
   {
     return Expanded(
                 child: Container(
-                  color: ColorConstants.gray3,
+                  color: ColorConstants.white,
                   child: Stack(
                     children: [
 
@@ -384,7 +415,7 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
                                 return ItemChatRoom(
                                   info: roomFilterList[index],
                                   onClick: () {
-                                    onClickMsgRoom(roomList[index].topic.toString());
+                                    onClickMsgRoom(roomFilterList[index].id.toString());
                                   },
                                   onLongPress: () {
                                     MessageRoomModel roomModel = roomFilterList[index];
@@ -523,9 +554,10 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-    
-      body: SizedBox(
+    return PageLayout(
+        //onBack: onBackPressed,
+        isLoading: isLoading,
+        child: SizedBox(
         width: double.infinity,
         height: double.infinity,
         child: Column(children: [
@@ -533,8 +565,49 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
           Obx(() => AppText(text: "ping: ${base_pingMiliSeconds.value}ms")),
 
           // SizedBox(height: Get.height * 0.07),
-          Center(child: AppText(text: "방리스트", fontSize: 20,)),
-
+          Container(
+            height: 56, // AppBar의 기본 높이
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: Center(
+                    child: AppText(
+                      text: "JadeChat",
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 16,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: InkWell(
+                      onTap: () {
+                        Get.to(MessageRoomAddScreen());
+                        // Navigator.of(context).push(
+                        //   SwipeablePageRoute(
+                        //     canOnlySwipeFromEdge: true,
+                        //     builder: (context) => MessageRoomAddScreen(),
+                        //   ),
+                        // ).then((value) {});
+                      },
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: Icon(
+                          Icons.add_circle_outline,
+                          size: 25,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           Row(
             children: [
               InkWell(
@@ -557,86 +630,17 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
                     color: Colors.black,
                   ),
                 ),
-              ),
-           
-              InkWell(
-                onTap: () => {Get.to(MessageRoomAddScreen())},
-                child: Container(
-                  width: 80,
-                  height: 50,
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.black,
-                        width: 2.0,
-                      ),
-                      borderRadius: const BorderRadius.all(Radius.circular(4))),
-                  child: AppText(
-                    text: "방 만들기",
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              // InkWell(
-              //   onTap: () => {Get.to(ProfileScreen( user: Constants.user))},
-              //   child: Container(
-              //     width: 80,
-              //     height: 50,
-              //     margin:
-              //         const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              //     padding:
-              //         const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-              //     decoration: BoxDecoration(
-              //         border: Border.all(
-              //           color: Colors.black,
-              //           width: 2.0,
-              //         ),
-              //         borderRadius: const BorderRadius.all(Radius.circular(4))),
-              //     child: AppText(
-              //       text: "내 프로필",
-              //       color: Colors.black,
-              //     ),
-              //   ),
-              // ),
+              ),          
             ],
           ),
           searchWidget(),
-          //  InkWell(
-          //       onTap: () => {Get.to(FriendListScreen())},
-          //       child: Container(
-          //         width: 70,
-          //         height: 50,
-          //         margin:
-          //             const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-          //         padding:
-          //             const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-          //         decoration: BoxDecoration(
-          //             border: Border.all(
-          //               color: Colors.black,
-          //               width: 2.0,
-          //             ),
-          //             borderRadius: const BorderRadius.all(Radius.circular(4))),
-          //         child: AppText(
-          //           text: "친구",
-          //           color: Colors.black,
-          //         ),
-          //       ),
-          //     ),
+  
           SizedBox(
             height: 10,
           ),
-          if(roomList.length==0)
-            Expanded(
-              child:Container(
-              alignment: Alignment.center,
-              width: double.maxFinite,
-              height: double.maxFinite,
-              child: AppText(text: "채팅방이 없습니다.", fontSize: 20,),))
-          else
+      
           messageListWidget(),
+          SizedBox(height: Constants.navBarHeight,),
           // Expanded(
           //   child: ListView.builder(
           //       cacheExtent: double.infinity,

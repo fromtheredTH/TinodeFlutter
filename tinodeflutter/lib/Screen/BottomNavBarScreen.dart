@@ -43,8 +43,8 @@ class _BottomNavBarScreen extends BaseState<BottomNavBarScreen> {
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
   GlobalKey<ScaffoldMessengerState>();
 
-  final InitController messageListScreenInitController = InitController();
-  final InitController friendScreenInitController = InitController();
+   InitController messageListScreenInitController = InitController();
+   InitController friendScreenInitController = InitController();
 
    final GlobalKey<NavigatorState> _discoverNavigatorKey = GlobalKey<NavigatorState>();
    final GlobalKey _globalKey = GlobalKey();

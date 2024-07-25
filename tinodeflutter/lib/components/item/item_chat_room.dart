@@ -30,7 +30,7 @@ class ItemChatRoom extends StatelessWidget {
 
   String getRoomName(){
     if((info.name!="")) {
-      return info.name;
+      return info.name ??"";
     }else{
       if((info.userList?.isEmpty ?? true)) {
         // if(info.is_group_room == 0 && info.personal_target != null){
@@ -186,7 +186,11 @@ class ItemChatRoom extends StatelessWidget {
       onTap: onClick,
       onLongPress: onLongPress,
       child: Container(
-        color: ColorConstants.colorBg1,
+          decoration: BoxDecoration(
+              color: ColorConstants.white,
+              border: Border(
+              bottom: BorderSide(color: Colors.grey.shade300, width: 0.5),
+              ),),
         child: Column(
           children: [
             SizedBox(height: 10),
@@ -247,6 +251,7 @@ class ItemChatRoom extends StatelessWidget {
                               child: AppText(
                                 text: info.unread_count > 99 ? "+99" : "${info.unread_count}",
                                 fontSize: 10,
+                                color: Colors.white,
                               ),
                             ),
                           ),
