@@ -128,78 +128,78 @@ abstract class BaseState<T extends StatefulWidget> extends State<T>
     }
   }
 
-  Future<bool> reLogin() async {
-    final prefs = await SharedPreferences.getInstance();
-    try {
-      if (prefs.getInt('login_type') == 0) // 0 : id , pw  // 1: firebase
-      {
-        id_pw_Login(prefs);
-        return true;
-      } else if (prefs.getInt('login_type') == 1) {
-        // firebase
-        firebaseLogin(prefs);
-        return true;
-      }
-      showToast('여기는 들어오는 곳 아님');
-      return false; // 여기는 들어오면 안됨
-    } catch (err) {
-      print("re login err : $err");
-      showToast('re login err  $err');
-      return false;
-    }
-  }
+  // Future<bool> reLogin() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   try {
+  //     if (prefs.getInt('login_type') == 0) // 0 : id , pw  // 1: firebase
+  //     {
+  //       id_pw_Login(prefs);
+  //       return true;
+  //     } else if (prefs.getInt('login_type') == 1) {
+  //       // firebase
+  //       firebaseLogin(prefs);
+  //       return true;
+  //     }
+  //     showToast('여기는 들어오는 곳 아님');
+  //     return false; // 여기는 들어오면 안됨
+  //   } catch (err) {
+  //     print("re login err : $err");
+  //     showToast('re login err  $err');
+  //     return false;
+  //   }
+  // }
 
-  void firebaseLogin(SharedPreferences prefs) async {
-    User? user = await FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        String firebaseToken =
-            "${await FirebaseAuth.instance.currentUser?.getIdToken()}";
-        // print("firebase login token : $firebaseToken ");
-        if (token != "") {
-          var response = await tinode_global.firebaseLogin(firebaseToken);
-          token = response.params['token'];
-          url_encoded_token = Uri.encodeComponent(response.params['token']);
-          prefs.setString('token', token);
-          prefs.setString('url_encoded_token', url_encoded_token);
-          showToast('파이어베이스 재 로그인 완료');
-            } else {
-          print("일로 오면 안돼");
-          showToast('파이어베이스 로그인 미구현');
+  // void firebaseLogin(SharedPreferences prefs) async {
+  //   User? user = await FirebaseAuth.instance.currentUser;
+  //   if (user != null) {
+  //     try {
+  //       String firebaseToken =
+  //           "${await FirebaseAuth.instance.currentUser?.getIdToken()}";
+  //       // print("firebase login token : $firebaseToken ");
+  //       if (token != "") {
+  //         var response = await tinode_global.firebaseLogin(firebaseToken);
+  //         token = response.params['token'];
+  //         url_encoded_token = Uri.encodeComponent(response.params['token']);
+  //         prefs.setString('token', token);
+  //         prefs.setString('url_encoded_token', url_encoded_token);
+  //         showToast('파이어베이스 재 로그인 완료');
+  //           } else {
+  //         print("일로 오면 안돼");
+  //         showToast('파이어베이스 로그인 미구현');
     
-          Get.offAll(SplashPage(), transition: Transition.rightToLeft);
-        }
+  //         Get.offAll(SplashPage(), transition: Transition.rightToLeft);
+  //       }
 
-        // Constants.getUserInfo(false,context, apiP);
-      } catch (e) {
-        print(e);
-        Get.offAll(SplashPage(), transition: Transition.rightToLeft);
-        }
-    }
-  }
+  //       // Constants.getUserInfo(false,context, apiP);
+  //     } catch (e) {
+  //       print(e);
+  //       Get.offAll(SplashPage(), transition: Transition.rightToLeft);
+  //       }
+  //   }
+  // }
 
-  void id_pw_Login(SharedPreferences prefs) async {
-    if (prefs.containsKey('basic_id')) {
-      id = prefs.getString('basic_id')!;
-    }
+  // void id_pw_Login(SharedPreferences prefs) async {
+  //   if (prefs.containsKey('basic_id')) {
+  //     id = prefs.getString('basic_id')!;
+  //   }
 
-    if (prefs.containsKey('basic_pw')) {
-      pw = prefs.getString('basic_pw')!;
-    }
+  //   if (prefs.containsKey('basic_pw')) {
+  //     pw = prefs.getString('basic_pw')!;
+  //   }
 
-    try {
-      var result = await tinode_global.loginBasic(id, pw, null);
-      // print('User Id: ' + result.params['user'].toString());
-      token = result.params['token'];
-      url_encoded_token = Uri.encodeComponent(result.params['token']);
-      prefs.setString('token', token);
-      prefs.setString('url_encoded_token', url_encoded_token);
-      // print("token : $token");
-      // print("url token : $url_encoded_token");
-      showToast("relogin 완료");
-    } catch (err) {
-      showToast("id pw 리 로그인 실패");
-      Get.offAll(SplashPage(), transition: Transition.rightToLeft);
-    }
-  }
+  //   try {
+  //     var result = await tinode_global.loginBasic(id, pw, null);
+  //     // print('User Id: ' + result.params['user'].toString());
+  //     token = result.params['token'];
+  //     url_encoded_token = Uri.encodeComponent(result.params['token']);
+  //     prefs.setString('token', token);
+  //     prefs.setString('url_encoded_token', url_encoded_token);
+  //     // print("token : $token");
+  //     // print("url token : $url_encoded_token");
+  //     showToast("relogin 완료");
+  //   } catch (err) {
+  //     showToast("id pw 리 로그인 실패");
+  //     Get.offAll(SplashPage(), transition: Transition.rightToLeft);
+  //   }
+  // }
 }

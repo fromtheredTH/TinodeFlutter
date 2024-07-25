@@ -86,24 +86,34 @@ Future<void> main() async {
       print('WebSocket 연결이 끊어졌습니다.');
       showToast('연결 끊김 웹소켓');
       // 여기에 연결이 끊어졌을 때 수행할 작업을 추가합니다.
-       try{
-          if(!tinode_global.isConnected)
-            {
-              showToast('웹 소켓 연결 시도 중 ...');
-              // Utils.showDialogWidget(context);
-              await tinode_global.connect();
-              // Get.back();
-              showToast('웹 소켓 연결 완료!');
+       try {
+              if (!tinode_global.isConnected && !isConnectProcessing_global) {
+          //     showToast('웹 소켓 연결 시도 중 ...');
+                isConnectProcessing_global = true;
+                await tinode_global.connect();
+                isConnectProcessing_global=false;
+                try {
+              //    showToast('re login 중 ...');
+                  var response = await tinode_global.loginWithAccessToken(token);
+                  final prefs = await SharedPreferences.getInstance();
+                  token = response.params['token'];
+                  url_encoded_token = Uri.encodeComponent(response.params['token']);
+                  prefs.setString('token', token);
+                  prefs.setString('url_encoded_token', url_encoded_token);
+            //      showToast('re login 완료...');
+                } catch (err) {
+                  showToast('기존 토큰 만료 최초 로그인 프로세스 relogin');
+                  reLogin();
+                }
+                Get.back();
+                showToast('웹 소켓 연결 완료!');
+              } else {
+                showToast('웹소켓 연결 OK 상태...');
+              }
+            } catch (err) {
+              showToast('fail to connect');
+              Get.offAll(SplashPage());
             }
-            else
-            {
-              showToast('웹소켓 연결 OK 상태...');
-            }
-          }
-          catch(err){
-            showToast('fail to connect');
-            Get.offAll(SplashPage());
-          }
     });
 
   findSystemLocale().then((value) {
