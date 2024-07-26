@@ -24,8 +24,7 @@ import '../../../Constants/utils.dart';
 
 
 class UserListItemWidget extends StatefulWidget {
-  UserListItemWidget({Key? key,required this.tinode, required this.user, this.isGoProfile = true, this.isShowAction = true, this.isMini=false, required this.deleteUser, this.followUser, this.unFollowUser}) : super(key: key);
-  Tinode tinode;
+  UserListItemWidget({Key? key, required this.user, this.isGoProfile = true, this.isShowAction = true, this.isMini=false, required this.deleteUser, this.followUser, this.unFollowUser}) : super(key: key);
   UserModel user;
   bool isShowAction;
   bool isMini;
@@ -42,20 +41,34 @@ class UserListItemWidget extends StatefulWidget {
 class _UserListItemWidget extends State<UserListItemWidget> {
   // late TopicSubscription userTopicSub;
   late UserModel user;
-  late Tinode tinode;
 
   @override
   void initState() {
     super.initState();
     user = widget.user;
-    tinode = widget.tinode;
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return Column(
-      children: [
+    return 
+    // Column(
+    //   children: [
+        Container(
+          padding: const EdgeInsets.only(bottom: 5),
+          decoration: 
+            BoxDecoration(
+                        border: Border(
+                        bottom: BorderSide(
+                          color: Colors.grey, // 선의 색상
+                          width: 0.5, // 선의 두께
+                        ),
+                      ),
+                    ),
+        child:
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -89,7 +102,7 @@ class _UserListItemWidget extends State<UserListItemWidget> {
                             width: widget.isMini ? 24 : 45,
                             height: widget.isMini ? 24 : 45,
                             decoration: BoxDecoration(
-                                shape: BoxShape.circle
+                                shape: BoxShape.circle,
                             ),
                             child: ImageUtils.ProfileImage(
                                 user.picture,
@@ -119,12 +132,12 @@ class _UserListItemWidget extends State<UserListItemWidget> {
                                         }
                                       },
                                       child: AppText(text: user.id!="" ? user.name : "deleted_account".tr(),
-                                          fontSize: widget.isMini ? 12 : 13,
-                                          color: ColorConstants.white,
+                                          fontSize: widget.isMini ? 14 : 15,
+                                          color: ColorConstants.black,
                                           textAlign: TextAlign.start,
                                           overflow: TextOverflow.ellipsis,
                                           fontFamily: FontConstants.AppFont,
-                                          fontWeight: FontWeight.w700
+                                          fontWeight: FontWeight.w600
                                       ),
                                     ),
                                   ),
@@ -140,32 +153,32 @@ class _UserListItemWidget extends State<UserListItemWidget> {
 
                               SizedBox(height: widget.isMini ?  2: 5,),
 
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
+                              // Row(
+                              //   crossAxisAlignment: CrossAxisAlignment.center,
+                              //   mainAxisAlignment: MainAxisAlignment.start,
+                              //   children: [
 
-                                  Expanded(
-                                      child: GestureDetector(
-                                          onTap: (){
-                                            if(widget.isGoProfile){
-                                              if(user.id!="") {
-                                                Get.to(ProfileScreen(user: user, ));
-                                              }
-                                            }
-                                          },
-                                          child: AppText(text: user.name ?? "",
-                                              fontSize: widget.isMini ? 12 : 13,
-                                              color: ColorConstants.halfWhite,
-                                              textAlign: TextAlign.start,
-                                              overflow: TextOverflow.ellipsis,
-                                              fontFamily: FontConstants.AppFont,
-                                              fontWeight: FontWeight.w400
-                                          )
-                                      )
-                                  )
-                                ],
-                              ),
+                              //     Expanded(
+                              //         child: GestureDetector(
+                              //             onTap: (){
+                              //               if(widget.isGoProfile){
+                              //                 if(user.id!="") {
+                              //                   Get.to(ProfileScreen(user: user, ));
+                              //                 }
+                              //               }
+                              //             },
+                              //             child: AppText(text: user.name ?? "",
+                              //                 fontSize: widget.isMini ? 12 : 13,
+                              //                 color: ColorConstants.black,
+                              //                 textAlign: TextAlign.start,
+                              //                 overflow: TextOverflow.ellipsis,
+                              //                 fontFamily: FontConstants.AppFont,
+                              //                 fontWeight: FontWeight.w400
+                              //             )
+                              //         )
+                              //     )
+                              //   ],
+                              // ),
                             ],
                           )
                       )
@@ -232,13 +245,18 @@ class _UserListItemWidget extends State<UserListItemWidget> {
                     }
                   }));
                 },
-                child: SvgPicture.asset(ImageConstants.moreIcon, width: 30,)
+                child: Icon(
+                      Icons.more_horiz,
+                      size: 30,
+                      color: Colors.black,
+                    ),
+                // child: SvgPicture.asset(ImageConstants.moreIcon, width: 30,)
               ),
           ],
         ),
-
-        SizedBox(height: widget.isMini ? 10 : 25,)
-      ],
-    );
+        );
+        // SizedBox(height: widget.isMini ? 10 : 25,)
+    //   ],
+    // );
   }
 }

@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_size_getter/file_input.dart';
 import 'package:image_size_getter/image_size_getter.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:tinodeflutter/global/global.dart';
 
 import '../app_text.dart';
 import 'ColorConstants.dart';
@@ -82,7 +83,7 @@ class ImageUtils {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(width/2),
         child: CachedNetworkImage(
-            imageUrl: "${src}",
+            imageUrl: "https://$hostAddres/${src}?apikey=$apiKey&auth=token&secret=$url_encoded_token",
             errorWidget: (context, url, error) =>
                 Container(
                   width: width,
@@ -321,12 +322,14 @@ class ImageUtils {
   }
 
   // 에셋 이미지 위젯
-  static Widget setImage(String src, double width,double height) {
+  static Widget setImage(String src, double width,double height, {Color? color}) {
     return Image.asset(
         src,
         width: width,
         height: height,
-        fit: BoxFit.cover);
+        fit: BoxFit.cover,
+        color: color,
+        );
   }
 
   static Widget setFitImage(String src, double width,double height) {

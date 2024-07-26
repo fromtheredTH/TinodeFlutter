@@ -465,6 +465,12 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(4),
+                      border: Border(
+            bottom: BorderSide(
+              color: Colors.black, // 선의 색상
+              width: 2.0, // 선의 두께
+            ),
+          ),
                       color: ColorConstants.white10Percent),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -800,6 +806,7 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
                     margin: EdgeInsets.all(10),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(4),
+                        
                         color: ColorConstants.colorMain),
                     child: Center(
                       child: AppText(

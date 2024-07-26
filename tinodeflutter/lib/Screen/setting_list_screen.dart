@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -51,9 +52,13 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
 
   @override
   Widget build(BuildContext context) {
-
+   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: ColorConstants.backgroundGrey, // 원하는 색상으로 변경
+      statusBarBrightness: Brightness.light, // iOS에서 상태바 콘텐츠를 어둡게 (검은색)
+      statusBarIconBrightness: Brightness.dark, 
+    ));
     return Scaffold(
-        backgroundColor: Colors.grey,
+        backgroundColor: ColorConstants.backgroundGrey,
         resizeToAvoidBottomInset: true,
         body: Column(
           children: [

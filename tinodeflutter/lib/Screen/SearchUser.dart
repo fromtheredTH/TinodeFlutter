@@ -24,17 +24,14 @@ import 'package:get_it/get_it.dart';
 import '../model/userModel.dart';
 
 class SerachUserScreen extends StatefulWidget {
-  Tinode tinode;
-  SerachUserScreen({super.key, required this.tinode});
+  
+  SerachUserScreen({super.key, });
 
   @override
   State<SerachUserScreen> createState() => _SerachUserScreenState();
 }
 
 class _SerachUserScreenState extends State<SerachUserScreen> {
-  late Tinode tinode;
-  late Topic roomTopic;
-  late Topic me;
   AutoScrollController mainController = AutoScrollController();
   TextEditingController inputController = TextEditingController();
   PositionRetainedScrollPhysics physics = PositionRetainedScrollPhysics();
@@ -46,7 +43,6 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
   @override
   void initState() {
     super.initState();
-    tinode = widget.tinode;
     initializeFndTopic();
   }
     @override
@@ -66,7 +62,7 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
   }
 
   void initializeFndTopic() async{
-    _fndTopic = tinode.getTopic('fnd') as TopicFnd;
+    _fndTopic = tinode_global.getTopic('fnd') as TopicFnd;
     _metaSubscription= _fndTopic.onMeta.listen((value) {
       _handleMetaMessage(value);
     });
@@ -79,8 +75,14 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
         print("search list :");
         for(int i = 0 ; i<msg.sub!.length ;i++)
           {
-            String pictureUrl = msg.sub?[i].public['photo']?['ref'] != null ? changePathToLink(msg.sub?[i].public['photo']['ref']) : "";
-            UserModel user = UserModel(id: msg.sub?[i].user ?? "" , name : msg.sub?[i].public['fn'], picture : pictureUrl, isFreind: msg.sub?[i].isFriend ?? false);
+            bool hasPublic=true;
+            if(msg.sub?[i].public ==null) hasPublic=false;
+            UserModel user =UserModel(id: msg.sub?[i].user ?? '', 
+            name: hasPublic? (msg.sub?[i].public['fn'] ?? "") : "", 
+            picture: hasPublic? (msg.sub?[i].public['photo']!=null ? (msg.sub?[i].public['photo']['ref']!=null ? (msg.sub?[i].public['photo']['ref'] ?? "" ) : (msg.sub?[i].public['photo'] ?? "")):""): "", 
+            isFreind: msg.sub?[i].isFriend ?? false);
+            // String pictureUrl = msg.sub?[i].public['photo']?['ref'] != null ? changePathToLink(msg.sub?[i].public['photo']['ref']) : "";
+            // UserModel user = UserModel(id: msg.sub?[i].user ?? "" , name : msg.sub?[i].public['fn'], picture : pictureUrl, isFreind: msg.sub?[i].isFriend ?? false);
             _searchResults.add(user);
           }
           setState(() {
@@ -143,7 +145,7 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
       showToast("내용입력");
       return;
     }
-    tinode.getFndTopic();
+    tinode_global.getFndTopic();
   }
 
   @override

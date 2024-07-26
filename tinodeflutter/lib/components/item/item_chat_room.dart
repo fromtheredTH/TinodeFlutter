@@ -215,15 +215,15 @@ class ItemChatRoom extends StatelessWidget {
                         AppText(
                           text: getRoomName(),
                           fontSize: 13,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                         ),
 
                         SizedBox(height: 5,),
 
                         AppText(
-                          text: chatTime2(info.last_chat_at ?? ''),
+                          text: chatTime2(info.touched_at ?? ''),
                           fontSize: 11,
-                          color: ColorConstants.halfWhite,
+                          color: Colors.grey[400],
                         ),
                       ],
                     ),
@@ -233,9 +233,9 @@ class ItemChatRoom extends StatelessWidget {
                       children: [
                         Expanded(
                             child: AppText(
-                              text: info.last_message?.unsended_at != null ? 'deleted_msg'.tr() :chatContent(info.last_message?.contents ?? 'new_room_msg'.tr(), eChatType.values[info.last_message?.type ?? 0]),
+                              text: "서버 데이터 필요",//info.last_message?.unsended_at != null ? 'deleted_msg'.tr() :chatContent(info.last_message?.contents ?? 'new_room_msg'.tr(), eChatType.values[info.last_message?.type ?? 0]),
                               fontSize: 12,
-                              color: ColorConstants.halfWhite,
+                              color: Colors.grey,
                               maxLine: 1,
                               overflow: TextOverflow.ellipsis,
                             ),

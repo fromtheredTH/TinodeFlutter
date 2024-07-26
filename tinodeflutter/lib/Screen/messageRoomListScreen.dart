@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tinodeflutter/Constants/ColorConstants.dart';
 import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:tinodeflutter/Constants/FontConstants.dart';
@@ -66,6 +67,7 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
   late TopicDescription topicDescription;
 
   List<MessageRoomModel> roomAllList = [];
+  List<MessageRoomModel> tempRoomList = [];
   List<MessageRoomModel> roomFilterList = [];
   bool isInit = false;
 
@@ -159,8 +161,12 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
           try{
             bool hasPublic=true;
           if(item.public ==null) hasPublic=false;
-          UserModel p2pUserData = item.topic?[0] == 'u' ? UserModel(id: item.topic ?? '', name: hasPublic? (item.public['fn'] ?? "") : "", picture: hasPublic? item.public['photo'] ?? "" : "", isFreind: item.isFriend ?? false) : UserModel(id: "", name: "", picture: "", isFreind: false);
-          
+          UserModel p2pUserData = item.topic?[0] == 'u' ? UserModel(id: item.topic ?? '', 
+            name: hasPublic? (item.public['fn'] ?? "") : "", 
+            picture: hasPublic? (item.public['photo']!=null ? (item.public['photo']['ref']!=null ? (item.public['photo']['ref'] ?? "" ) : (item.public['photo'] ?? "")):""): "", 
+            isFreind: item.isFriend ?? false) 
+            : UserModel(id: "", name: "", picture: "", isFreind: false);
+            
           MessageRoomModel messageRoomModel = 
             MessageRoomModel(id: item.topic??"",
             name: hasPublic ? (item.public['fn']?? "") : "",
@@ -175,7 +181,7 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
             seq : item.seq??0,
             userList: [p2pUserData],
             unread_count: item.unread ?? 0);
-            roomAllList.add(messageRoomModel);
+            tempRoomList.add(messageRoomModel);
           }
           catch(err)
           {
@@ -183,7 +189,10 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
           }
         
         });
-        roomFilterList = roomAllList;
+
+        roomFilterList = tempRoomList.reversed.toList();
+        tempRoomList.clear();
+        // roomFilterList = roomAllList.reversed.toList();
         //roomList.sort(compareRoomList);
       });
     });
@@ -324,7 +333,7 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
     // getRoomList();
   }
 
-  Widget searchWidget()
+  Widget _searchWidget()
   {
     return  Container(
                 height: 65,
@@ -335,20 +344,20 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(borderRadius: BorderRadius.circular(4),
-                      color: ColorConstants.gray3
+                      color: ColorConstants.white
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Image.asset(ImageConstants.chatSearchWhite, height: 24, width: 24),
+                      Image.asset(ImageConstants.chatSearchWhite, height: 24, width: 24, color: Colors.grey,),
                       const SizedBox(width: 10),
                       Expanded(
                         child: TextField(
                           controller: searchController,
                           cursorColor: Colors.black,
                           style: TextStyle(
-                              color: Colors.white,
+                              color: Colors.grey,
                               fontWeight: FontWeight.w400,
                               fontFamily: FontConstants.AppFont,
                               fontSize: 14,
@@ -362,12 +371,12 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
                               counterText: "",
                               contentPadding: EdgeInsets.zero,
                               floatingLabelBehavior: FloatingLabelBehavior.never,
-                              hintText: '검색',
+                              hintText: '채팅방 검색',
                               isDense: true,
                               hintStyle: TextStyle(
                                   fontWeight: FontWeight.w400,
                                   fontFamily: FontConstants.AppFont,
-                                  color: ColorConstants.halfWhite,
+                                  color: Colors.grey,
                                   fontSize: 14
                               ),
                               border: InputBorder.none),
@@ -384,7 +393,7 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
               );
   }
 
-  Widget messageListWidget()
+  Widget _messageRoomListWidget()
   {
     return Expanded(
                 child: Container(
@@ -549,23 +558,9 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
               );
   }
 
-
-  
-
-  @override
-  Widget build(BuildContext context) {
-    return PageLayout(
-        //onBack: onBackPressed,
-        isLoading: isLoading,
-        child: SizedBox(
-        width: double.infinity,
-        height: double.infinity,
-        child: Column(children: [
-          SizedBox(height: Get.height * 0.04),
-          Obx(() => AppText(text: "ping: ${base_pingMiliSeconds.value}ms")),
-
-          // SizedBox(height: Get.height * 0.07),
-          Container(
+  Widget _topBarWidget()
+  {
+    return  Container(
             height: 56, // AppBar의 기본 높이
             child: Stack(
               children: [
@@ -607,39 +602,39 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
                 ),
               ],
             ),
-          ),
-          Row(
-            children: [
-              InkWell(
-                onTap: () => {Get.to(SerachUserScreen(tinode: tinode_global))},
-                child: Container(
-                  width: 80,
-                  height: 50,
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.black,
-                        width: 2.0,
-                      ),
-                      borderRadius: const BorderRadius.all(Radius.circular(4))),
-                  child: AppText(
-                    text: "유저검색",
-                    color: Colors.black,
-                  ),
-                ),
-              ),          
-            ],
-          ),
-          searchWidget(),
+          );
+           
+  }
+
+
   
+
+  @override
+  Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: ColorConstants.backgroundGrey, // 원하는 색상으로 변경
+      statusBarBrightness: Brightness.light, // iOS에서 상태바 콘텐츠를 어둡게 (검은색)
+      statusBarIconBrightness: Brightness.dark, 
+    ));
+    return PageLayout(
+        //onBack: onBackPressed,
+        isLoading: isLoading,
+        child: SizedBox(
+        width: double.infinity,
+        height: double.infinity,
+        child: Column(children: [
+          SizedBox(height: Get.height * 0.04),
+          Obx(() => AppText(text: "ping: ${base_pingMiliSeconds.value}ms")),
+
+          // SizedBox(height: Get.height * 0.07),
+         _topBarWidget(),
+          _searchWidget(),
+
           SizedBox(
             height: 10,
           ),
       
-          messageListWidget(),
+          _messageRoomListWidget(),
           SizedBox(height: Constants.navBarHeight,),
           // Expanded(
           //   child: ListView.builder(

@@ -106,33 +106,98 @@ String chatTime(String chatAt) {
   return result;
 }
 
-String chatTime2(String chatAt, ) {
+String chatTime2(String chatAt) {
   String result = "";
   if (chatAt.isNotEmpty) {
-    DateFormat format1 = DateFormat('yyyy-MM-ddTHH:mm:ss.SSSZ');
-    //DateFormat format2 = DateFormat('aa hh:mm');
-    DateFormat format2 ;
-    DateTime date = format1.parse(chatAt);
-    date = date.add(const Duration(hours: 9));
-    //result = format2.format(date);
-    DateTime now = DateTime.now();
-    if(date.year != now.year){
-      format2 = DateFormat('dm_time_format2'.tr());
-    }else if(date.month != now.month || date.day != now.day){
-      DateTime yesterDay = now.subtract(Duration(days: 1));
-      if(date.month == yesterDay.month && date.day == yesterDay.day  ){
-        return "yesterday".tr();
+    try {
+      // ISO 8601 형식으로 파싱
+      DateTime date = DateTime.parse(chatAt);
+      // 한국 시간대로 변환 (UTC +9)
+      date = date.add(const Duration(hours: 9));
+
+      DateTime now = DateTime.now();
+      DateFormat format2;
+
+      if (date.year != now.year) {
+        format2 = DateFormat('yyyy-MM-dd');
+      } else if (date.month != now.month || date.day != now.day) {
+        DateTime yesterDay = now.subtract(Duration(days: 1));
+        if (date.month == yesterDay.month && date.day == yesterDay.day) {
+          return "어제";
+        } else {
+          format2 = DateFormat('MM-dd');
+        }
+      } else {
+        format2 = DateFormat('HH:mm');
       }
-      else {
-      format2 = DateFormat('dm_time_format3'.tr());
-      }
-    }else {
-      format2 = DateFormat('hh:mm aa');
+
+      result = format2.format(date);
+    } catch (e) {
+      print("Error parsing date: $e");
+      result = "Invalid date";
     }
-    result = format2.format(date);
   }
   return result;
 }
+// String chatTime2(String chatAt) {
+//   String result = "";
+//   if (chatAt.isNotEmpty) {
+//     try {
+//       // ISO 8601 형식으로 파싱
+//       DateTime date = DateTime.parse(chatAt).toLocal();
+
+//       DateTime now = DateTime.now();
+//       DateFormat format2;
+
+//       if (date.year != now.year) {
+//         format2 = DateFormat('yyyy-MM-dd');
+//       } else if (date.month != now.month || date.day != now.day) {
+//         DateTime yesterDay = now.subtract(Duration(days: 1));
+//         if (date.month == yesterDay.month && date.day == yesterDay.day) {
+//           return "어제";
+//         } else {
+//           format2 = DateFormat('MM-dd');
+//         }
+//       } else {
+//         format2 = DateFormat('HH:mm');
+//       }
+
+//       result = format2.format(date);
+//     } catch (e) {
+//       print("Error parsing date: $e");
+//       result = "Invalid date";
+//     }
+//   }
+//   return result;
+// }
+
+// String chatTime2(String chatAt, ) {
+//   String result = "";
+//   if (chatAt.isNotEmpty) {
+//     DateFormat format1 = DateFormat('yyyy-MM-ddTHH:mm:ss.SSSZ');
+//     //DateFormat format2 = DateFormat('aa hh:mm');
+//     DateFormat format2 ;
+//     DateTime date = format1.parse(chatAt);
+//     date = date.add(const Duration(hours: 9));
+//     //result = format2.format(date);
+//     DateTime now = DateTime.now();
+//     if(date.year != now.year){
+//       format2 = DateFormat('dm_time_format2'.tr());
+//     }else if(date.month != now.month || date.day != now.day){
+//       DateTime yesterDay = now.subtract(Duration(days: 1));
+//       if(date.month == yesterDay.month && date.day == yesterDay.day  ){
+//         return "yesterday".tr();
+//       }
+//       else {
+//       format2 = DateFormat('dm_time_format3'.tr());
+//       }
+//     }else {
+//       format2 = DateFormat('hh:mm aa');
+//     }
+//     result = format2.format(date);
+//   }
+//   return result;
+// }
 
 String chatTime3(String chatAt) {
   String result = "";

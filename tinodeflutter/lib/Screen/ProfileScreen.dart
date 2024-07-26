@@ -6,7 +6,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Trans;
+
 import 'package:get/get_core/src/get_main.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_gallery/photo_gallery.dart';
@@ -29,11 +30,14 @@ import 'package:tinodeflutter/model/btn_bottom_sheet_model.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/page/base/base_state.dart';
+import 'package:tinodeflutter/page/base/page_layout.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
 import 'package:tinodeflutter/Screen/Login/login.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:tinodeflutter/Screen/Login/login.dart' as LoignScreen;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:easy_localization/easy_localization.dart';
+
 
 class ProfileScreen extends StatefulWidget {
   UserModel user;
@@ -140,7 +144,7 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
           //바깥 영역 터치시 닫을지 여부 결정
           builder: ((context) {
             return Dialog(
-              backgroundColor: Colors.grey[300],
+              backgroundColor: Colors.grey,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16)),
               child: Container(
@@ -154,7 +158,7 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
                       height: 15,
                     ),
                     AppText(
-                      text: "my_qr_code",
+                      text: "my_qr_code".tr(),
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                     ),
@@ -193,15 +197,15 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
                       onTap: () {
                         Clipboard.setData(ClipboardData(
                             text: "https://jade-chat.com/${user.name}"));
-                        Utils.showToast("qr_copy_complete");
+                        Utils.showToast("qr_copy_complete".tr());
                       },
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          ImageUtils.setImage(ImageConstants.copyIcon, 18, 18),
+                          ImageUtils.setImage(ImageConstants.copyIcon, 18, 18, color:  Colors.black),
                           AppText(
-                            text: "qr_copy",
+                            text: "qr_copy".tr(),
                             fontSize: 14,
                           )
                         ],
@@ -219,14 +223,20 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
           await ScreenBrightness().setScreenBrightness(currentBright);
         });
       },
-      child: ImageUtils.setImage(ImageConstants.qr, 25, 25),
+      child: Icon(Icons.qr_code,  size: 25, color: Colors.black,),
+      // ImageUtils.setImage(ImageConstants.qr, 25, 25,),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.grey,
+     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+  statusBarColor: Colors.white, // 상태바 배경색을 흰색으로 설정
+  statusBarBrightness: Brightness.light, // iOS에서 상태바 콘텐츠를 어둡게 (검은색)
+  statusBarIconBrightness: Brightness.dark, // Android에서 상태바 아이콘을 어둡게 (검은색)
+));
+    return  Scaffold(
+        backgroundColor: Colors.white,
         resizeToAvoidBottomInset: true,
         body: Column(children: [
           SizedBox(height: Get.height * 0.07),
@@ -239,19 +249,19 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // if(user.id!=Constants.user.id)
+                   if(user.id!=Constants.user.id)
                     GestureDetector(
                         onTap: () {
                           Get.back();
                         },
-                        child: Icon(Icons.arrow_back_ios, color: Colors.white)),
+                        child: Icon(Icons.arrow_back_ios, color: Colors.black)),
 
                     AppText(
                       text: user.id == tinode_global.userId //Constants.user.id
-                          ? "my_page"
+                          ? "my_page".tr()
                           : user.id != 0
                               ? user.name
-                              : "deleted_account",
+                              : "deleted_account".tr(),
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     )
@@ -301,7 +311,7 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
                                         //Get.offAll(()=>Login(title: "티노드"));
                                       }));
                             },
-                            child: SvgPicture.asset(ImageConstants.moreIcon),
+                            child:  ImageUtils.setImage(ImageConstants.profileSetting, 28, 28, color: Colors.black), // SvgPicture.asset(ImageConstants.moreIcon,),
                           )
                         ],
                       )
@@ -316,87 +326,105 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
                 child: ImageUtils.ProfileImage(user.picture ?? "", 150, 150),
               ),
               if (user.id == Constants.user.id)
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: GestureDetector(
-                    onTap: () async {
-                      if (await _promptPermissionSetting()) {
-                        List<BtnBottomSheetModel> items = [];
-                        items.add(BtnBottomSheetModel(
-                            ImageConstants.cameraIcon, "camera", 0));
-                        items.add(BtnBottomSheetModel(
-                            ImageConstants.albumIcon, "gallery", 1));
-                        items.add(BtnBottomSheetModel(ImageConstants.deleteIcon,
-                            "current_profile_delete", 2));
+                Positioned(
+                  bottom: -10, // 프로필 이미지와 겹치도록 조정
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Transform.translate(
+                      offset: Offset(0, -10), // 위로 약간 이동
+                      child: GestureDetector(
+                        onTap: () async {
+            if (await _promptPermissionSetting()) {
+              List<BtnBottomSheetModel> items = [];
+              items.add(BtnBottomSheetModel(
+                  ImageConstants.cameraIcon, "camera".tr(), 0));
+              items.add(BtnBottomSheetModel(
+                  ImageConstants.albumIcon, "gallery".tr(), 1));
+              items.add(BtnBottomSheetModel(ImageConstants.deleteIcon,
+                  "current_profile_delete".tr(), 2));
 
-                        Get.bottomSheet(
-                            enterBottomSheetDuration:
-                                Duration(milliseconds: 100),
-                            exitBottomSheetDuration:
-                                Duration(milliseconds: 100),
-                            BtnBottomSheetWidget(
-                              btnItems: items,
-                              onTapItem: (sheetIdx) async {
-                                if (sheetIdx == 0) {
-                                  AssetEntity? assets =
-                                      await MyAssetPicker.pickCamera(
-                                          context, false);
-                                  if (assets != null) {
-                                    procAssets([assets]);
-                                  }
-                                } else if (sheetIdx == 1) {
-                                  if (await _promptPermissionSetting()) {
-                                    showModalBottomSheet(
-                                        context: context,
-                                        isScrollControlled: true,
-                                        isDismissible: true,
-                                        backgroundColor: Colors.transparent,
-                                        constraints: BoxConstraints(
-                                          minHeight: 0.8,
-                                          maxHeight: Get.height * 0.95,
-                                        ),
-                                        builder: (BuildContext context) {
-                                          return DraggableScrollableSheet(
-                                              initialChildSize: 0.5,
-                                              minChildSize: 0.4,
-                                              maxChildSize: 0.9,
-                                              expand: false,
-                                              builder: (_, controller) =>
-                                                  GalleryBottomSheet(
-                                                    controller: controller,
-                                                    limitCnt: 1,
-                                                    sendText: "profile_change",
-                                                    onlyImage: true,
-                                                    onTapSend: (results) {
-                                                      procAssetsWithGallery(
-                                                          results);
-                                                    },
-                                                  ));
-                                        });
-                                  }
-                                } else {
-                                  // delete profile image
-                                  // var response = await DioClient.updateUserProfile( null, null, true, null);
-                                  await CachedNetworkImage.evictFromCache(
-                                      user.picture ?? "");
-                                  //  getUserInfo();
-                                }
-                              },
-                            ));
+              Get.bottomSheet(
+                  enterBottomSheetDuration: Duration(milliseconds: 100),
+                  exitBottomSheetDuration: Duration(milliseconds: 100),
+                  BtnBottomSheetWidget(
+                    btnItems: items,
+                    onTapItem: (sheetIdx) async {
+                      if (sheetIdx == 0) {
+                        AssetEntity? assets =
+                            await MyAssetPicker.pickCamera(context, false);
+                        if (assets != null) {
+                          procAssets([assets]);
+                        }
+                      } else if (sheetIdx == 1) {
+                        if (await _promptPermissionSetting()) {
+                          showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              isDismissible: true,
+                              backgroundColor: Colors.transparent,
+                              constraints: BoxConstraints(
+                                minHeight: 0.8,
+                                maxHeight: Get.height * 0.95,
+                              ),
+                              builder: (BuildContext context) {
+                                return DraggableScrollableSheet(
+                                    initialChildSize: 0.5,
+                                    minChildSize: 0.4,
+                                    maxChildSize: 0.9,
+                                    expand: false,
+                                    builder: (_, controller) =>
+                                        GalleryBottomSheet(
+                                          controller: controller,
+                                          limitCnt: 1,
+                                          sendText: "profile_change".tr(),
+                                          onlyImage: true,
+                                          onTapSend: (results) {
+                                            procAssetsWithGallery(results);
+                                          },
+                                        ));
+                              });
+                        }
+                      } else {
+                        // delete profile image
+                        await CachedNetworkImage.evictFromCache(
+                            user.picture ?? "");
+                        //  getUserInfo();
                       }
                     },
-                    child:
-                        ImageUtils.setImage(ImageConstants.editProfile, 20, 20),
+                  ));
+            }
+          },
+                        child: Container(
+                          width: 30, // 컨테이너 크기 조정
+                          height: 30,
+                          // decoration: BoxDecoration(
+                          //   color: Colors.white, // 배경색 추가
+                          //   shape: BoxShape.circle, // 원형 모양
+                          //   border: Border.all(color: Colors.grey, width: 1), // 테두리 추가
+                          // ),
+                          child: Center(
+                            child: ImageUtils.setImage(ImageConstants.editProfile, 20, 20),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                )
+                ),
             ],
           ),
+
           SizedBox(
             height: 10,
           ),
-          Center(
-            child: AppText(text: user.name),
-          ),
+         Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children:[
+               AppText(text: "이름 :", fontSize: 20, fontWeight: FontWeight.w700,),
+               SizedBox(width: 10,),
+               AppText(text: user.name, fontSize: 20, fontWeight: FontWeight.w700,),
+          ]),
+          
           SizedBox(
             height: 10,
           ),
@@ -404,11 +432,12 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
               child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              AppText(text: tinode_global.userId),
-              SizedBox(
-                width: 20,
-              ),
-              if(user.id == Constants.user.id) QrWidget(),
+               AppText(text: "JadeChat ID :", fontSize: 16, fontWeight: FontWeight.w700,),
+               SizedBox(width: 10,),
+               AppText(text: user.id, fontSize: 16, fontWeight: FontWeight.w700,),
+               SizedBox(width: 15,),
+               if(user.id == Constants.user.id) QrWidget(),
+
             ],
           )),
           SizedBox(
@@ -438,7 +467,7 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
               alignment: Alignment.center,
               child: Column(children: [
                 
-                AppText(text: "멤버십 정보", fontSize: 25,),
+               // AppText(text: "멤버십 정보", fontSize: 25,),
                 // Row(
                 //   mainAxisAlignment: MainAxisAlignment.center,
                 //   crossAxisAlignment: CrossAxisAlignment.center,
@@ -455,9 +484,9 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                       AppText(
-                    text: "서비스 이용기간",
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
+                    text: "서비스 이용기간 :",
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
                     //color: ColorConstants.white,
                     ),
                        const SizedBox(
@@ -467,8 +496,8 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
                     if (Constants.user.membership != null &&  Constants.user.membership!['level'] != 0)
                       AppText(
                         text: "${Constants.user.membership!['endat']}",
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
                         color: ColorConstants.colorMain,
                       )
                   ],

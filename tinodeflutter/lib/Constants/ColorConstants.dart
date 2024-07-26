@@ -54,6 +54,7 @@ class ColorConstants {
   static Color textFormGry=Color(0xff555768);
   static Color textDesGry=Color(0xff999796);
 
+  static Color backgroundGrey = Color(0xFFEDEDED);
   static Color gray3 = Color(0xff828282);
   static const Color white = Color(0xffffffff);
   static const Color black = Color(0xff000000);

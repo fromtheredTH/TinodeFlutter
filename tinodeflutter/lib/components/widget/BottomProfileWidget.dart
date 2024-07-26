@@ -72,22 +72,22 @@ class _BottomProfileWidget extends State<BottomProfileWidget> {
                       children: [
                         AppText(
                           text: widget.user.id != 0 ? widget.user.name : "deleted_account".tr(),
-                          fontSize: 14,
+                          fontSize: 18,
                           maxLine: 1,
                           fontWeight: FontWeight.w700,
                         ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            AppText(text: "@${widget.user.name}",
-                                fontSize: 12,
-                                color: ColorConstants.halfWhite),
+                        // Row(
+                        //   crossAxisAlignment: CrossAxisAlignment.center,
+                        //   children: [
+                        //     AppText(text: "@${widget.user.name}",
+                        //         fontSize: 12,
+                        //         color: ColorConstants.halfWhite),
 
-                            SizedBox(width: 5,),
+                        //     SizedBox(width: 5,),
 
-                           //   TagCreatorWidget(positionIndex: widget.user.profile.jobGroup,)
-                          ],
-                        ),
+                        //    //   TagCreatorWidget(positionIndex: widget.user.profile.jobGroup,)
+                        //   ],
+                        // ),
                       ],
                     ),
                   ],
@@ -107,11 +107,11 @@ class _BottomProfileWidget extends State<BottomProfileWidget> {
                   },
                   child: Row(
                     children: [
-                      ImageUtils.setImage(ImageConstants.profileSetting, 24, 24),
+                      ImageUtils.setImage(ImageConstants.profileSetting, 28, 28),
                       SizedBox(width: 10,),
                       AppText(
                         text: "setting".tr(),
-                        fontSize: 14,
+                        fontSize: 17,
                       )
                     ],
                   ),
@@ -126,11 +126,11 @@ class _BottomProfileWidget extends State<BottomProfileWidget> {
                   },
                   child: Row(
                     children: [
-                      ImageUtils.setImage(ImageConstants.logout, 24, 24),
+                      ImageUtils.setImage(ImageConstants.logout, 28, 28),
                       SizedBox(width: 10,),
                       AppText(
                         text: "logout".tr(),
-                        fontSize: 14,
+                        fontSize: 17,
                       )
                     ],
                   ),

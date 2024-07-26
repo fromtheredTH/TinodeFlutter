@@ -13,6 +13,7 @@ import 'package:tinodeflutter/Constants/ImageUtils.dart';
 import 'package:tinodeflutter/Constants/RouteString.dart';
 import 'package:tinodeflutter/Screen/BottomNavBarScreen.dart';
 import 'package:tinodeflutter/Screen/ProfileScreen.dart';
+import 'package:tinodeflutter/Screen/SearchUser.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/components/widget/UserListItemWidget.dart';
 import 'package:tinodeflutter/components/focus_detector.dart';
@@ -180,48 +181,72 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
   }
 
   Future<void> _delFriend(String userid) async {
-    var data = await tinode_global.friMeta(userid, 'del');
+    try{
+      var data = await tinode_global.friMeta(userid, 'del');
+      showToast('친구 삭제 완료');
+    }
+    catch(err)
+    {
+      print("delete err : $err");
+    }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    var size = MediaQuery.of(context).size;
-    final double itemHeight =
-        size.width * 0.4 * 1.8; // Adjust the fraction as needed
-    final double itemWidth = size.width * 0.4;
+  Widget _topBarWidget()
+  {
+    return  Container(
+                      height: 56, // AppBar의 기본 높이
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: Center(
+                              child: AppText(
+                                text: "대화 상대",
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            right: 16,
+                            top: 0,
+                            bottom: 0,
+                            child: Center(
+                              child: InkWell(
+                                onTap: () {
+                                  Get.to(SerachUserScreen());
+                                  // Navigator.of(context).push(
+                                  //   SwipeablePageRoute(
+                                  //     canOnlySwipeFromEdge: true,
+                                  //     builder: (context) => MessageRoomAddScreen(),
+                                  //   ),
+                                  // ).then((value) {});
+                                },
+                                child: SizedBox(
+                                  width: 30,
+                                  height: 30,
+                                  child: Icon(
+                                    Icons.person_add,
+                                    size: 25,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+  }
 
-    return FocusDetector(
-        onFocusLost: () {},
-        onFocusGained: () {
-          setState(() {});
-        },
-        child: GestureDetector(
-            onTap: FocusScope.of(context).unfocus,
-            child: Scaffold(
-              backgroundColor: Colors.grey,
-              resizeToAvoidBottomInset: true,
-              body: Padding(
-                padding: EdgeInsets.only(
-                    right: Get.width * 0.01, left: Get.width * 0.01),
-                child: Column(
-                  children: [
-                    SizedBox(height: Get.height * 0.07),
-
-                    // Padding(
-                    //     padding: EdgeInsets.only(left: 10, right: 10),
-                    //     child: CustomTitleBar(callBack: (){
-                    //       Get.to(ProfileScreen(user: Constants.user, tinode: tinode,));
-                    //     },onTapLogo: (){
-                    //       widget.onTapLogo();
-                    //     },)),
-                    SizedBox(height: Get.height * 0.02),
-                    Padding(
+  Widget _searchWidget()
+  {
+    return  Padding(
                       padding: EdgeInsets.only(
                           right: Get.width * 0.02, left: Get.width * 0.02),
                       child: Container(
                           width: Get.width, // Set width according to your needs
                           decoration: BoxDecoration(
-                            color: ColorConstants.searchBackColor,
+                            color: Colors.white,
                             borderRadius: BorderRadius.circular(
                                 6.0), // Adjust the value as needed
                           ),
@@ -259,7 +284,7 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
                                     previousSearchText = text;
                                   },
                                   style: TextStyle(
-                                      color: ColorConstants.white,
+                                      color: Colors.grey,
                                       fontFamily: FontConstants.AppFont,
                                       fontSize: 16),
                                   textInputAction: TextInputAction.search,
@@ -272,16 +297,13 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
                                     border: InputBorder.none,
                                     prefixIcon: Padding(
                                       padding: const EdgeInsets.all(10.0),
-                                      child: SvgPicture.asset(
-                                        ImageConstants.searchIcon,
-                                        color: Colors.white,
-                                      ),
+                                      child: ImageUtils.setImage(ImageConstants.chatSearchWhite, 10, 10, color: Colors.grey),
                                     ),
                                     // Align hintText to center
                                     hintStyle: TextStyle(
-                                        color: ColorConstants.halfWhite,
+                                        color: Colors.grey,
                                         fontFamily: FontConstants.AppFont,
-                                        fontSize: 16),
+                                        fontSize: 14),
                                     // alignLabelWithHint: true,
                                   ),
                                 ),
@@ -305,13 +327,50 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
                               )
                             ],
                           )),
-                    ),
+                    );
+  }
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
+    final double itemHeight =
+        size.width * 0.4 * 1.8; // Adjust the fraction as needed
+    final double itemWidth = size.width * 0.4;
+
+    return FocusDetector(
+        onFocusLost: () {},
+        onFocusGained: () {
+          setState(() {});
+        },
+        child: GestureDetector(
+            onTap: FocusScope.of(context).unfocus,
+            child: Scaffold(
+              backgroundColor: ColorConstants.backgroundGrey,
+              resizeToAvoidBottomInset: true,
+              body: Padding(
+                padding: EdgeInsets.only(
+                    right: Get.width * 0.01, left: Get.width * 0.01),
+                child: Column(
+                  children: [
+                    SizedBox(height: Get.height * 0.04),
+                    _topBarWidget(),
+                    // Padding(
+                    //     padding: EdgeInsets.only(left: 10, right: 10),
+                    //     child: CustomTitleBar(callBack: (){
+                    //       Get.to(ProfileScreen(user: Constants.user, tinode: tinode,));
+                    //     },onTapLogo: (){
+                    //       widget.onTapLogo();
+                    //     },)),
+                    // SizedBox(height: Get.height * 0.02),
+                    _searchWidget(),
                     // 친구리스트 보여지는 영역
                     isSearchMode
                         ? Expanded(
                             child: isSearchLoading
                                 ? LoadingWidget()
-                                : friendList.length == 0
+                                : friendList.isEmpty
                                     ? Center(
                                         child: AppText(
                                           text: "empty_search".tr(),
@@ -319,58 +378,16 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
                                           color: ColorConstants.gray3,
                                         ),
                                       )
-                                    : Padding(
+                                    : Container(
                                         padding: EdgeInsets.only(
                                             left: 10, right: 10),
                                         child: SingleChildScrollView(
+                                          
                                           child: Column(
-                                            children: [
-                                           
-                                              friendList.isNotEmpty
-                                                  ? Column(
-                                                      children: [
-                                                        // Container(
-                                                        //   padding:
-                                                        //       EdgeInsets.only(
-                                                        //           bottom: 25),
-                                                        //   child: Row(
-                                                        //     mainAxisAlignment:
-                                                        //         MainAxisAlignment
-                                                        //             .center,
-                                                        //     crossAxisAlignment:
-                                                        //         CrossAxisAlignment
-                                                        //             .center,
-                                                        //     children: [
-                                                        //       SizedBox(
-                                                        //           width: 30),
-                                                        //       Expanded(
-                                                        //           child: Container(
-                                                        //               height:
-                                                        //                   0.5,
-                                                        //               color: ColorConstants
-                                                        //                   .colorMain)),
-                                                        //       SizedBox(
-                                                        //           width: 20),
-                                                        //       AppText(
-                                                        //         text:
-                                                        //             "user".tr(),
-                                                        //         fontSize: 10,
-                                                        //         color: ColorConstants
-                                                        //             .colorMain,
-                                                        //       ),
-                                                        //       SizedBox(
-                                                        //           width: 20),
-                                                        //       Expanded(
-                                                        //           child: Container(
-                                                        //               height:
-                                                        //                   0.51,
-                                                        //               color: ColorConstants
-                                                        //                   .colorMain)),
-                                                        //       SizedBox(
-                                                        //           width: 30),
-                                                        //     ],
-                                                        //   ),
-                                                        // ),
+                                            children: [                                           
+                                              friendList.isNotEmpty? 
+                                              Column(
+                                                      children: [                                                      
                                                         ListView.builder(
                                                             shrinkWrap: true,
                                                             physics:
@@ -379,34 +396,23 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
                                                                 friendList
                                                                     .length,
                                                             itemBuilder:
-                                                                (context,
-                                                                    index) {
+                                                                (context,index) {
                                                               Key key = Key(
-                                                                  friendList[
-                                                                          index]
-                                                                      .id
-                                                                      .toString());
+                                                                  friendList[index].id.toString());
                                                               return UserListItemWidget(
                                                                 key: key,
-                                                                tinode: tinode_global,
-                                                                user:
-                                                                    friendList[
-                                                                        index],
+                                                                user:friendList[index],
                                                                 isShowAction:
                                                                     true,
                                                                     unFollowUser: (){
                                                                       _delFriend(friendList[index].id);
                                                                        setState(() {
-                                                                    friendList
-                                                                        .removeAt(
-                                                                            index);
+                                                                    friendList.removeAt(index);
                                                                   });
                                                                     },
                                                                 deleteUser: () {
                                                                   setState(() {
-                                                                    friendList
-                                                                        .removeAt(
-                                                                            index);
+                                                                    friendList.removeAt(index);
                                                                   });
                                                                 },
                                                               );
@@ -429,93 +435,37 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
                                           color: Colors.black,
                                         ),
                                       )
-                                    : Padding(
+                                    : Container(
                                         padding: EdgeInsets.only(
+                                            top:10,
                                             left: 10, right: 10),
+                                            color: Colors.white,
                                         child: SingleChildScrollView(
                                           child: Column(
                                             children: [
                                              
                                               friendList.isNotEmpty
                                                   ? Column(
-                                                      children: [
-                                                        // Container(
-                                                        //   padding:
-                                                        //       EdgeInsets.only(
-                                                        //           bottom: 25),
-                                                        //   child: Row(
-                                                        //     mainAxisAlignment:
-                                                        //         MainAxisAlignment
-                                                        //             .center,
-                                                        //     crossAxisAlignment:
-                                                        //         CrossAxisAlignment
-                                                        //             .center,
-                                                        //     children: [
-                                                        //       SizedBox(
-                                                        //           width: 30),
-                                                        //       Expanded(
-                                                        //           child: Container(
-                                                        //               height:
-                                                        //                   0.5,
-                                                        //               color: ColorConstants
-                                                        //                   .colorMain)),
-                                                        //       SizedBox(
-                                                        //           width: 20),
-                                                        //       AppText(
-                                                        //         text:
-                                                        //             "user".tr(),
-                                                        //         fontSize: 10,
-                                                        //         color: ColorConstants
-                                                        //             .colorMain,
-                                                        //       ),
-                                                        //       SizedBox(
-                                                        //           width: 20),
-                                                        //       Expanded(
-                                                        //           child: Container(
-                                                        //               height:
-                                                        //                   0.51,
-                                                        //               color: ColorConstants
-                                                        //                   .colorMain)),
-                                                        //       SizedBox(
-                                                        //           width: 30),
-                                                        //     ],
-                                                        //   ),
-                                                        // ),
+                                                      children: [                                                    
                                                         ListView.builder(
                                                             shrinkWrap: true,
-                                                            physics:
-                                                                NeverScrollableScrollPhysics(),
-                                                            itemCount:
-                                                                friendList
-                                                                    .length,
-                                                            itemBuilder:
-                                                                (context,
-                                                                    index) {
-                                                              Key key = Key(
-                                                                  friendList[
-                                                                          index]
-                                                                      .id
-                                                                      .toString());
+                                                            physics: NeverScrollableScrollPhysics(),
+                                                            itemCount: friendList.length,
+                                                            itemBuilder: (context,index) {
+                                                              Key key = Key(friendList[index].id.toString());
                                                               return UserListItemWidget(
                                                                 key: key,
-                                                                tinode: tinode_global,
-                                                                user: friendList[
-                                                                    index],
-                                                                isShowAction:
-                                                                    true,
+                                                                user: friendList[index],
+                                                                isShowAction: true,
                                                                 unFollowUser:(){
                                                                   _delFriend(friendList[index].id);
                                                                    setState(() {
-                                                                    friendList
-                                                                        .removeAt(
-                                                                            index);
+                                                                    friendList.removeAt(index);
                                                                   });
                                                                 },
                                                                 deleteUser: () {
                                                                   setState(() {
-                                                                    friendList
-                                                                        .removeAt(
-                                                                            index);
+                                                                    friendList.removeAt(index);
                                                                   });
                                                                 },
                                                               );
@@ -527,49 +477,9 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
                                           ),
                                         ),
                                       )
-                            // child: FutureBuilder(
-                            //     future: postFuture,
-                            //     builder: (context, snapshot) {
-                            //       if(snapshot.hasData){
-                            //         return RefreshIndicator(
-                            //             color: ColorConstants.colorMain,
-                            //             onRefresh: () async {
-                            //           //    await refreshPosts();
-                            //               setState(() {
-                            //               });
-                            //             },
-                            //             child: GridView.builder(
-                            //               padding: EdgeInsets.only(top: 15),
-                            //               shrinkWrap: true,
-                            //               scrollDirection: Axis.vertical,
-                            //               controller: scrollController,
-                            //               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            //                   crossAxisCount: 2, // 1개의 행에 항목을 3개씩
-                            //                   mainAxisSpacing: 10,
-                            //                   crossAxisSpacing: 10,
-                            //                   childAspectRatio: (itemWidth / itemHeight)
-                            //               ),
-                            //               itemCount: hasPostNextPage ? posts.length+1 : posts.length,
-                            //               itemBuilder: (context, index) {
-                            //                 if(posts.length == index){
-                            //                   return Padding(
-                            //                     padding: EdgeInsets.only(top: 30, bottom: 50),
-                            //                     child: LoadingWidget(),
-                            //                   );
-                            //                 }
-                            //                 return DiscoverWidget(post: posts[index]);
-                            //               },
-                            //             )
-                            //         );
-                            //       }
-                            //       return Expanded(
-                            //           child: LoadingWidget()
-                            //       );
-                            //     }
-                            // )
+                         
                             ),
                     SizedBox(height: Constants.navBarHeight,),
-                    // SizedBox(height: Get.height*0.05,)
                   ],
                 ),
               ),

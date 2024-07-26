@@ -30,7 +30,7 @@ class PageLayout extends StatefulWidget {
     isAvoidResize ??= true;
     drawer ??= null;
     endDrawer ??= null;
-    bgColor ??= ColorConstants.white;
+    bgColor ??= ColorConstants.backgroundGrey;
     orientation ??= Orientation.portrait;
     safeAreaColor ??= ColorConstants.white;
   }
