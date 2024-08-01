@@ -2,12 +2,13 @@ class UserModel {
    String id;
    String name;
    String? email;
+   String searchId;
    String picture;
    bool isFreind=false;
    dynamic? membership;
    bool selected=false;
 
-  UserModel({required this.id, required this.name, required this.picture, required this.isFreind , this.membership, this.selected=false});
+  UserModel({required this.id, required this.name, required this.picture, required this.isFreind , this.membership, this.searchId="", this.selected=false});
 
 
    UserModel.fromJson(Map<String, dynamic> json)
@@ -17,7 +18,8 @@ class UserModel {
        // nickname = json['nickname'] ?? "",
         // channelId = json['channel_id'] ?? "",
         email = json['email'] ?? "",
-        picture = json['public']['photo']['ref'] ?? "";
+        picture = json['public']['photo']['ref'] ?? "",
+        searchId = json['public']['photo']['ref'] ?? "";
         //isFreind = json['picture'] ?? json["profile_img"] ?? "";
         // urlBanner = json['url_banner'] ?? "",
         // isDeveloper = json['is_developer'] != null ? json['is_developer'] is int ? json['is_developer'] == 1 ? true : false : json['is_developer'] : false,
@@ -46,6 +48,7 @@ class UserModel {
       // 'channel_id': channelId,
       'email': email,
       'picture': picture,
+      'searchId': searchId,
       // 'url_banner': urlBanner,
       // 'is_developer': isDeveloper == 1,
       // 'id_verified': idVerified,

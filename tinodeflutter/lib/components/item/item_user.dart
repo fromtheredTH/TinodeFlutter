@@ -28,9 +28,20 @@ class ItemUser extends StatelessWidget {
           onClick();
         }
       },
-      child: Column(
+      child: Container(
+          padding: const EdgeInsets.only(bottom: 5),
+          decoration: 
+            BoxDecoration(
+                        border: Border(
+                        bottom: BorderSide(
+                          color: Colors.grey.shade300, // 선의 색상
+                          width: 0.5, // 선의 두께
+                        ),
+                      ),
+                    ),
+        child: Column(
         children: [
-          const SizedBox(height: 20),
+           const SizedBox(height: 5),
           Row(
             children: [
               const SizedBox(width: 10),
@@ -54,35 +65,37 @@ class ItemUser extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     fontSize: 13,
                     maxLine: 1,
-                    color: selected ? ColorConstants.colorMain : Colors.white,
+                    color: Colors.black, //selected ? ColorConstants.colorMain : Colors.black,
                     fontWeight: FontWeight.w700,
                   ),
                   ),
-                  SizedBox(height: 3,),
-                  Opacity(
-                    opacity: isDisabled ? 0.3 : 1,
-                    child: AppText(
-                    text: user.id ?? '',
-                    overflow: TextOverflow.ellipsis,
-                    fontSize: 12,
-                    maxLine: 1,
-                    color: ColorConstants.halfWhite,
-                  ),
-                  ),
+                  // SizedBox(height: 3,),
+                  // Opacity(
+                  //   opacity: isDisabled ? 0.3 : 1,
+                  //   child: AppText(
+                  //   text: user.id ?? '',
+                  //   overflow: TextOverflow.ellipsis,
+                  //   fontSize: 12,
+                  //   maxLine: 1,
+                  //   color: ColorConstants.halfBlack,
+                  // ),
+                  // ),
                 ],
               )),
               const SizedBox(width: 6),
               Opacity(
                 opacity: isDisabled ? 0.3 : 1,
-                child: Image.asset(isDisabled ? ImageConstants.chatRadioOnDisabled : selected ? ImageConstants.chatRadioOn : ImageConstants.chatRadioOff,
-                  height: 24, width: 24),
+                child: 
+                 isDisabled ? Image.asset(ImageConstants.chatRadioOnDisabled, height: 24, width: 24, color: Colors.grey,) :
+                 selected? Image.asset(ImageConstants.chatRadioOn,  height: 24, width: 24, color: ColorConstants.colorMain) : 
+                  Image.asset(ImageConstants.chatRadioOff,  height: 24, width: 24, color: Colors.grey),
               ),
               const SizedBox(width: 10),
             ],
           ),
-          const SizedBox(height: 10),
+         // const SizedBox(height: 10),
         ],
       ),
-    );
+    ));
   }
 }

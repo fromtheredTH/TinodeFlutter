@@ -228,6 +228,103 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
     );
   }
 
+  Widget _profileWidget()
+  {
+    return Stack(
+            children: [
+              Center(
+                child: ImageUtils.ProfileImage(user.picture ?? "", 100, 100),
+              ),
+              if (user.id == Constants.user.id)
+                Positioned(
+                  bottom: -10, // 프로필 이미지와 겹치도록 조정
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Transform.translate(
+                      offset: Offset(0, -10), // 위로 약간 이동
+                      child: GestureDetector(
+                        onTap: () async {
+            if (await _promptPermissionSetting()) {
+              List<BtnBottomSheetModel> items = [];
+              items.add(BtnBottomSheetModel(
+                  ImageConstants.cameraIcon, "camera".tr(), 0));
+              items.add(BtnBottomSheetModel(
+                  ImageConstants.albumIcon, "gallery".tr(), 1));
+              items.add(BtnBottomSheetModel(ImageConstants.deleteIcon,
+                  "current_profile_delete".tr(), 2));
+
+              Get.bottomSheet(
+                  enterBottomSheetDuration: Duration(milliseconds: 100),
+                  exitBottomSheetDuration: Duration(milliseconds: 100),
+                  BtnBottomSheetWidget(
+                    btnItems: items,
+                    onTapItem: (sheetIdx) async {
+                      if (sheetIdx == 0) {
+                        AssetEntity? assets =
+                            await MyAssetPicker.pickCamera(context, false);
+                        if (assets != null) {
+                          procAssets([assets]);
+                        }
+                      } else if (sheetIdx == 1) {
+                        if (await _promptPermissionSetting()) {
+                          showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              isDismissible: true,
+                              backgroundColor: Colors.transparent,
+                              constraints: BoxConstraints(
+                                minHeight: 0.8,
+                                maxHeight: Get.height * 0.95,
+                              ),
+                              builder: (BuildContext context) {
+                                return DraggableScrollableSheet(
+                                    initialChildSize: 0.5,
+                                    minChildSize: 0.4,
+                                    maxChildSize: 0.9,
+                                    expand: false,
+                                    builder: (_, controller) =>
+                                        GalleryBottomSheet(
+                                          controller: controller,
+                                          limitCnt: 1,
+                                          sendText: "profile_change".tr(),
+                                          onlyImage: true,
+                                          onTapSend: (results) {
+                                            procAssetsWithGallery(results);
+                                          },
+                                        ));
+                              });
+                        }
+                      } else {
+                        // delete profile image
+                        await CachedNetworkImage.evictFromCache(
+                            user.picture ?? "");
+                        //  getUserInfo();
+                      }
+                    },
+                  ));
+            }
+          },
+                        child: Container(
+                          width: 30, // 컨테이너 크기 조정
+                          height: 30,
+                          // decoration: BoxDecoration(
+                          //   color: Colors.white, // 배경색 추가
+                          //   shape: BoxShape.circle, // 원형 모양
+                          //   border: Border.all(color: Colors.grey, width: 1), // 테두리 추가
+                          // ),
+                          child: Center(
+                            child: ImageUtils.setImage(ImageConstants.editProfile, 20, 20),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          );
+  }
+
   @override
   Widget build(BuildContext context) {
      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -320,99 +417,7 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
             ),
           ),
           SizedBox(height: Get.height * 0.02),
-          Stack(
-            children: [
-              Center(
-                child: ImageUtils.ProfileImage(user.picture ?? "", 150, 150),
-              ),
-              if (user.id == Constants.user.id)
-                Positioned(
-                  bottom: -10, // 프로필 이미지와 겹치도록 조정
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: Transform.translate(
-                      offset: Offset(0, -10), // 위로 약간 이동
-                      child: GestureDetector(
-                        onTap: () async {
-            if (await _promptPermissionSetting()) {
-              List<BtnBottomSheetModel> items = [];
-              items.add(BtnBottomSheetModel(
-                  ImageConstants.cameraIcon, "camera".tr(), 0));
-              items.add(BtnBottomSheetModel(
-                  ImageConstants.albumIcon, "gallery".tr(), 1));
-              items.add(BtnBottomSheetModel(ImageConstants.deleteIcon,
-                  "current_profile_delete".tr(), 2));
-
-              Get.bottomSheet(
-                  enterBottomSheetDuration: Duration(milliseconds: 100),
-                  exitBottomSheetDuration: Duration(milliseconds: 100),
-                  BtnBottomSheetWidget(
-                    btnItems: items,
-                    onTapItem: (sheetIdx) async {
-                      if (sheetIdx == 0) {
-                        AssetEntity? assets =
-                            await MyAssetPicker.pickCamera(context, false);
-                        if (assets != null) {
-                          procAssets([assets]);
-                        }
-                      } else if (sheetIdx == 1) {
-                        if (await _promptPermissionSetting()) {
-                          showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              isDismissible: true,
-                              backgroundColor: Colors.transparent,
-                              constraints: BoxConstraints(
-                                minHeight: 0.8,
-                                maxHeight: Get.height * 0.95,
-                              ),
-                              builder: (BuildContext context) {
-                                return DraggableScrollableSheet(
-                                    initialChildSize: 0.5,
-                                    minChildSize: 0.4,
-                                    maxChildSize: 0.9,
-                                    expand: false,
-                                    builder: (_, controller) =>
-                                        GalleryBottomSheet(
-                                          controller: controller,
-                                          limitCnt: 1,
-                                          sendText: "profile_change".tr(),
-                                          onlyImage: true,
-                                          onTapSend: (results) {
-                                            procAssetsWithGallery(results);
-                                          },
-                                        ));
-                              });
-                        }
-                      } else {
-                        // delete profile image
-                        await CachedNetworkImage.evictFromCache(
-                            user.picture ?? "");
-                        //  getUserInfo();
-                      }
-                    },
-                  ));
-            }
-          },
-                        child: Container(
-                          width: 30, // 컨테이너 크기 조정
-                          height: 30,
-                          // decoration: BoxDecoration(
-                          //   color: Colors.white, // 배경색 추가
-                          //   shape: BoxShape.circle, // 원형 모양
-                          //   border: Border.all(color: Colors.grey, width: 1), // 테두리 추가
-                          // ),
-                          child: Center(
-                            child: ImageUtils.setImage(ImageConstants.editProfile, 20, 20),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
+          _profileWidget(),
 
           SizedBox(
             height: 10,
@@ -420,9 +425,9 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
          Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children:[
-               AppText(text: "이름 :", fontSize: 20, fontWeight: FontWeight.w700,),
+               AppText(text: "이름 :", fontSize: 16, fontWeight: FontWeight.w700,),
                SizedBox(width: 10,),
-               AppText(text: user.name, fontSize: 20, fontWeight: FontWeight.w700,),
+               AppText(text: user.name, fontSize: 16, fontWeight: FontWeight.w700,),
           ]),
           
           SizedBox(
@@ -432,9 +437,9 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
               child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-               AppText(text: "JadeChat ID :", fontSize: 16, fontWeight: FontWeight.w700,),
+               AppText(text: "JadeChat ID :", fontSize: 13, fontWeight: FontWeight.w700,),
                SizedBox(width: 10,),
-               AppText(text: user.id, fontSize: 16, fontWeight: FontWeight.w700,),
+               AppText(text: user.searchId, fontSize: 13, fontWeight: FontWeight.w700,),
                SizedBox(width: 15,),
                if(user.id == Constants.user.id) QrWidget(),
 

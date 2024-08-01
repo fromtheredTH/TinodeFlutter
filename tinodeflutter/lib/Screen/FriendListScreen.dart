@@ -26,7 +26,6 @@ import 'package:tinodeflutter/tinode/tinode.dart';
 import '../../../Constants/ColorConstants.dart';
 import '../../../Constants/FontConstants.dart';
 import '../../../Constants/ImageConstants.dart';
-import '../../../global/DioClient.dart';
 
 class FriendListScreen extends StatefulWidget {
   FriendListScreen({
@@ -47,7 +46,7 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
   _FriendListScreenState(InitController friendScreenInitController){
     friendScreenInitController.initHome = initHome;
   }
-  late TopicFnd _fndTopic;
+  late TopicFnd _fndFriendTopic;
 
   void initHome() {
     setState(() {
@@ -72,7 +71,7 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
   String? hashTag;
 
   List<UserModel> userList = <UserModel>[];
-  List<UserModel> friendList = <UserModel>[];
+  List<UserModel> _friendList = <UserModel>[];
   List<TopicSubscription> userTopicSubList = <TopicSubscription>[];
   StreamSubscription? _metaSubscription;
 
@@ -87,7 +86,7 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
       @override
   void dispose() {
     if(_metaSubscription!=null) _metaSubscription?.cancel();
-    _fndTopic.leave(true); 
+    _fndFriendTopic.leave(true); 
     super.dispose();
   }
 
@@ -98,14 +97,14 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
   }
 
    void _initializeFndTopic() async{
-    _fndTopic = tinode_global.getTopic('fnd') as TopicFnd;
-    _metaSubscription= _fndTopic.onMeta.listen((value) {
-      _handleMetaMessage(value);
+    _fndFriendTopic = tinode_global.getTopic('fnd') as TopicFnd;
+    _metaSubscription= _fndFriendTopic.onMeta.listen((value) {
+      _handleFriendMetaMessage(value);
     });
-    if(!_fndTopic.isSubscribed) await _fndTopic.subscribe(MetaGetBuilder(_fndTopic).withData(null, null, null).build(), null);
+    if(!_fndFriendTopic.isSubscribed) await _fndFriendTopic.subscribe(MetaGetBuilder(_fndFriendTopic).withData(null, null, null).build(), null);
   }
 
-  void _handleMetaMessage(MetaMessage msg) {
+  void _handleFriendMetaMessage(MetaMessage msg) {
     if (msg.sub != null) {
         try{
         print("search list :");
@@ -113,7 +112,7 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
         {
           String pictureUrl = msg.sub?[i].public['photo']?['ref'] != null ? changePathToLink(msg.sub?[i].public['photo']['ref']) : "";
           UserModel user = UserModel(id: msg.sub?[i].user ?? "" , name : msg.sub?[i].public['fn'], picture : pictureUrl, isFreind: msg.sub?[i].isFriend ?? false);
-          friendList.add(user);
+          _friendList.add(user);
         }
         setState(() {
           isSearchLoading = false;
@@ -137,16 +136,16 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
         ),
       );
       // fnd 토픽에 메타데이터 설정 요청 보내기
-      var ctrl = await _fndTopic.setMeta(setParams);
+      var ctrl = await _fndFriendTopic.setMeta(setParams);
 
    // GetQuery 객체를 생성하여 검색 결과 요청
     GetQuery getQuery = GetQuery(
-      topic : _fndTopic.name,
+      topic : _fndFriendTopic.name,
       what: 'sub',
     );
     // fnd 토픽에 메타데이터 요청 보내기
-    friendList = [];
-    var meta = await _fndTopic.getMeta(getQuery);
+    _friendList = [];
+    var meta = await _fndFriendTopic.getMeta(getQuery);
 
     } catch (err) {
       print("err search : $err");
@@ -169,9 +168,9 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
               id: data.fri[i].user,
               name: data.fri[i].public['fn'],
               picture: pictureUrl, isFreind: true);
-          //friendList.add(user);
+          //_friendList.add(user);
           setState(() {
-          friendList.add(user);
+          _friendList.add(user);
           });
         }
       }
@@ -370,7 +369,7 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
                         ? Expanded(
                             child: isSearchLoading
                                 ? LoadingWidget()
-                                : friendList.isEmpty
+                                : _friendList.isEmpty
                                     ? Center(
                                         child: AppText(
                                           text: "empty_search".tr(),
@@ -385,7 +384,7 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
                                           
                                           child: Column(
                                             children: [                                           
-                                              friendList.isNotEmpty? 
+                                              _friendList.isNotEmpty? 
                                               Column(
                                                       children: [                                                      
                                                         ListView.builder(
@@ -393,26 +392,26 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
                                                             physics:
                                                                 NeverScrollableScrollPhysics(),
                                                             itemCount:
-                                                                friendList
+                                                                _friendList
                                                                     .length,
                                                             itemBuilder:
                                                                 (context,index) {
                                                               Key key = Key(
-                                                                  friendList[index].id.toString());
+                                                                  _friendList[index].id.toString());
                                                               return UserListItemWidget(
                                                                 key: key,
-                                                                user:friendList[index],
+                                                                user:_friendList[index],
                                                                 isShowAction:
                                                                     true,
                                                                     unFollowUser: (){
-                                                                      _delFriend(friendList[index].id);
+                                                                      _delFriend(_friendList[index].id);
                                                                        setState(() {
-                                                                    friendList.removeAt(index);
+                                                                    _friendList.removeAt(index);
                                                                   });
                                                                     },
                                                                 deleteUser: () {
                                                                   setState(() {
-                                                                    friendList.removeAt(index);
+                                                                    _friendList.removeAt(index);
                                                                   });
                                                                 },
                                                               );
@@ -427,7 +426,7 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
                         : Expanded(
                             child: isSearchLoading
                                 ? LoadingWidget()
-                                : friendList.length == 0
+                                : _friendList.length == 0
                                     ? Center(
                                         child: AppText(
                                           text: "친구가 없습니다.",
@@ -444,28 +443,28 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
                                           child: Column(
                                             children: [
                                              
-                                              friendList.isNotEmpty
+                                              _friendList.isNotEmpty
                                                   ? Column(
                                                       children: [                                                    
                                                         ListView.builder(
                                                             shrinkWrap: true,
                                                             physics: NeverScrollableScrollPhysics(),
-                                                            itemCount: friendList.length,
+                                                            itemCount: _friendList.length,
                                                             itemBuilder: (context,index) {
-                                                              Key key = Key(friendList[index].id.toString());
+                                                              Key key = Key(_friendList[index].id.toString());
                                                               return UserListItemWidget(
                                                                 key: key,
-                                                                user: friendList[index],
+                                                                user: _friendList[index],
                                                                 isShowAction: true,
                                                                 unFollowUser:(){
-                                                                  _delFriend(friendList[index].id);
+                                                                  _delFriend(_friendList[index].id);
                                                                    setState(() {
-                                                                    friendList.removeAt(index);
+                                                                    _friendList.removeAt(index);
                                                                   });
                                                                 },
                                                                 deleteUser: () {
                                                                   setState(() {
-                                                                    friendList.removeAt(index);
+                                                                    _friendList.removeAt(index);
                                                                   });
                                                                 },
                                                               );

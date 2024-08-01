@@ -36,8 +36,8 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
   TextEditingController inputController = TextEditingController();
   PositionRetainedScrollPhysics physics = PositionRetainedScrollPhysics();
   List<UserModel> _searchResults = [];
-  late TopicFnd _fndTopic;
-  StreamSubscription? _metaSubscription;
+  late TopicFnd _fndSearchUserTopic;
+  StreamSubscription? _metaSubscription_SearchUser ;
 
 
   @override
@@ -47,8 +47,8 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
   }
     @override
   void dispose() {
-    if(_metaSubscription!=null) _metaSubscription?.cancel();
-    _fndTopic.leave(true); 
+    if(_metaSubscription_SearchUser!=null) _metaSubscription_SearchUser?.cancel();
+    _fndSearchUserTopic.leave(true); 
     super.dispose();
   }
 
@@ -62,11 +62,11 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
   }
 
   void initializeFndTopic() async{
-    _fndTopic = tinode_global.getTopic('fnd') as TopicFnd;
-    _metaSubscription= _fndTopic.onMeta.listen((value) {
+    _fndSearchUserTopic = tinode_global.getTopic('fnd') as TopicFnd;
+    _metaSubscription_SearchUser= _fndSearchUserTopic.onMeta.listen((value) {
       _handleMetaMessage(value);
     });
-    if(!_fndTopic.isSubscribed) await _fndTopic.subscribe(MetaGetBuilder(_fndTopic).withData(null, null, null).build(), null);
+    if(!_fndSearchUserTopic.isSubscribed) await _fndSearchUserTopic.subscribe(MetaGetBuilder(_fndSearchUserTopic).withData(null, null, null).build(), null);
   }
 
   void _handleMetaMessage(MetaMessage msg) {
@@ -108,16 +108,17 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
         ),
       );
       // fnd 토픽에 메타데이터 설정 요청 보내기
-      var ctrl = await _fndTopic.setMeta(setParams);
+      var ctrl = await _fndSearchUserTopic.setMeta(setParams);
 
    // GetQuery 객체를 생성하여 검색 결과 요청
     GetQuery getQuery = GetQuery(
-      topic : _fndTopic.name,
+      topic : _fndSearchUserTopic.name,
       what: 'sub',
       //sub: GetOptsType(user: query), // 적절한 GetOptsType 설정
     );
     // fnd 토픽에 메타데이터 요청 보내기
-    var meta = await _fndTopic.getMeta(getQuery);
+    var meta = await _fndSearchUserTopic.getMeta(getQuery);
+    print("");
     // if(meta?.text=="no content")
     //   showToast("해당 유저없음");
     // 메타데이터 응답 처리

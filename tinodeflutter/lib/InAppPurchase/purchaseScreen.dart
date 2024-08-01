@@ -392,7 +392,7 @@ class purchaseScreen extends BaseState<PurchaseScreen>  {
   Widget build(BuildContext context) {
     
     return Scaffold(
-        backgroundColor: Colors.grey,
+        backgroundColor: ColorConstants.backgroundGrey,
         resizeToAvoidBottomInset: true,
         body: Column(crossAxisAlignment: CrossAxisAlignment.start, 
         children: [
@@ -411,7 +411,7 @@ class purchaseScreen extends BaseState<PurchaseScreen>  {
                           Get.back();
                         },
                         child: const Icon(Icons.arrow_back_ios,
-                            color: Colors.white)),
+                            color: Colors.black)),
                     AppText(
                       text: "서비스 이용권 구매", // purchase
                       fontSize: 16,
@@ -435,7 +435,8 @@ class purchaseScreen extends BaseState<PurchaseScreen>  {
           Container(
             width: double.maxFinite,
             decoration: BoxDecoration(
-                border: Border.all(color: ColorConstants.halfWhite, width: 1),
+              color: Colors.white,
+                border: Border.all(color: Colors.grey.shade300, width: 1),
                 borderRadius: const BorderRadius.all(Radius.circular(4))),
             margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8.5),
@@ -444,7 +445,7 @@ class purchaseScreen extends BaseState<PurchaseScreen>  {
                 text: "서비스 이용기간",
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
-                color: ColorConstants.white,
+                color: ColorConstants.black,
               ),
               const SizedBox(
                 width: 10,
@@ -481,10 +482,11 @@ class purchaseScreen extends BaseState<PurchaseScreen>  {
                 child: Container(
                     width: double.maxFinite,
                     decoration: BoxDecoration(
+                      color: Colors.white,
                         border: Border.all(
                           color: _isSelected[index]
                               ? ColorConstants.colorMain
-                              : ColorConstants.halfWhite,
+                              : Colors.grey.shade300,
                           width: _isSelected[index] ? 3.0 : 2.0,
                         ),
                         borderRadius:
@@ -502,14 +504,14 @@ class purchaseScreen extends BaseState<PurchaseScreen>  {
                                 "${itemListRes[index]['refItem']['description']}",
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
-                            color: ColorConstants.white,
+                            color: ColorConstants.black,
                           ),
                           AppText(
                             // text: "${itemListRes[index].refItem.description}",
                             text: "${itemListRes[index]['price']}원",
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
-                            color: ColorConstants.white,
+                            color: ColorConstants.black,
                           )
                         ])),
               );

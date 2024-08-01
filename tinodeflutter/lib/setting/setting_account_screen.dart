@@ -93,7 +93,7 @@ class _SettingAccountScreen extends BaseState<SettingAccountScreen> {
   Widget build(BuildContext context) {
     return PageLayout(
         child: Scaffold(
-            backgroundColor: Colors.grey[800],
+            backgroundColor: Colors.white,
             resizeToAvoidBottomInset: false,
             body: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -115,7 +115,7 @@ class _SettingAccountScreen extends BaseState<SettingAccountScreen> {
                                     Get.back();
                                   },
                                   child: Icon(Icons.arrow_back_ios,
-                                      color: Colors.white)),
+                                      color: Colors.black)),
                               AppText(
                                 text: "account".tr(),
                                 fontSize: 16,
@@ -130,7 +130,7 @@ class _SettingAccountScreen extends BaseState<SettingAccountScreen> {
                             child: AppText(
                               text: "remove_account".tr(),
                               fontSize: 14,
-                              color: ColorConstants.halfWhite,
+                              color: ColorConstants.halfBlack,
                             ),
                           )
                         ],
@@ -142,22 +142,84 @@ class _SettingAccountScreen extends BaseState<SettingAccountScreen> {
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            AppText(
-                              text: "email".tr(),
-                              fontWeight: FontWeight.w700,
+                            // AppText(
+                            //   text: "email".tr(),
+                            //   fontWeight: FontWeight.w700,
+                            // ),
+                            // SizedBox(
+                            //   height: 10,
+                            // ),
+                            // TextField(
+                            //   style: TextStyle(
+                            //     color: Color(0xFFFFFFFF),
+                            //     fontSize: 13,
+                            //     fontFamily: FontConstants.AppFont,
+                            //     fontWeight: FontWeight.w400,
+                            //   ),
+                            //   readOnly: true,
+                            //   controller: emailController,
+                            //   decoration: InputDecoration(
+                            //       border: OutlineInputBorder(
+                            //         borderRadius: BorderRadius.circular(5),
+                            //         borderSide: BorderSide(
+                            //             color:
+                            //                 Color(0xFFFFFFFF).withOpacity(0.5)),
+                            //       ),
+                            //       hintText: "",
+                            //       hintStyle: TextStyle(
+                            //         color: Color(0xFFFFFFFF).withOpacity(0.5),
+                            //         fontWeight: FontWeight.w400,
+                            //         fontFamily: FontConstants.AppFont,
+                            //         fontSize: 13,
+                            //       ),
+                            //       contentPadding: EdgeInsets.symmetric(
+                            //           vertical: 10, horizontal: 10)),
+                            // ),
+                            // SizedBox(
+                            //   height: 25,
+                            // ),
+
+                            // Name
+                            Row(
+                              children: [
+                                AppText(
+                                  text: "name".tr(),
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    Utils.showToast("name_guide".tr());
+                                  },
+                                  child: ImageUtils.setImage(
+                                      ImageConstants.accountEditQuestion,
+                                      16,
+                                      16),
+                                )
+                              ],
                             ),
                             SizedBox(
                               height: 10,
                             ),
                             TextField(
                               style: TextStyle(
-                                color: Color(0xFFFFFFFF),
+                                color: Colors.black,
                                 fontSize: 13,
                                 fontFamily: FontConstants.AppFont,
                                 fontWeight: FontWeight.w400,
                               ),
-                              readOnly: true,
-                              controller: emailController,
+                              onChanged: (value) {
+                                isTapNameOkBtn.value = false;
+                                isNameEmpty.value = value.isEmpty;
+                                if (value.isNotEmpty && value.length < 2) {
+                                  isNameCorrect.value = false;
+                                } else {
+                                  isNameCorrect.value = true;
+                                }
+                              },
+                              controller: nameController,
                               decoration: InputDecoration(
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(5),
@@ -176,12 +238,32 @@ class _SettingAccountScreen extends BaseState<SettingAccountScreen> {
                                       vertical: 10, horizontal: 10)),
                             ),
                             SizedBox(
+                              height: 5,
+                            ),
+                            Obx(() => AppText(
+                                  text:
+                                      !isNameCorrect.value || isNameEmpty.value
+                                          ? "name_incorrect".tr()
+                                          : "name_enable".tr(),
+                                  color:
+                                      isNameEmpty.value && isTapNameOkBtn.value
+                                          ? ColorConstants.red
+                                          : !isNameCorrect.value
+                                              ? ColorConstants.red
+                                              : ColorConstants.halfBlack,
+                                  fontSize: 11,
+                                  maxLine: 2,
+                                )),
+                            SizedBox(
                               height: 25,
                             ),
-                            Row(
+
+
+                              // ID
+                             Row(
                               children: [
                                 AppText(
-                                  text: "id",
+                                  text: "JadeChat ID",
                                   fontWeight: FontWeight.w700,
                                 ),
                                 SizedBox(
@@ -203,7 +285,7 @@ class _SettingAccountScreen extends BaseState<SettingAccountScreen> {
                             ),
                             TextField(
                               style: TextStyle(
-                                color: Color(0xFFFFFFFF),
+                                color: Colors.black,
                                 fontSize: 13,
                                 fontFamily: FontConstants.AppFont,
                                 fontWeight: FontWeight.w400,
@@ -257,90 +339,13 @@ class _SettingAccountScreen extends BaseState<SettingAccountScreen> {
                                           isNicknameEmpty.value
                                       ? isTapIdOkBtn.value
                                           ? ColorConstants.red
-                                          : ColorConstants.halfWhite
+                                          : ColorConstants.halfBlack
                                       : isIdCorrect.value &&
                                               isNicknameNotDuplicate.value
-                                          ? ColorConstants.halfWhite
+                                          ? ColorConstants.halfBlack
                                           : !isIdCorrect.value
                                               ? ColorConstants.red
                                               : ColorConstants.red,
-                                  fontSize: 11,
-                                  maxLine: 2,
-                                )),
-                            SizedBox(
-                              height: 25,
-                            ),
-                            Row(
-                              children: [
-                                AppText(
-                                  text: "name".tr(),
-                                  fontWeight: FontWeight.w700,
-                                ),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    Utils.showToast("name_guide".tr());
-                                  },
-                                  child: ImageUtils.setImage(
-                                      ImageConstants.accountEditQuestion,
-                                      16,
-                                      16),
-                                )
-                              ],
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            TextField(
-                              style: TextStyle(
-                                color: Color(0xFFFFFFFF),
-                                fontSize: 13,
-                                fontFamily: FontConstants.AppFont,
-                                fontWeight: FontWeight.w400,
-                              ),
-                              onChanged: (value) {
-                                isTapNameOkBtn.value = false;
-                                isNameEmpty.value = value.isEmpty;
-                                if (value.isNotEmpty && value.length < 2) {
-                                  isNameCorrect.value = false;
-                                } else {
-                                  isNameCorrect.value = true;
-                                }
-                              },
-                              controller: nameController,
-                              decoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(5),
-                                    borderSide: BorderSide(
-                                        color:
-                                            Color(0xFFFFFFFF).withOpacity(0.5)),
-                                  ),
-                                  hintText: "",
-                                  hintStyle: TextStyle(
-                                    color: Color(0xFFFFFFFF).withOpacity(0.5),
-                                    fontWeight: FontWeight.w400,
-                                    fontFamily: FontConstants.AppFont,
-                                    fontSize: 13,
-                                  ),
-                                  contentPadding: EdgeInsets.symmetric(
-                                      vertical: 10, horizontal: 10)),
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            Obx(() => AppText(
-                                  text:
-                                      !isNameCorrect.value || isNameEmpty.value
-                                          ? "name_incorrect".tr()
-                                          : "name_enable".tr(),
-                                  color:
-                                      isNameEmpty.value && isTapNameOkBtn.value
-                                          ? ColorConstants.red
-                                          : !isNameCorrect.value
-                                              ? ColorConstants.red
-                                              : ColorConstants.halfWhite,
                                   fontSize: 11,
                                   maxLine: 2,
                                 )),

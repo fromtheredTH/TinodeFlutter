@@ -88,18 +88,23 @@ class Constants {
   {
     //내 data 받아오기
     GetQuery getQuery = GetQuery(
-      what: 'sub desc tags cred',
+      what: 'sub desc cred',
     );
     GetQuery getMembershipQuery = GetQuery(
       what: 'membership',
     );
+    GetQuery getTagsQuery = GetQuery(
+      what: 'tags',
+    );
     // fnd 토픽에 메타데이터 요청 보내기
     var meta = await me.getMeta(getQuery);
     var membershipMeta = await me.getMeta(getMembershipQuery);
+    var tagData = await me.getMeta(getTagsQuery);
 
     var userId = tinode_global.getCurrentUserId();
     String pictureUrl = meta.desc?.public['photo']?['ref'] != null ? changePathToLink(meta.desc?.public['photo']['ref']) : "";
-    Constants.user = UserModel(id: userId, name: meta.desc.public['fn'], membership: membershipMeta.membership, picture: pictureUrl, isFreind: false);
+    String searchId = tagData.tags.last.replaceFirst("search:", "");
+    Constants.user = UserModel(id: userId, name: meta.desc.public['fn'], membership: membershipMeta.membership, picture: pictureUrl,searchId: searchId, isFreind: false);
 
   }
 

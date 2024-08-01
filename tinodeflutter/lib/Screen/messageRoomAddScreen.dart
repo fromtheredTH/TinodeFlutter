@@ -401,7 +401,7 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
                           height: 24,
                           margin: const EdgeInsets.only(left: 10),
                           child: Center(
-                            child: Image.asset(ImageConstants.backWhite,
+                            child: Image.asset(ImageConstants.backWhite,color: Colors.black,
                                 width: 24, height: 24),
                           )),
                     ),
@@ -441,10 +441,10 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
                                 fontWeight: FontWeight.w700,
                                 fontFamily: FontConstants.AppFont,
                                 color: widget.existUserList != null
-                                    ? Colors.white
+                                    ? Colors.black
                                     : selectList.length < 2
-                                        ? Colors.white
-                                        : ColorConstants.halfWhite,
+                                        ? Colors.black
+                                        : ColorConstants.halfBlack,
                                 fontSize: 16),
                             border: InputBorder.none),
                       ),
@@ -464,19 +464,19 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border(
-            bottom: BorderSide(
-              color: Colors.black, // 선의 색상
-              width: 2.0, // 선의 두께
-            ),
-          ),
-                      color: ColorConstants.white10Percent),
+                    borderRadius: BorderRadius.circular(4),
+          //             border: Border(
+          //   bottom: BorderSide(
+          //     color: Colors.black, // 선의 색상
+          //     width: 2.0, // 선의 두께
+          //   ),
+          // ),
+                  color: ColorConstants.white),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Image.asset(ImageConstants.chatSearchWhite,
+                      Image.asset(ImageConstants.chatSearchWhite, color: Colors.grey,
                           height: 24, width: 24),
                       const SizedBox(width: 10),
                       Expanded(
@@ -505,7 +505,7 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
                               hintStyle: TextStyle(
                                   fontWeight: FontWeight.w400,
                                   fontFamily: FontConstants.AppFont,
-                                  color: ColorConstants.halfWhite,
+                                  color: ColorConstants.backGryText,
                                   fontSize: 14),
                               border: InputBorder.none),
                         ),
@@ -527,22 +527,9 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
               );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return PageLayout(
-        onBack: onBackPressed,
-        isLoading: isLoading,
-        bgColor: ColorConstants.colorBg1,
-        child: SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-          child: Column(
-            children: [
-              topBar(),
-              searchUserBox(),
-              
-              selectList.length >= 1
-                  ? Container(
+  Widget _selectedUsersBar()
+  {
+    return Container(
                       height: 25,
                       margin: EdgeInsets.only(left: 15, right: 15, bottom: 15),
                       child: Row(
@@ -586,9 +573,10 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
                                             child: Row(
                                               children: [
                                                 AppText(
-                                                  text: selectList[index].id ??
+                                                  text: selectList[index].name ??
                                                       '샘플 닉네임',
                                                   fontSize: 12,
+                                                  color: Colors.white,
                                                 ),
                                                 if (selectList[index].selected)
                                                   Padding(
@@ -612,13 +600,35 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
                           ),
                         ],
                       ),
-                    )//select list >=1 이상일때
+                    );//select list >=1 이상일때
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PageLayout(
+        onBack: onBackPressed,
+        isLoading: isLoading,
+        bgColor: ColorConstants.backgroundGrey,
+        child: SizedBox(
+          width: double.infinity,
+          height: double.infinity,
+          child: Column(
+            children: [
+              topBar(),
+              searchUserBox(),
+              
+              selectList.length >= 1
+                  ? _selectedUsersBar()
                   : Container(),  //select list ==0 일때
 
               searchTextController.text.isEmpty
                   ? Expanded(
                       child: 
-                      // isInit?
+                       Container(
+                         padding: EdgeInsets.only(top:10,left: 10, right: 10),
+                         color: Colors.white,
+                          child:
+                          // isInit?
                            SingleChildScrollView(
                               controller: mainScrollController,
                               child: Column(
@@ -639,22 +649,23 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
                                                   child: Container(
                                                       height: 0.5,
                                                       color: ColorConstants
-                                                          .colorMain)),
+                                                          .black)),
                                               const SizedBox(width: 20),
                                               AppText(
                                                 text: searchTextController
                                                         .text.isEmpty
-                                                    ? '친구목록'
+                                                    ? '친구'
                                                     : "add_chat_search",
-                                                fontSize: 10,
-                                                color: ColorConstants.colorMain,
+                                                fontSize: 12,
+                                                fontWeight:  FontWeight.w700,
+                                                color: ColorConstants.black,
                                               ),
                                               const SizedBox(width: 20),
                                               Expanded(
                                                   child: Container(
                                                       height: 0.51,
                                                       color: ColorConstants
-                                                          .colorMain)),
+                                                          .black)),
                                             ],
                                           ),
                                         ),
@@ -731,10 +742,15 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
                           //       ),
                           //     ),
                           //   ),
+                       ),
                     ) // 여기까지 searchTextController is empty : true , 여기 밑에는 false
                   : Expanded(
                       child: isSearchingLoading
-                          ? Center(
+                          ?
+                          Container(
+                            padding: EdgeInsets.only( top:10, left: 10, right: 10),
+                            color: Colors.white,
+                            child: Center(
                               child: SizedBox(
                                 child: Center(
                                     child: CircularProgressIndicator(
@@ -743,6 +759,9 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
                                 width: 20.0,
                               ),
                             )
+
+                          ) 
+                         
                           : searchUserList.isNotEmpty
                               ? ListView.builder(
                                   shrinkWrap: true,
@@ -813,10 +832,11 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
                         text: widget.existUserList != null
                             ? "add_chat_user".tr(args: ["${selectList.length}"])
                             : selectList.length == 1
-                                ? 'new_chat'.tr(args: ["${selectList[0].id}"])
+                                ? 'new_chat'.tr(args: ["${selectList[0].name}"])
                                 : 'new_group_chat'
                                     .tr(args: ["${selectList.length}"]),
                         fontWeight: FontWeight.w700,
+                        color: Colors.white,
                         fontSize: 16,
                       ),
                     ),

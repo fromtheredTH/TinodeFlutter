@@ -50,6 +50,36 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
     return super.didChangeAppLifecycleState(state);
   }
 
+  Widget _topBarSetting()
+  {
+    return   Padding(
+              padding:EdgeInsets.only(left: 15, right: 15),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                          onTap: (){
+                            Get.back();
+                          },
+                          child: Icon(Icons.arrow_back_ios, color:Colors.black)),
+
+                      AppText(
+                        text: "setting".tr(),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      )
+                    ],
+                  ),
+
+                ],
+              ),
+            );
+  }
+
   @override
   Widget build(BuildContext context) {
    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -63,32 +93,7 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
         body: Column(
           children: [
             SizedBox(height: Get.height*0.07),
-            Padding(
-              padding:EdgeInsets.only(left: 15, right: 15),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                          onTap: (){
-                            Get.back();
-                          },
-                          child: Icon(Icons.arrow_back_ios, color:Colors.white)),
-
-                      AppText(
-                        text: "setting".tr(),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      )
-                    ],
-                  ),
-
-                ],
-              ),
-            ),
+            _topBarSetting(),
             SizedBox(height: 30),
             Expanded(
               child: SingleChildScrollView(
@@ -112,7 +117,7 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    ImageUtils.setImage(ImageConstants.settingAccount, 20, 20),
+                                    ImageUtils.setImage(ImageConstants.settingAccount, 20, 20,color: Colors.black),
                                     SizedBox(width: 5,),
                                     AppText(
                                       text: "account".tr(),
@@ -121,7 +126,7 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
                                   ],
                                 ),
 
-                                Icon(Icons.arrow_forward_ios_rounded, color: ColorConstants.white, size: 14,)
+                                Icon(Icons.arrow_forward_ios_rounded, color: ColorConstants.black, size: 14,)
                               ],
                             ),
                           ),
@@ -130,7 +135,7 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
                         Container(
                           margin: EdgeInsets.only(top: 15, bottom: 25),
                           height: 0.5,
-                          color: ColorConstants.halfWhite,
+                          color: ColorConstants.halfBlack,
                         ),
 
                         GestureDetector(
@@ -147,7 +152,7 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    ImageUtils.setImage(ImageConstants.settingSecurity, 20, 20),
+                                    ImageUtils.setImage(ImageConstants.settingSecurity, 20, 20,color: Colors.black),
                                     SizedBox(width: 5,),
                                     AppText(
                                       text: "purchase_service".tr(),
@@ -156,7 +161,7 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
                                   ],
                                 ),
 
-                                Icon(Icons.arrow_forward_ios_rounded, color: ColorConstants.white, size: 14,)
+                                Icon(Icons.arrow_forward_ios_rounded, color: ColorConstants.black, size: 14,)
                               ],
                             ),
                           )
@@ -165,7 +170,7 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
                         // Container(
                         //   margin: EdgeInsets.only(top: 15, bottom: 25),
                         //   height: 0.5,
-                        //   color: ColorConstants.halfWhite,
+                        //   color: ColorConstants.halfBlack,
                         // ),
 
                         // GestureDetector(
@@ -193,7 +198,7 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
                         //           ],
                         //         ),
 
-                        //         Icon(Icons.arrow_forward_ios_rounded, color: ColorConstants.white, size: 14,)
+                        //         Icon(Icons.arrow_forward_ios_rounded, color: ColorConstants.black, size: 14,)
                         //       ],
                         //     ),
                         //   )
@@ -202,7 +207,7 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
                         Container(
                           margin: EdgeInsets.only(top: 15, bottom: 25),
                           height: 0.5,
-                          color: ColorConstants.halfWhite,
+                          color: ColorConstants.halfBlack,
                         ),
 
                         GestureDetector(
@@ -223,7 +228,7 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    ImageUtils.setImage(ImageConstants.settingTerms, 20, 20),
+                                    ImageUtils.setImage(ImageConstants.settingTerms, 20, 20, color: Colors.black),
                                     SizedBox(width: 5,),
                                     AppText(
                                       text: "terms".tr(),
@@ -232,7 +237,7 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
                                   ],
                                 ),
 
-                                Icon(Icons.arrow_forward_ios_rounded, color: ColorConstants.white, size: 14,)
+                                Icon(Icons.arrow_forward_ios_rounded, color: ColorConstants.black, size: 14,)
                               ],
                             ),
                           )
@@ -241,7 +246,7 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
                         // Container(
                         //   margin: EdgeInsets.only(top: 15, bottom: 25),
                         //   height: 0.5,
-                        //   color: ColorConstants.halfWhite,
+                        //   color: ColorConstants.halfBlack,
                         // ),
 
                         // GestureDetector(
@@ -267,17 +272,17 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
                         //           ],
                         //         ),
 
-                        //         Icon(Icons.arrow_forward_ios_rounded, color: ColorConstants.white, size: 14,)
+                        //         Icon(Icons.arrow_forward_ios_rounded, color: ColorConstants.black, size: 14,)
                         //       ],
                         //     ),
                         //   )
                         // ),
 
-                        Container(
-                          margin: EdgeInsets.only(top: 15, bottom: 25),
-                          height: 0.5,
-                          color: ColorConstants.halfWhite,
-                        ),
+                        // Container(
+                        //   margin: EdgeInsets.only(top: 15, bottom: 25),
+                        //   height: 0.5,
+                        //   color: ColorConstants.halfBlack,
+                        // ),
 
                         // GestureDetector(
                         //   onTap: (){
@@ -302,17 +307,17 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
                         //           ],
                         //         ),
 
-                        //         Icon(Icons.arrow_forward_ios_rounded, color: ColorConstants.white, size: 14,)
+                        //         Icon(Icons.arrow_forward_ios_rounded, color: ColorConstants.black, size: 14,)
                         //       ],
                         //     ),
                         //   )
                         // ),
 
-                        Container(
-                          margin: EdgeInsets.only(top: 15, bottom: 25),
-                          height: 0.5,
-                          color: ColorConstants.halfWhite,
-                        ),
+                        // Container(
+                        //   margin: EdgeInsets.only(top: 15, bottom: 25),
+                        //   height: 0.5,
+                        //   color: ColorConstants.halfBlack,
+                        // ),
 
                         // GestureDetector(
                         //   onTap: (){
@@ -337,17 +342,17 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
                         //           ],
                         //         ),
 
-                        //         Icon(Icons.arrow_forward_ios_rounded, color: ColorConstants.white, size: 14,)
+                        //         Icon(Icons.arrow_forward_ios_rounded, color: ColorConstants.black, size: 14,)
                         //       ],
                         //     ),
                         //   )
                         // ),
 
-                        Container(
-                          margin: EdgeInsets.only(top: 15, bottom: 25),
-                          height: 0.5,
-                          color: ColorConstants.halfWhite,
-                        ),
+                        // Container(
+                        //   margin: EdgeInsets.only(top: 15, bottom: 25),
+                        //   height: 0.5,
+                        //   color: ColorConstants.halfBlack,
+                        // ),
 
                         // GestureDetector(
                         //   onTap: (){
@@ -372,7 +377,7 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
                         //           ],
                         //         ),
 
-                        //         Icon(Icons.arrow_forward_ios_rounded, color: ColorConstants.white, size: 14,)
+                        //         Icon(Icons.arrow_forward_ios_rounded, color: ColorConstants.black, size: 14,)
                         //       ],
                         //     ),
                         //   )
@@ -382,7 +387,7 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
                         Container(
                           margin: EdgeInsets.only(top: 15, bottom: 25),
                           height: 0.5,
-                          color: ColorConstants.halfWhite,
+                          color: ColorConstants.halfBlack,
                         ),
 
                         GestureDetector(
@@ -399,7 +404,7 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    ImageUtils.setImage(ImageConstants.settingVersion, 20, 20),
+                                    ImageUtils.setImage(ImageConstants.settingVersion, 20, 20, color: Colors.black),
                                     SizedBox(width: 5,),
                                     AppText(
                                       text: "version_info".tr(),
@@ -416,7 +421,12 @@ class _SettingListScreen extends BaseState<SettingListScreen> {
                             ),
                           )
                         ),
-
+                        
+                        Container(
+                          margin: EdgeInsets.only(top: 15, bottom: 25),
+                          height: 0.5,
+                          color: ColorConstants.halfBlack,
+                        ),
                         SizedBox(height: 25,)
                       ]
                   ),

@@ -11,7 +11,6 @@ import 'package:tinodeflutter/Screen/ProfileScreen.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/components/widget/BtnBottomSheetWidget.dart';
 import 'package:tinodeflutter/model/btn_bottom_sheet_model.dart';
-import 'package:tinodeflutter/global/DioClient.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
 
