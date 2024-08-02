@@ -50,7 +50,7 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
 
   void initHome() {
     setState(() {
-      isSearchMode = false;
+      _isFriendSearchMode = false;
       searchController.text = "";
     });
   }
@@ -60,20 +60,18 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
   bool isShowKeyboard = false;
   TextEditingController searchController = TextEditingController();
   String previousSearchText = "";
-  bool isSearchMode = false;
-  bool isSearchLoading = false;
+  bool _isFriendSearchMode = false;
+  bool _isFriendSearchLoading = false;
   RxBool isExistSearchText = false.obs;
-  bool isLoading = false;
+  bool _isFriLoading = false;
   ScrollController scrollController = ScrollController();
-  bool hasPostNextPage = false;
-  int discoverPage = 0;
 
   String? hashTag;
 
   List<UserModel> userList = <UserModel>[];
   List<UserModel> _friendList = <UserModel>[];
   List<TopicSubscription> userTopicSubList = <TopicSubscription>[];
-  StreamSubscription? _metaSubscription;
+  StreamSubscription? _metaFriSubscription;
 
   @override
   void initState() {
@@ -85,7 +83,7 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
   }
       @override
   void dispose() {
-    if(_metaSubscription!=null) _metaSubscription?.cancel();
+    if(_metaFriSubscription!=null) _metaFriSubscription?.cancel();
     _fndFriendTopic.leave(true); 
     super.dispose();
   }
@@ -98,24 +96,29 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
 
    void _initializeFndTopic() async{
     _fndFriendTopic = tinode_global.getTopic('fnd') as TopicFnd;
-    _metaSubscription= _fndFriendTopic.onMeta.listen((value) {
-      _handleFriendMetaMessage(value);
+    _metaFriSubscription= _fndFriendTopic.onMeta.listen((value) {
+     // _handleFriendMetaMessage(value);
     });
     if(!_fndFriendTopic.isSubscribed) await _fndFriendTopic.subscribe(MetaGetBuilder(_fndFriendTopic).withData(null, null, null).build(), null);
   }
 
   void _handleFriendMetaMessage(MetaMessage msg) {
     if (msg.sub != null) {
+        if(msg.sub?[0].user==null) {
+          showToast('서버에서 이상하게 데이터 줌'); 
+          return;
+          }
         try{
         print("search list :");
         for(int i = 0 ; i<msg.sub!.length ;i++)
         {
-          String pictureUrl = msg.sub?[i].public['photo']?['ref'] != null ? changePathToLink(msg.sub?[i].public['photo']['ref']) : "";
+          String pictureUrl = msg.sub?[i].public['photo']!=null ? (msg.sub?[i].public['photo']['ref']!=null ? (msg.sub?[i].public['photo']['ref'] ?? "" ) : (msg.sub?[i].public['photo'] ?? "")):"";
+          //String pictureUrl = msg.sub?[i].public['photo']?['ref'] != null ? changePathToLink(msg.sub?[i].public['photo']['ref']) : "";
           UserModel user = UserModel(id: msg.sub?[i].user ?? "" , name : msg.sub?[i].public['fn'], picture : pictureUrl, isFreind: msg.sub?[i].isFriend ?? false);
           _friendList.add(user);
         }
         setState(() {
-          isSearchLoading = false;
+          //_isFriendSearchLoading = false;
         });
         }
         catch(err)
@@ -127,7 +130,7 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
 
   Future<void> _searchFriend(String query) async {
     try {
-      searchController.text="";
+      //searchController.text="";
       // SetParams 객체를 생성하여 검색 쿼리 설정
       String friendQuery = "friend:$query";
       SetParams setParams = SetParams(
@@ -146,10 +149,20 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
     // fnd 토픽에 메타데이터 요청 보내기
     _friendList = [];
     var meta = await _fndFriendTopic.getMeta(getQuery);
-
+      print("11");
+    if(meta.runtimeType==CtrlMessage){
+      if(meta.text !=null && meta.text =="no content") 
+        {showToast('해당 유저는 친구가 아닙니다.');}
+    }else{
+      _handleFriendMetaMessage(meta);
+    }
+    setState(() {
+      _isFriendSearchLoading=false;      _isFriLoading=false;
+    });
+    
     } catch (err) {
       print("err search : $err");
-      isLoading=false;
+      _isFriLoading=false;
     }
   }
 
@@ -260,18 +273,18 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
                                     // widget.changePage(RouteString.disvoerSearch, text);
                                   },
                                   onChanged: (text) {
-                                    isSearchLoading = true;
+                                    _isFriendSearchLoading = true;
                                     if (previousSearchText.isEmpty &&
                                         text.isNotEmpty) {
                                       setState(() {
-                                        isSearchMode = true;
+                                        _isFriendSearchMode = true;
                                       });
                                       _searchFriend(text);
                                       isExistSearchText.value = true;
                                     } else if (previousSearchText.isNotEmpty &&
                                         text.isEmpty) {
                                       setState(() {
-                                        isSearchMode = false;
+                                        _isFriendSearchMode = false;
                                       });
                                     } else {
                                       print("검색");
@@ -314,7 +327,7 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
                                           isExistSearchText.value = false;
                                           searchController.text = "";
                                           previousSearchText = "";
-                                          isSearchMode = false;
+                                          _isFriendSearchMode = false;
                                         });
                                       },
                                       child: ImageUtils.setImage(
@@ -365,9 +378,9 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
                     // SizedBox(height: Get.height * 0.02),
                     _searchWidget(),
                     // 친구리스트 보여지는 영역
-                    isSearchMode
+                    _isFriendSearchMode
                         ? Expanded(
-                            child: isSearchLoading
+                            child: _isFriendSearchLoading
                                 ? LoadingWidget()
                                 : _friendList.isEmpty
                                     ? Center(
@@ -378,10 +391,8 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
                                         ),
                                       )
                                     : Container(
-                                        padding: EdgeInsets.only(
-                                            left: 10, right: 10),
-                                        child: SingleChildScrollView(
-                                          
+                                        padding: EdgeInsets.only(left: 10, right: 10),
+                                        child: SingleChildScrollView(                                          
                                           child: Column(
                                             children: [                                           
                                               _friendList.isNotEmpty? 
@@ -391,9 +402,7 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
                                                             shrinkWrap: true,
                                                             physics:
                                                                 NeverScrollableScrollPhysics(),
-                                                            itemCount:
-                                                                _friendList
-                                                                    .length,
+                                                            itemCount: _friendList.length,
                                                             itemBuilder:
                                                                 (context,index) {
                                                               Key key = Key(
@@ -424,7 +433,7 @@ class _FriendListScreenState extends BaseState<FriendListScreen> {
                                         ),
                                       ))
                         : Expanded(
-                            child: isSearchLoading
+                            child: _isFriendSearchLoading
                                 ? LoadingWidget()
                                 : _friendList.length == 0
                                     ? Center(

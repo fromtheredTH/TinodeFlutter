@@ -3,7 +3,15 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:tinodeflutter/Constants/ColorConstants.dart';
+import 'package:tinodeflutter/Constants/Constants.dart';
+import 'package:tinodeflutter/Constants/FontConstants.dart';
+import 'package:tinodeflutter/Constants/ImageConstants.dart';
+import 'package:tinodeflutter/Constants/ImageUtils.dart';
 import 'package:tinodeflutter/Screen/ProfileScreen.dart';
+import 'package:tinodeflutter/components/focus_detector.dart';
+import 'package:tinodeflutter/components/widget/UserListItemWidget.dart';
+import 'package:tinodeflutter/components/widget/loading_widget.dart';
 import 'package:tinodeflutter/global/global.dart';
 import 'messageRoomScreen.dart';
 import '../tinode/tinode.dart';
@@ -11,12 +19,12 @@ import '../tinode/src/models/message.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:http/http.dart';
 import 'package:tinodeflutter/helpers/common_util.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:get/get_core/src/get_main.dart';
 
 import '../../components/item/PositionRetainedScrollPhysics.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_it/get_it.dart';
@@ -39,6 +47,11 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
   late TopicFnd _fndSearchUserTopic;
   StreamSubscription? _metaSubscription_SearchUser ;
 
+  String previousUserSearchText = "";
+  bool _isUserSearchLoading =false;
+  bool _isUserSearchMode =false;
+  TextEditingController searchUserController = TextEditingController();
+  RxBool isExistUserSearchText = false.obs;
 
   @override
   void initState() {
@@ -118,6 +131,11 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
     );
     // fnd 토픽에 메타데이터 요청 보내기
     var meta = await _fndSearchUserTopic.getMeta(getQuery);
+      setState(() {
+      _isUserSearchLoading=false;     
+    });
+    if(meta?.text !=null && meta.text =="no content") {showToast('해당 유저는 친구가 아닙니다.');}
+
     print("");
     // if(meta?.text=="no content")
     //   showToast("해당 유저없음");
@@ -149,144 +167,292 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
     tinode_global.getFndTopic();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("유저검색"),
-      ),
-      body: SizedBox(
-        width: double.infinity,
-        height: double.infinity,
-        child: Column(children: [
-          SizedBox(
-            height: 20,
-          ),
-          InkWell(
-            onTap: () {
-              if (!inputController.value.text.isEmpty)
-                _searchUsers(inputController.value.text);
-              else
-                showToast("입력해주세요");
-              FocusManager.instance.primaryFocus?.unfocus();
-            },
-            child: Container(
-              width: 100,
-              height: 20,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.black)),
-              padding: const EdgeInsets.only(left: 10, right: 10),
-              child: AppText(
-                text: "검색",
-                textAlign: TextAlign.center,
-                color: Colors.black,
-              ),
-            ),
-          ),
-
-          SizedBox(
-            height: 20,
-          ),
-          Container(
-              height: 100,
-              margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.black)),
-              padding: const EdgeInsets.only(
-                  left: 20, top: 12, bottom: 12, right: 10),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: inputController,
-                      cursorColor: Colors.black,
-                      style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700),
-                      onEditingComplete: () {},
-                      keyboardType: TextInputType.text,
-                      textAlign: TextAlign.start,
-                      textAlignVertical: TextAlignVertical.center,
-                      textInputAction: TextInputAction.done,
-                      maxLength: 50,
-                      decoration: InputDecoration(
-                          counterText: "",
-                          contentPadding: EdgeInsets.zero,
-                          floatingLabelBehavior: FloatingLabelBehavior.never,
-                          hintText: '유저 검색...',
-                          isDense: true,
-                          hintStyle: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700),
-                          border: InputBorder.none),
-                      onChanged: (text) {
-                        setState(() {});
-                      },
-                    ),
-                  ),
-                ],
-              )),
-          if(_searchResults.length==0)
-           Expanded(
-              child:Container(
-              alignment: Alignment.center,
-              width: double.maxFinite,
-              height: double.maxFinite,
-              child: AppText(text: "검색한 유저는 없습니다.", fontSize: 20,),))
-          else
-          Expanded(
-            child: ListView.builder(
-                cacheExtent: double.infinity,
-                shrinkWrap: false,
-                padding: const EdgeInsets.all(10),
-                controller: mainController,
-                itemCount: _searchResults.length,
-                reverse: false,
-                physics: physics,
-                itemBuilder: (BuildContext context, int index) {
-                  return AutoScrollTag(
-                    key: ValueKey(index),
-                    controller: mainController,
-                    index: index,
-                    child: GestureDetector(
-                        onLongPress: () => {},
-                        child: Stack(
-                          children: [
-                            InkWell(
-                              onTap: () {
-                                Get.to(()=>ProfileScreen( user: _searchResults[index]));
-                              },
-                              child: Container(
-                                height: 40,
-                                child: Row(children: [
-                                  AppText(
-                                    text: _searchResults[index].name.toString(),
-                                    fontSize: 12,
-                                    color: Colors.black,
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  AppText(
-                                    text: _searchResults[index].id.toString(),
-                                    fontSize: 12,
-                                    color: Colors.red,
-                                  ),
-                                ]),
+    Widget _topBarUserSearchWidget()
+  {
+    return  Container(
+                      height: 56, // AppBar의 기본 높이
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: Center(
+                              child: AppText(
+                                text: "대화 상대",
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                          ],
-                        )),
-                  );
-                }),
-          ),
-        ]),
-      ),
-    );
+                          ),
+                          Positioned(
+                            right: 16,
+                            top: 0,
+                            bottom: 0,
+                            child: Center(
+                              child: InkWell(
+                                onTap: () {
+                                  Get.to(SerachUserScreen());
+                                  // Navigator.of(context).push(
+                                  //   SwipeablePageRoute(
+                                  //     canOnlySwipeFromEdge: true,
+                                  //     builder: (context) => MessageRoomAddScreen(),
+                                  //   ),
+                                  // ).then((value) {});
+                                },
+                                child: SizedBox(
+                                  width: 30,
+                                  height: 30,
+                                  child: Icon(
+                                    Icons.person_add,
+                                    size: 25,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+  }
+
+  Widget _searchUserWidget()
+  {
+    return  Padding(
+                      padding: EdgeInsets.only(
+                          right: Get.width * 0.02, left: Get.width * 0.02),
+                      child: Container(
+                          width: Get.width, // Set width according to your needs
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(
+                                6.0), // Adjust the value as needed
+                          ),
+                          margin: EdgeInsets.only(bottom: 10),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Flexible(
+                                child: TextFormField(
+                                  controller: searchUserController,
+                                  onFieldSubmitted: (text) {
+                                    // widget.changePage(RouteString.disvoerSearch, text);
+                                  },
+                                  onChanged: (text) {
+                                    _isUserSearchLoading = true;
+                                    if (previousUserSearchText.isEmpty &&
+                                        text.isNotEmpty) {
+                                      setState(() {
+                                        _isUserSearchMode = true;
+                                      });
+                                      _searchUsers(text);
+                                      isExistUserSearchText.value = true;
+                                    } else if (previousUserSearchText.isNotEmpty &&
+                                        text.isEmpty) {
+                                      setState(() {
+                                        _isUserSearchMode = false;
+                                      });
+                                    } else {
+                                      print("검색");
+                                      print(text);
+                                      print(searchUserController.text);
+                                      _searchUsers(text);
+                                      isExistUserSearchText.value = true;
+                                    }
+                                    previousUserSearchText = text;
+                                  },
+                                  style: TextStyle(
+                                      color: Colors.grey,
+                                      fontFamily: FontConstants.AppFont,
+                                      fontSize: 16),
+                                  textInputAction: TextInputAction.search,
+                                  decoration: InputDecoration(
+                                    hintText: '유저 검색',
+                                    contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 16.0,
+                                        vertical:
+                                            12.0), // Adjust vertical padding
+                                    border: InputBorder.none,
+                                    prefixIcon: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: ImageUtils.setImage(ImageConstants.chatSearchWhite, 10, 10, color: Colors.grey),
+                                    ),
+                                    // Align hintText to center
+                                    hintStyle: TextStyle(
+                                        color: Colors.grey,
+                                        fontFamily: FontConstants.AppFont,
+                                        fontSize: 14),
+                                    // alignLabelWithHint: true,
+                                  ),
+                                ),
+                              ),
+                              Obx(() => isExistUserSearchText.value
+                                  ? GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          isExistUserSearchText.value = false;
+                                          searchUserController.text = "";
+                                          previousUserSearchText = "";
+                                          _isUserSearchMode = false;
+                                        });
+                                      },
+                                      child: ImageUtils.setImage(
+                                          ImageConstants.searchX, 20, 20),
+                                    )
+                                  : Container()),
+                              SizedBox(
+                                width: 10,
+                              )
+                            ],
+                          )),
+                    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
+    final double itemHeight =
+        size.width * 0.4 * 1.8; // Adjust the fraction as needed
+    final double itemWidth = size.width * 0.4;
+
+    return FocusDetector(
+        onFocusLost: () {},
+        onFocusGained: () {
+          setState(() {});
+        },
+        child: GestureDetector(
+            onTap: FocusScope.of(context).unfocus,
+            child: Scaffold(
+              backgroundColor: ColorConstants.backgroundGrey,
+              resizeToAvoidBottomInset: true,
+              body: Padding(
+                padding: EdgeInsets.only(
+                    right: Get.width * 0.01, left: Get.width * 0.01),
+                child: Column(
+                  children: [
+                    SizedBox(height: Get.height * 0.04),
+                    _topBarUserSearchWidget(),
+                    // Padding(
+                    //     padding: EdgeInsets.only(left: 10, right: 10),
+                    //     child: CustomTitleBar(callBack: (){
+                    //       Get.to(ProfileScreen(user: Constants.user, tinode: tinode,));
+                    //     },onTapLogo: (){
+                    //       widget.onTapLogo();
+                    //     },)),
+                    // SizedBox(height: Get.height * 0.02),
+                    _searchUserWidget(),
+                    // 친구리스트 보여지는 영역
+                    _isUserSearchMode
+                        ? Expanded(
+                            child: _isUserSearchLoading
+                                ? LoadingWidget()
+                                : _searchResults.isEmpty
+                                    ? Center(
+                                        child: AppText(
+                                          text: "empty_search".tr(),
+                                          fontSize: 13,
+                                          color: ColorConstants.gray3,
+                                        ),
+                                      )
+                                    : Container(
+                                        padding: EdgeInsets.only(left: 10, right: 10),
+                                        child: SingleChildScrollView(                                          
+                                          child: Column(
+                                            children: [                                           
+                                              _searchResults.isNotEmpty? 
+                                              Column(
+                                                      children: [                                                      
+                                                        ListView.builder(
+                                                            shrinkWrap: true,
+                                                            physics:
+                                                                NeverScrollableScrollPhysics(),
+                                                            itemCount: _searchResults.length,
+                                                            itemBuilder:
+                                                                (context,index) {
+                                                              Key key = Key(
+                                                                  _searchResults[index].id.toString());
+                                                              return UserListItemWidget(
+                                                                key: key,
+                                                                user:_searchResults[index],
+                                                                isShowAction:
+                                                                    true,
+                                                                    unFollowUser: (){
+                                                                      //_delFriend(_searchResults[index].id);
+                                                                       setState(() {
+                                                                    _searchResults.removeAt(index);
+                                                                  });
+                                                                    },
+                                                                deleteUser: () {
+                                                                  setState(() {
+                                                                    _searchResults.removeAt(index);
+                                                                  });
+                                                                },
+                                                              );
+                                                            }),
+                                                      ],
+                                                    )
+                                                  : Container(),
+                                            ],
+                                          ),
+                                        ),
+                                      ))
+                        : Expanded(
+                            child: _isUserSearchLoading
+                                ? LoadingWidget()
+                                : _searchResults.length == 0
+                                    ? Center(
+                                        child: AppText(
+                                          text: "유저가 없습니다.",
+                                          fontSize: 13,
+                                          color: Colors.black,
+                                        ),
+                                      )
+                                    : Container(
+                                        padding: EdgeInsets.only(
+                                            top:10,
+                                            left: 10, right: 10),
+                                            color: Colors.white,
+                                        child: SingleChildScrollView(
+                                          child: Column(
+                                            children: [
+                                             
+                                              _searchResults.isNotEmpty
+                                                  ? Column(
+                                                      children: [                                                    
+                                                        ListView.builder(
+                                                            shrinkWrap: true,
+                                                            physics: NeverScrollableScrollPhysics(),
+                                                            itemCount: _searchResults.length,
+                                                            itemBuilder: (context,index) {
+                                                              Key key = Key(_searchResults[index].id.toString());
+                                                              return UserListItemWidget(
+                                                                key: key,
+                                                                user: _searchResults[index],
+                                                                isShowAction: true,
+                                                                unFollowUser:(){
+                                                                 // _delFriend(_searchResults[index].id);
+                                                                   setState(() {
+                                                                    _searchResults.removeAt(index);
+                                                                  });
+                                                                },
+                                                                deleteUser: () {
+                                                                  setState(() {
+                                                                    _searchResults.removeAt(index);
+                                                                  });
+                                                                },
+                                                              );
+                                                            }),
+                                                      ],
+                                                    )
+                                                  : Container(),
+                                            ],
+                                          ),
+                                        ),
+                                      )
+                         
+                            ),
+                   // SizedBox(height: Constants.navBarHeight,),
+                  ],
+                ),
+              ),
+            )));
   }
 }
