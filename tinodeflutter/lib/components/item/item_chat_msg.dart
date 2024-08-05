@@ -1,7 +1,8 @@
-import 'dart:typed_data';
 import 'dart:convert';
+import 'dart:typed_data';
 
 
+import 'package:flutter_sound/flutter_sound.dart';
 import 'package:image/image.dart' as img;
 import 'package:get/get.dart' hide Trans;
 
@@ -27,11 +28,13 @@ import '../widget/image_viewer.dart';
 class ItemChatMsg extends StatelessWidget {
   List<UserModel> users;
   MessageModel info;
-  List<UnreadDto> unread;
+  //List<UnreadDto> unread;
   MessageModel? before;
   MessageModel? next;
   String? parentNick;
   bool? bNewMsg;
+  FlutterSoundPlayer? playerModule;
+
   final setState;
   final onProfile;
   final onDelete;
@@ -51,7 +54,7 @@ class ItemChatMsg extends StatelessWidget {
       {Key? key,
       required this.users,
       required this.info,
-      required this.unread,
+      //required this.unread,
       this.before,
       this.next,
       this.parentNick,
@@ -101,24 +104,18 @@ class ItemChatMsg extends StatelessWidget {
 
   void getUnreadCount(dynamic info) {
     // print("chat id : ${info.id}, timetime : ${DateTime.now()}");
-    if (unread.isEmpty || (users.isEmpty)) return;
-    int count = 0;
-    for (var e in unread) {
-      if (e.last_read_id != null &&
-          users.map((e) => e.id).contains(e.user_id)) {
-        if (e.last_read_id! < info.id) {
-          count++;
-        }
-      }
-    }
-    info.unread_count = count;
-    // WriteLog.renderingEndTime = DateTime.now();
-    // WriteLog.write("unread chat id : ${info.id}, timetime : ${DateTime.now()}\n ",fileName: 'getUnreadCountFunc.txt');
-    // WriteLog.write("unread chat id : ${info.id}, timetime : ${DateTime.now()}\n ",fileName: 'AllInOne.txt');
-    // WriteLog.write(' clientRenderingTime chat id : ${info.id} : ${WriteLog.TimeDifferenceClientRendering()} \n',fileName: 'clitent_Rendering_Span.txt');
-    // WriteLog.write(' clientRenderingTime chat id : ${info.id} : ${WriteLog.TimeDifferenceClientRendering()} \n',fileName: 'AllInOne.txt');
-    // WriteLog.write(' overall_Span time: ${WriteLog.TimeDifferenceOverall()} \n',fileName: 'overall_Span.txt');
-    // WriteLog.write(' overall_Span time: ${WriteLog.TimeDifferenceOverall()} \n',fileName: 'AllInOne.txt');
+    // if (unread.isEmpty || (users.isEmpty)) return;
+    // int count = 0;
+    // for (var e in unread) {
+    //   if (e.last_read_id != null &&
+    //       users.map((e) => e.id).contains(e.user_id)) {
+    //     if (e.last_read_id! < info.id) {
+    //       count++;
+    //     }
+    //   }
+    // }
+    // info.unread_count = count;
+ 
   }
 
   Future<void> loadAudio() async {
@@ -163,7 +160,7 @@ class ItemChatMsg extends StatelessWidget {
                   images: (info.contents ?? '').split(","),
                   selected: index,
                   isVideo: false,
-                 // user: getUser(),
+                  user: getUser(),
                 ))).then((value) {
       if (value == "delete") {
         onDelete();
@@ -175,8 +172,7 @@ class ItemChatMsg extends StatelessWidget {
     return Container(
       constraints: BoxConstraints(maxWidth: Get.width * 0.65),
       decoration: BoxDecoration(
-        color:
-            mine ? ColorConstants.colorMyMessage : ColorConstants.white5Percent,
+        color:  mine ? ColorConstants.colorMyMessage : ColorConstants.darkGrey,
         borderRadius: BorderRadius.circular(info.chat_idx == -1 ? 8 : 8),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
@@ -302,6 +298,7 @@ class ItemChatMsg extends StatelessWidget {
       time = info.unsended_at!;
     }
     DateTime now = DateTime.now();
+    try{
     DateTime createdTime = DateTime.parse(time);
     if(createdTime.year == now.year) {
       DateFormat formatter = DateFormat("dm_time_format".tr(), Constants.languageCode);
@@ -311,6 +308,13 @@ class ItemChatMsg extends StatelessWidget {
     DateFormat formatter = DateFormat("dm_time_format2".tr(), Constants.languageCode);
     String strToday = formatter.format(createdTime);
     return strToday;
+    }
+    catch(err)
+    {
+      print("1");
+      return "";
+    }
+    
   }
 
   Widget imageTile(BuildContext context) {
@@ -444,7 +448,7 @@ class ItemChatMsg extends StatelessWidget {
                       images: (info.contents ?? '').split(","),
                       selected: 0,
                       isVideo: true,
-                      //user: getUser(),
+                      user: getUser(),
                     ))).then((value) {
           if (value == "delete") {
             onDelete();
@@ -592,7 +596,7 @@ class ItemChatMsg extends StatelessWidget {
                   //                 info.created_at ?? info.unsended_at ?? "")
                   //             : DateTime.now()),
                   text: getTime(),
-                  color: Colors.white,
+                  color: Colors.black,
                   fontSize: 10,
                 ),
               ),
@@ -644,7 +648,7 @@ class ItemChatMsg extends StatelessWidget {
                                           .tr(args: [parentNick ?? '']),
                                       fontSize: 10,
                                       fontWeight: FontWeight.w400,
-                                      color: ColorConstants.halfWhite,
+                                      color: ColorConstants.halfBlack,
                                     ),
                                     Container(
                                       constraints:
@@ -657,7 +661,7 @@ class ItemChatMsg extends StatelessWidget {
                                             : chatContent(
                                                 info.parent_chat?.contents ??
                                                     '',
-                                                (info.parent_chat?.type ?? 0) as eChatType),
+                                                 (info.parent_chat?.type ?? eChatType.NONE)),
                                         fontWeight: FontWeight.w400,
                                         fontSize: 12,
                                       ),
@@ -696,18 +700,18 @@ class ItemChatMsg extends StatelessWidget {
                                                 text: chatTime3(
                                                     info.created_at ?? ''),
                                                 fontSize: 10,
-                                                color: ColorConstants.halfWhite,
+                                                color: ColorConstants.halfBlack,
                                               ),
                                     ],
                                   ),
                                   const SizedBox(width: 4),
-                                  if (info.type == eChatType.TEXT.index)
+                                  if (info.type == eChatType.TEXT)
                                     textTile()
-                                  else if (info.type == eChatType.IMAGE.index)
+                                  else if (info.type == eChatType.IMAGE)
                                     imageTile(context)
-                                  else if (info.type == eChatType.VIDEO.index)
+                                  else if (info.type == eChatType.VIDEO)
                                     videoTile(context)
-                                  else if (info.type == eChatType.AUDIO.index)
+                                  else if (info.type == eChatType.AUDIO)
                                     audioTile()
                                 ],
                               ),
@@ -765,7 +769,7 @@ class ItemChatMsg extends StatelessWidget {
                                                       ]),
                                                   fontSize: 10,
                                                   color:
-                                                      ColorConstants.halfWhite,
+                                                      ColorConstants.halfBlack,
                                                 ),
                                               ),
                                               Container(
@@ -783,7 +787,7 @@ class ItemChatMsg extends StatelessWidget {
                                                       info.parent_chat
                                                               ?.contents ??
                                                           '',
-                                                      (info.parent_chat?.type ?? 0) as eChatType),
+                                                      (info.parent_chat?.type ?? eChatType.NONE)),
                                                   fontSize: 12,
                                                 ),
                                               )
@@ -801,7 +805,7 @@ class ItemChatMsg extends StatelessWidget {
                                                         "unknown".tr(),
                                                     fontSize: 13,
                                                     color: ColorConstants
-                                                        .halfWhite,
+                                                        .halfBlack,
                                                   ),
                                                 )),
                                           ),
@@ -846,7 +850,7 @@ class ItemChatMsg extends StatelessWidget {
                                                 text: chatTime3(
                                                     info.created_at ?? ''),
                                                 fontSize: 10,
-                                                color: ColorConstants.halfWhite,
+                                                color: ColorConstants.halfBlack,
                                               ),
                                           ],
                                         ),

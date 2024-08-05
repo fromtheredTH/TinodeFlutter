@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:tinodeflutter/global/global.dart';
+import 'package:tinodeflutter/model/MessageModel.dart';
+import 'package:tinodeflutter/model/userModel.dart';
 
 String getLang(int uid) {
   String lang = uid == 1
@@ -202,9 +204,11 @@ String chatTime2(String chatAt) {
 String chatTime3(String chatAt) {
   String result = "";
   if (chatAt.isNotEmpty) {
-    DateFormat format1 = DateFormat('yyyy-MM-ddTHH:mm:ss.SSSZ');
+    // DateFormat format1 = DateFormat('yyyy-MM-ddTHH:mm:ss.SSSZ');
     DateFormat? format2;
-    DateTime date = format1.parse(chatAt);
+    DateTime date = DateTime.parse(chatAt);
+
+   // DateTime date = format1.parse(chatAt);
     date = date.add(const Duration(hours: 9));
 
     DateTime now = DateTime.now();
@@ -231,23 +235,23 @@ String pad2(int i) {
   return i.toString().padLeft(2, '0');
 }
 
-// String parentChatNick(List<UserDto> users, UserDto? me, List<ChatMsgDto> list, int chat_id) {
-//   List<UserDto> usersAll = [];
-//   usersAll.addAll(users);
-//   if (me != null) {
-//     usersAll.add(me);
-//   }
-//   if (chat_id == 0) return 'unknown'.tr();
-//   List<ChatMsgDto> dto = list.where((element) => element.id == chat_id).toList();
-//   if (dto.isNotEmpty) {
-//     List<UserDto> list = usersAll.where((element) => element.id == dto[0].sender_id).toList();
-//     if (list.isEmpty) {
-//       return 'unknown'.tr();
-//     }
-//     return dto[0].sender?.nickname ?? '';
-//   }
-//   return '';
-// }
+String parentChatNick(List<UserModel> users, UserModel? me, List<MessageModel> list, int chat_id) {
+  List<UserModel> usersAll = [];
+  usersAll.addAll(users);
+  if (me != null) {
+    usersAll.add(me);
+  }
+  if (chat_id == 0) return 'unknown'.tr();
+  List<MessageModel> messageDatas = list.where((element) => element.id == chat_id).toList();
+  if (messageDatas.isNotEmpty) {
+    List<UserModel> list = usersAll.where((element) => element.id == messageDatas[0].sender_id).toList();
+    if (list.isEmpty) {
+      return 'unknown'.tr();
+    }
+    return messageDatas[0].sender_id ?? '';
+  }
+  return '';
+}
 
 
   String formatMilliseconds(int milliseconds) {

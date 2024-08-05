@@ -171,46 +171,52 @@ class _SerachUserScreenState extends State<SerachUserScreen> {
   {
     return  Container(
                       height: 56, // AppBar의 기본 높이
-                      child: Stack(
-                        children: [
-                          Positioned.fill(
-                            child: Center(
+                      child:Center(
                               child: AppText(
-                                text: "대화 상대",
+                                text: "유저 검색",
                                 fontSize: 20,
                                 fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            right: 16,
-                            top: 0,
-                            bottom: 0,
-                            child: Center(
-                              child: InkWell(
-                                onTap: () {
-                                  Get.to(SerachUserScreen());
-                                  // Navigator.of(context).push(
-                                  //   SwipeablePageRoute(
-                                  //     canOnlySwipeFromEdge: true,
-                                  //     builder: (context) => MessageRoomAddScreen(),
-                                  //   ),
-                                  // ).then((value) {});
-                                },
-                                child: SizedBox(
-                                  width: 30,
-                                  height: 30,
-                                  child: Icon(
-                                    Icons.person_add,
-                                    size: 25,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                              ),)
+                      // child: Stack(
+                      //   children: [
+                      //     Positioned.fill(
+                      //       child: Center(
+                      //         child: AppText(
+                      //           text: "유저 검색",
+                      //           fontSize: 20,
+                      //           fontWeight: FontWeight.w600,
+                      //         ),
+                      //       ),
+                      //     ),
+                      //     Positioned(
+                      //       right: 16,
+                      //       top: 0,
+                      //       bottom: 0,
+                      //       child: Center(
+                      //         child: InkWell(
+                      //           onTap: () {
+                      //             Get.to(SerachUserScreen());
+                      //             // Navigator.of(context).push(
+                      //             //   SwipeablePageRoute(
+                      //             //     canOnlySwipeFromEdge: true,
+                      //             //     builder: (context) => MessageRoomAddScreen(),
+                      //             //   ),
+                      //             // ).then((value) {});
+                      //           },
+                      //           child: SizedBox(
+                      //             width: 30,
+                      //             height: 30,
+                      //             child: Icon(
+                      //               Icons.person_add,
+                      //               size: 25,
+                      //               color: Colors.black,
+                      //             ),
+                      //           ),
+                      //         ),
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
                     );
   }
 

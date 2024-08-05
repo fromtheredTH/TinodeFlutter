@@ -39,12 +39,12 @@ class ImageViewer extends StatefulWidget {
   final int selected;
   final bool isVideo;
  // final Image img;
- // final User? user;
+  final UserModel? user;
 
   ImageViewer(
       {super.key, required this.images, this.selected = 0, required this.isVideo, 
       //required this.img,
-      //required this.user
+      required this.user
       });
 
   @override

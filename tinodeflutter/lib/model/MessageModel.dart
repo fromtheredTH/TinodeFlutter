@@ -2,8 +2,10 @@
 import 'dart:io';
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:tinodeflutter/global/global.dart';
 import 'package:tinodeflutter/helpers/bind_json.dart';
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/tinode/src/database/model.dart';
 
 
 
@@ -11,9 +13,9 @@ class MessageModel {
   int id;
   String? unsended_at;
   String? contents;
-  int room_id;
+  String room_id;
   String sender_id;
-  int type;
+  eChatType type;
   int parent_id;
   String? created_at;
   String? updated_at;
@@ -27,7 +29,7 @@ class MessageModel {
   int? totalProgress;
   int? audioTime;
   bool? isPlayAudio;
-
+  DataMessage dataMessage;
 
     MessageModel(
       {required this.id,
@@ -37,6 +39,7 @@ class MessageModel {
       required this.sender_id,
       required this.type,
       required this.parent_id,
+      required this.dataMessage,
       this.created_at,
       this.updated_at,
       this.deleted_at,
@@ -54,6 +57,7 @@ class MessageModel {
       contents= json['contents'] as String?,
       room_id= json['room_id'],
       sender_id= json['sender_id'],
+      dataMessage= json['dataMessage'],
       type= json['type'],
       parent_id= json['parent_id'],
       created_at= json['created_at'] as String?,
@@ -68,7 +72,7 @@ class MessageModel {
 
   Map<String, dynamic> toJson() =>
       {
-       'id': id,
+      'id': id,
       'unsended_at': unsended_at,
       'contents': contents,
       'room_id': room_id,
