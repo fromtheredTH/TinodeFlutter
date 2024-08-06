@@ -172,16 +172,23 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
 
           if (msgList.length != 0 && msgList[0].dataMessage.seq == data.seq)
             return;
-
+          eChatType chatType = checkMsgType(data);
+          if(chatType==eChatType.VOICE_CALL || chatType ==eChatType.VIDEO_CALL)
+          {
+            switch (data.head?['webrtc']) {
+              case 'started':
+              case 'accepted':
+              return;
+          }}
           MessageModel messageModel = MessageModel(
               id: data.seq ?? -1,
               room_id: data.topic ?? "",
               created_at: data.ts.toString() ?? "",
               sender_id: data.from ?? "",
-              type: checkMsgType(data),
+              type: chatType,
               parent_id: -1,
               dataMessage: data,
-              contents: data.content);
+              contents: data.content.runtimeType == String ? data.content : "");
           //msgList.insert(0, data);
           msgList.add(messageModel);
           setState(() {
@@ -383,36 +390,8 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
         ));
   }
 
-  // void fullView(BuildContext context, int index, String imageUrl) {
-  //   Navigator.push(
-  //       context,
-  //       MaterialPageRoute(
-  //           builder: (context) => ImageViewer(
-  //                 images: [imageUrl],
-  //                 selected: index,
-  //                 isVideo: false,
 
-  //                 //  user: getUser(),
-  //               ))).then((value) {
-  //     // if (value == "delete") {
-  //     //   onDelete();
-  //     // }
-  //   });
-  // }
 
-  late Uint8List imageDecode;
-
-  Image getImageBase64Decoder(String base64) {
-    imageDecode = Base64Decoder().convert(base64);
-    return Image.memory(
-      imageDecode,
-      // width: 200,
-      // height: 200,
-      fit: BoxFit.cover,
-      width: Get.width * 0.4,
-      height: Get.width * 0.4,
-    );
-  }
 
   Future<String> encodeFileToBase64(File file) async {
     List<int> bytes = await file.readAsBytes();
@@ -420,129 +399,9 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
     return base64Image;
   }
 
-  String fileUrl = "";
 
-  String getFileUrl(DataMessage dataMessage, eChatType fileType,
-      {bool getVideoThumbnail = false}) {
-    switch (fileType) {
-      case eChatType.IMAGE:
-        fileUrl =
-            "https://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
-        break;
-      case eChatType.VIDEO:
-        if (getVideoThumbnail)
-          fileUrl =
-              "https://$hostAddres/${dataMessage.content['ent'][0]['data']['preref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
-        else {
-          fileUrl =
-              "https://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
-        }
-        break;
-      default:
-        break;
-    }
-    print("file url : $fileUrl");
-    return fileUrl;
-  }
 
-  Widget getUrltoImage(String imageUrl) {
-    return Image.network(
-      imageUrl,
-      fit: BoxFit.cover,
-      loadingBuilder: (BuildContext context, Widget child,
-          ImageChunkEvent? loadingProgress) {
-        if (loadingProgress == null) {
-          return child;
-        } else {
-          return Center(
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                      (loadingProgress.expectedTotalBytes ?? 1)
-                  : null,
-            ),
-          );
-        }
-      },
-      errorBuilder:
-          (BuildContext context, Object error, StackTrace? stackTrace) {
-        return Center(
-          child: Text('Failed to load image'),
-        );
-      },
-    );
-  }
 
-  // Widget imageTile(BuildContext context, DataMessage dataMessage, int index) {
-  //   bool isBase64 = false;
-  //   if (dataMessage.content['ent'][0]['data']['ref'] != null) {
-  //     isBase64 = false;
-  //   } else {
-  //     isBase64 = true;
-  //   }
-  //   return Container(
-  //     constraints: BoxConstraints(maxWidth: Get.width * 0.65),
-  //     child: Stack(
-  //       children: [
-  //         GestureDetector(
-  //           onTap: () {
-  //              isBase64
-  //               ?fullView(
-  //                 context, 0,  Base64Decoder().convert(dataMessage.content['ent'][0]['data']['val']) as String)
-  //               : fullView(
-  //                 context, 0,   getFileUrl(dataMessage,eChatType.IMAGE) );
-
-  //                 ;
-  //           },
-  //           onLongPress: () {
-  //             deleteMsgForAllPerson(msgList[index].id ?? -1);
-  //           },
-  //           child: isBase64
-  //               ? getImageBase64Decoder(
-  //                   dataMessage.content['ent'][0]['data']['val'])
-  //               : getUrltoImage(getFileUrl(dataMessage,eChatType.IMAGE)),
-
-  //           // info.file.isNotEmpty
-  //           //     ? Image.file(
-  //           //         info.file[0],
-  //           //         fit: BoxFit.cover,
-  //           //       )
-  //           //     : CachedNetworkImage(imageUrl: arr[0], fit: BoxFit.cover),
-  //         ),
-  //         // if (info.fileProgress != null &&
-  //         //     info.totalProgress != null &&
-  //         //     info.file != null)
-  //         //   Positioned.fill(
-  //         //       child: Container(
-  //         //     color: Colors.black.withOpacity(0.5),
-  //         //     child: Center(
-  //         //         child: Column(
-  //         //       mainAxisAlignment: MainAxisAlignment.center,
-  //         //       crossAxisAlignment: CrossAxisAlignment.center,
-  //         //       children: [
-  //         //         CircularPercentIndicator(
-  //         //           radius: 12.0,
-  //         //           lineWidth: 1.0,
-  //         //           percent: info.fileProgress!.toDouble() /
-  //         //               info.totalProgress!.toDouble(),
-  //         //           progressColor: Colors.white,
-  //         //         ),
-  //         //         SizedBox(
-  //         //           height: 2,
-  //         //         ),
-  //         //         AppText(
-  //         //           text:
-  //         //               "${sizeStr(info.fileProgress!, info.totalProgress!)} / ${totalSizeStr(info.totalProgress!)}",
-  //         //           color: Colors.white,
-  //         //           fontSize: 14,
-  //         //         ),
-  //         //       ],
-  //         //     )),
-  //         //   )),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   // Widget videoTile(
   //   BuildContext context,
@@ -797,7 +656,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
     });
     Get.back();
     if (fileList.isNotEmpty) {
-      int randid = Random().nextInt(10000);
+      //int randid = Random().nextInt(10000);
       // List<String> imageList = [];
 
       // // base64 encode
@@ -1321,74 +1180,6 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
 
   bool closeRoom = false;
 
-  Widget fileButtonWidget() {
-    return InkWell(
-      onTap: () async {
-        if (closeRoom) return;
-        if (await _promptPermissionSetting()) {
-          List<BtnBottomSheetModel> items = [];
-          items
-              .add(BtnBottomSheetModel(ImageConstants.cameraIcon, "camera", 0));
-          items
-              .add(BtnBottomSheetModel(ImageConstants.albumIcon, "gallery", 1));
-
-          Get.bottomSheet(
-              enterBottomSheetDuration: Duration(milliseconds: 100),
-              exitBottomSheetDuration: Duration(milliseconds: 100),
-              BtnBottomSheetWidget(
-                btnItems: items,
-                onTapItem: (sheetIdx) async {
-                  if (sheetIdx == 0) {
-                    AssetEntity? assets =
-                        await MyAssetPicker.pickCamera(context, true);
-                    if (assets != null) {
-                      procAssetsWithCamera([assets]);
-                    }
-                  } else {
-                    if (await _promptPermissionSetting()) {
-                      showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          isDismissible: true,
-                          backgroundColor: Colors.transparent,
-                          constraints: BoxConstraints(
-                            minHeight: 0.4,
-                            maxHeight: Get.height * 0.95,
-                          ),
-                          builder: (BuildContext context) {
-                            return DraggableScrollableSheet(
-                                initialChildSize: 0.5,
-                                minChildSize: 0.4,
-                                maxChildSize: 0.9,
-                                expand: false,
-                                builder: (_, controller) => GalleryBottomSheet(
-                                      controller: controller,
-                                      onTapSend: (results) {
-                                        procAssetsWithGallery(results);
-                                      },
-                                    ));
-                          });
-                    }
-                  }
-                },
-              ));
-        }
-      },
-      child: Container(
-        width: 35,
-        height: 35,
-        child: Center(
-          child: Image.asset(
-            closeRoom
-                ? "assets/image/ic_add_disable.png"
-                : ImageConstants.chatPlus,
-            width: 20,
-            height: 20,
-          ),
-        ),
-      ),
-    );
-  }
 
   Future<void> download(List<String> files, int idx) async {
     if (idx == files.length) return;
@@ -2084,67 +1875,83 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
                                       : Row(
                                           children: [
                                             const SizedBox(width: 7),
-                                            // InkWell(
-                                            //   onTap: () async {
-                                            //     if (closeRoom) return;
-                                            //     if (await _promptPermissionSetting()) {
-                                            //       List<BtnBottomSheetModel> items = [];
-                                            //       items.add(BtnBottomSheetModel(ImageConstants.cameraIcon, "camera".tr(), 0));
-                                            //       items.add(BtnBottomSheetModel(ImageConstants.albumIcon, "gallery".tr(), 1));
-
-                                            //       Get.bottomSheet(enterBottomSheetDuration: Duration(milliseconds: 100), exitBottomSheetDuration: Duration(milliseconds: 100),BtnBottomSheetWidget(
-                                            //         btnItems: items,
-                                            //         onTapItem: (sheetIdx) async {
-                                            //           if(sheetIdx == 0){
-                                            //             AssetEntity? assets = await MyAssetPicker.pickCamera(context, true);
-                                            //             if (assets != null) {
-                                            //               procAssets([assets]);
-                                            //             }
-                                            //           }else {
-                                            //             if (await _promptPermissionSetting()) {
-                                            //               showModalBottomSheet(
-                                            //                   context: context,
-                                            //                   isScrollControlled: true,
-                                            //                   isDismissible: true,
-                                            //                   backgroundColor: Colors.transparent,
-                                            //                   constraints: BoxConstraints(
-                                            //                     minHeight: 0.4,
-                                            //                     maxHeight: Get.height*0.95,
-                                            //                   ),
-                                            //                   builder: (BuildContext context) {
-                                            //                     return DraggableScrollableSheet(
-                                            //                         initialChildSize: 0.5,
-                                            //                         minChildSize: 0.4,
-                                            //                         maxChildSize: 0.9,
-                                            //                         expand: false,
-                                            //                         builder: (_, controller) => GalleryBottomSheet(
-                                            //                           controller: controller,
-                                            //                           onTapSend: (results){
-                                            //                             procAssetsWithGallery(results);
-                                            //                           },
-                                            //                         )
-                                            //                     );
-                                            //                   }
-                                            //               );
-                                            //             }
-                                            //           }
-                                            //         },
-                                            //       ));
-                                            //     }
-                                            //   },
-                                            //   child: Container(
-                                            //     width: 35,
-                                            //     height: 35,
-                                            //     child: Center(
-                                            //       child: Image.asset(
-                                            //         closeRoom ? "assets/image/ic_add_disable.png" : ImageConstants.chatPlus,
-                                            //         width: 20,
-                                            //         height: 20,
-                                            //         color: Colors.black,
-                                            //       ),
-                                            //     ),
-                                            //   ),
-                                            // ),
+                                            InkWell(
+                                              onTap: () async {
+                                                if (closeRoom) return;
+                                                if (await _promptPermissionSetting()) {
+                                                  List<BtnBottomSheetModel> items = [];
+                                                  items.add(BtnBottomSheetModel(ImageConstants.cameraIcon, "camera".tr(), 0));
+                                                  items.add(BtnBottomSheetModel(ImageConstants.albumIcon, "gallery".tr(), 1));
+                                                  if(joinUserList.length==2)
+                                                  {
+                                                    items.add(BtnBottomSheetModel(ImageConstants.voiceCallIcon, "음성 통화", 2));
+                                                    items.add(BtnBottomSheetModel(ImageConstants.videoCallIcon, "영상 통화", 3));  
+                                                  }
+                                                  
+                                                  Get.bottomSheet(enterBottomSheetDuration: Duration(milliseconds: 100), exitBottomSheetDuration: Duration(milliseconds: 100),BtnBottomSheetWidget(
+                                                    btnItems: items,
+                                                    onTapItem: (sheetIdx) async {
+                                                      if(sheetIdx == 0){
+                                                        AssetEntity? assets = await MyAssetPicker.pickCamera(context, true);
+                                                        if (assets != null) {
+                                                          procAssets([assets]);
+                                                        }
+                                                      }else if(sheetIdx == 1) {
+                                                        if (await _promptPermissionSetting()) {
+                                                          showModalBottomSheet(
+                                                              context: context,
+                                                              isScrollControlled: true,
+                                                              isDismissible: true,
+                                                              backgroundColor: Colors.transparent,
+                                                              constraints: BoxConstraints(
+                                                                minHeight: 0.4,
+                                                                maxHeight: Get.height*0.95,
+                                                              ),
+                                                              builder: (BuildContext context) {
+                                                                return DraggableScrollableSheet(
+                                                                    initialChildSize: 0.5,
+                                                                    minChildSize: 0.4,
+                                                                    maxChildSize: 0.9,
+                                                                    expand: false,
+                                                                    builder: (_, controller) => GalleryBottomSheet(
+                                                                      controller: controller,
+                                                                      onTapSend: (results){
+                                                                        procAssetsWithGallery(results);
+                                                                      },
+                                                                    )
+                                                                );
+                                                              }
+                                                          );
+                                                        }
+                                                      }
+                                                      else if(sheetIdx == 2)
+                                                      {
+                                                        requestVoiceCall();
+                                                      }
+                                                      else if(sheetIdx == 3)
+                                                      {
+                                                        requestVideoCall();
+                                                      }
+                                                    },
+                                                  ));
+                                                }
+                                              },
+                                              child: Container(
+                                                width: 35,
+                                                height: 35,
+                                                child: Center(
+                                                  child: closeRoom ?  Icon(
+                                                          Icons.add_circle_outline,
+                                                          size: 25,
+                                                          color: Colors.grey,
+                                                        ) :   Icon(
+                                                          Icons.add_circle_outline,
+                                                          size: 25,
+                                                          color: Colors.black,
+                                                        ),
+                                                ),
+                                              ),
+                                            ),
                                             const SizedBox(width: 10),
                                           ],
                                         )),
@@ -2191,7 +1998,8 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
                             //audioButtonWidget(),
                           ],
                         ))),
-                GestureDetector(
+                //if(sendString.value.replaceAll(" ", "").isNotEmpty)
+                  GestureDetector(
                     onTap: onTextSend,
                     child: Obx(
                       () => Container(
@@ -2207,7 +2015,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
                                     height: 30,
                                   )
                                 : Image.asset(ImageConstants.sendChatDisableBnt,
-                                    width: 30, height: 30)),
+                                    width: 30, height: 30,color: Colors.grey.shade400,)),
                       ),
                     )),
                 SizedBox(
@@ -2350,6 +2158,8 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
                           Get.back();
                         }
                       },
+                      // onVoiceCall: requestVoiceCall(),
+                      // onVideoCall: requestVideoCall(),
                       onDelete: () {
                         if (msgList[index].id == -1) return;
                         deleteChat(index);

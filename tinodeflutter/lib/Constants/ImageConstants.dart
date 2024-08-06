@@ -97,6 +97,11 @@ class ImageConstants {
   static const String chatRadioOff = "assets/icons/ic_chat_add_radio_off.png";
   static const String chatRadioOn = "assets/icons/ic_chat_add_radio_on.png";
   static const String chatRadioOnDisabled = "assets/icons/ic_chat_add_radio_on_disabled.png";
+  static const String voiceCallIcon = "assets/icons/ic_voicecall.png";
+  static const String videoCallIcon = "assets/icons/ic_videocam.png";
+  static const String voiceCallChat = "assets/icons/ic_voicCall_chat.png";
+  static const String videoCallChat = "assets/icons/ic_video_chat.png";
+  static const String voiceCallFail = "assets/icons/ic_voicecall_fail.png";
 
   static const String bottomHome = "assets/icons/ic_home.png";
   static const String bottomHomeUnselect = "assets/icons/ic_home_unselect.png";

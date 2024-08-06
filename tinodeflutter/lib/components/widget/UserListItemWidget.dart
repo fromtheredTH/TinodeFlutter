@@ -62,7 +62,7 @@ class _UserListItemWidget extends State<UserListItemWidget> {
             BoxDecoration(
                         border: Border(
                         bottom: BorderSide(
-                          color: Colors.grey, // 선의 색상
+                          color: Colors.grey.shade300, // 선의 색상
                           width: 0.5, // 선의 두께
                         ),
                       ),

@@ -35,14 +35,14 @@ import '../../model/btn_bottom_sheet_model.dart';
 import 'dialog.dart';
 
 class ImageViewer extends StatefulWidget {
-  final List<String> images;
+  final List<String> fileUrlList;
   final int selected;
   final bool isVideo;
  // final Image img;
   final UserModel? user;
 
   ImageViewer(
-      {super.key, required this.images, this.selected = 0, required this.isVideo, 
+      {super.key, required this.fileUrlList, this.selected = 0, required this.isVideo, 
       //required this.img,
       required this.user
       });
@@ -68,7 +68,7 @@ class _ImageViewerState extends State<ImageViewer> {
 
   @override
   void initState() {
-    fileExtension = widget.images.first.split(".").last;
+    fileExtension = widget.fileUrlList.first.split(".").last;
     super.initState();
 
     IsolateNameServer.registerPortWithName(_port.sendPort, 'downloader_send_port');
@@ -105,13 +105,13 @@ class _ImageViewerState extends State<ImageViewer> {
   }
 
   Future<void> initVideo() async {
-    videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(widget.images[0]));
+    videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(widget.fileUrlList[0]));
 
     await videoPlayerController!.initialize();
     print(videoPlayerController?.value.size);
     width = (videoPlayerController?.value.size.width ?? 0).toInt();
     height = (videoPlayerController?.value.size.height ?? 0).toInt();
-    Future<http.Response> r = http.get(Uri.parse(widget.images[0]));
+    Future<http.Response> r = http.get(Uri.parse(widget.fileUrlList[0]));
     r.then((value) {
       try {
         size = int.parse(value.headers["content-length"] ?? "0");
@@ -222,7 +222,7 @@ class _ImageViewerState extends State<ImageViewer> {
         child: Container(
           width: double.infinity,
           height: double.infinity,
-          color: ColorConstants.colorBg1,
+          color: ColorConstants.backgroundGrey,
           child: SafeArea(
             child: Column(
               children: [
@@ -237,7 +237,7 @@ class _ImageViewerState extends State<ImageViewer> {
                             height: 24,
                             margin: const EdgeInsets.only(left: 10),
                             child: Center(
-                              child: Image.asset(ImageConstants.backWhite, width: 24, height: 24),
+                              child: Image.asset(ImageConstants.backWhite, width: 24, height: 24, color: Colors.black,),
                             )
                         ),
                       ),
@@ -256,7 +256,7 @@ class _ImageViewerState extends State<ImageViewer> {
                           initialScale: 1.0,
                           maxScale: widget.isVideo ? 1.0 : 3.0,
                           minScale: 1.0,
-                          heroAttributes: PhotoViewHeroAttributes(tag: widget.images[index]),
+                          heroAttributes: PhotoViewHeroAttributes(tag: widget.fileUrlList[index]),
                           child: widget.isVideo
                               ? (chewieController != null
                               ? Chewie(
@@ -264,7 +264,7 @@ class _ImageViewerState extends State<ImageViewer> {
                           )
                               : Container())
                               : CachedNetworkImage(
-                            imageUrl: widget.images[index],
+                            imageUrl: widget.fileUrlList[index],
                             imageBuilder: (context, imageProvider) {
                               imageProvider
                                   .resolve(const ImageConfiguration())
@@ -282,7 +282,7 @@ class _ImageViewerState extends State<ImageViewer> {
                             errorWidget: (context, url, error) => const Icon(Icons.error),
                           ));
                     },
-                    itemCount: widget.isVideo ? 1 : widget.images.length,
+                    itemCount: widget.isVideo ? 1 : widget.fileUrlList.length,
                     loadingBuilder: (context, event) => Center(
                       child: SizedBox(
                         width: 20.0,
@@ -299,7 +299,7 @@ class _ImageViewerState extends State<ImageViewer> {
                     onPageChanged: (value) {
                       if (selectedImage != value) {
                         selectedImage = value;
-                        fileExtension = widget.images[selectedImage].split(".").last;
+                        fileExtension = widget.fileUrlList[selectedImage].split(".").last;
                         // catController.scrollToIndex(value);
                         setState(() {});
                       }
@@ -335,7 +335,7 @@ class _ImageViewerState extends State<ImageViewer> {
                 //                         ),
                 //                         padding: EdgeInsets.all(1),
                 //                         child: CachedNetworkImage(
-                //                           imageUrl: widget.images[index],
+                //                           imageUrl: widget.fileUrlList[index],
                 //                           fit: BoxFit.cover,
                 //                           placeholder: (context, url) => CircularProgressIndicator(color: ColorConstants.colorMain,),
                 //                           errorWidget: (context, url, error) => Icon(Icons.error),
@@ -346,11 +346,11 @@ class _ImageViewerState extends State<ImageViewer> {
                 //                     ),
                 //                   );
                 //                 },
-                //                 itemCount: widget.isVideo ? 0 : widget.images.length)),
+                //                 itemCount: widget.isVideo ? 0 : widget.fileUrlList.length)),
                 //         const SizedBox(height: 20),
                 //         Center(
                 //          child: AppText(
-                //            text: "${selectedImage + 1} / ${widget.images.length}",
+                //            text: "${selectedImage + 1} / ${widget.fileUrlList.length}",
                 //            fontSize: 13,
                 //          ),
                 //         )
@@ -367,7 +367,7 @@ class _ImageViewerState extends State<ImageViewer> {
                         onTap: (){
                           List<BtnBottomSheetModel> items = [];
                           if(!widget.isVideo){
-                            if(widget.images.length > 1) {
+                            if(widget.fileUrlList.length > 1) {
                               items.add(BtnBottomSheetModel(
                                   "", "download_all".tr(), 0));
                             }
@@ -381,14 +381,14 @@ class _ImageViewerState extends State<ImageViewer> {
                             btnItems: items,
                             onTapItem: (index){
                               if(index == 0){
-                               // download(widget.images, 0);
+                               // download(widget.fileUrlList, 0);
                               }else{
-                              // download([widget.images[selectedImage]], 0);
+                              // download([widget.fileUrlList[selectedImage]], 0);
                               }
                             },
                           ));
                         },
-                        child: Image.asset(ImageConstants.imgDownload, width: 32, height: 32),
+                        child: Image.asset(ImageConstants.imgDownload, width: 32, height: 32, color: Colors.black),
                       ),
 
                       Visibility(
@@ -399,7 +399,7 @@ class _ImageViewerState extends State<ImageViewer> {
                                 Navigator.pop(context, "delete");
                               });
                             },
-                            child: Image.asset(ImageConstants.deleteIcon, width: 32, height: 32),
+                            child: Image.asset(ImageConstants.deleteIcon, width: 32, height: 32,  color: Colors.black),
                           ),
                       ),
                       Visibility(
@@ -408,7 +408,7 @@ class _ImageViewerState extends State<ImageViewer> {
                           onTap: (){
                             AppDialog.showImaegInfoDialog(context, fileExtension.toUpperCase(), sizeStr(), width, height);
                           },
-                          child: Image.asset(ImageConstants.imgInfo, width: 32, height: 32),
+                          child: Image.asset(ImageConstants.imgInfo, width: 32, height: 32, color: Colors.black,),
                         ),
                       ),
                     ],

@@ -190,5 +190,7 @@ enum eCallState{
   ACCEPTED,
   DECLINED,
   MISSED,
+  DISCONNECTED,
+  FINISHED,
 }
 eCallState nowCallState = eCallState.NONE;

@@ -16,6 +16,7 @@ import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:tinodeflutter/global/global.dart';
 import 'package:tinodeflutter/model/MessageModel.dart';
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/tinode/src/database/model.dart';
 
 import '../../Constants/ColorConstants.dart';
 import '../../Constants/ImageConstants.dart';
@@ -40,6 +41,8 @@ class ItemChatMsg extends StatelessWidget {
   final onTap;
   final onReply;
   final onLongPress;
+  // final onVoiceCall;
+  // final onVideoCall;
 
   UserModel me;
   bool mine = true;
@@ -58,6 +61,8 @@ class ItemChatMsg extends StatelessWidget {
       this.nextMessage,
       this.parentNick,
       this.bNewMsg,
+      // required this.onVoiceCall,
+      // required this.onVideoCall,
       required this.me,
       required this.setState,
       required this.playerModule,
@@ -151,12 +156,12 @@ class ItemChatMsg extends StatelessWidget {
     return list.first;
   }
 
-  void fullView(BuildContext context, int index) {
+  void fullView(BuildContext context, int index, String imageUrl) {
     Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) => ImageViewer(
-                  images: (messageData.contents ?? '').split(","),
+                  fileUrlList: [imageUrl],//(messageData.contents ?? '').split(","),
                   selected: index,
                   isVideo: false,
                   user: getUser(),
@@ -312,26 +317,110 @@ class ItemChatMsg extends StatelessWidget {
     }
   }
 
+  String fileUrl = "";
+  String getFileUrl(DataMessage dataMessage, eChatType fileType,
+      {bool getVideoThumbnail = false}) {
+    switch (fileType) {
+      case eChatType.IMAGE:
+        fileUrl =
+            "https://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+        break;
+      case eChatType.VIDEO:
+        if (getVideoThumbnail)
+          fileUrl =
+              "https://$hostAddres/${dataMessage.content['ent'][0]['data']['preref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+        else {
+          fileUrl =
+              "https://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+        }
+        break;
+      default:
+        break;
+    }
+    print("file url : $fileUrl");
+    return fileUrl;
+  }
+
+  late Uint8List imageDecode;
+  Image getImageBase64Decoder(String base64) {
+    imageDecode = Base64Decoder().convert(base64);
+    return Image.memory(
+      imageDecode,
+      // width: 200,
+      // height: 200,
+      fit: BoxFit.cover,
+      width: Get.width * 0.4,
+      height: Get.width * 0.4,
+    );
+  }
+  Widget getUrltoImage(String imageUrl) {
+ 
+    return Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
+      loadingBuilder: (BuildContext context, Widget child,
+          ImageChunkEvent? loadingProgress) {
+        if (loadingProgress == null) {
+          return child;
+        } else {
+          return Center(
+            child: CircularProgressIndicator(
+              color: ColorConstants.colorMain,
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      (loadingProgress.expectedTotalBytes ?? 1)
+                  : null,
+            ),
+          );
+        }
+      },
+      errorBuilder:
+          (BuildContext context, Object error, StackTrace? stackTrace) {
+        return Center(
+          child: Text('Failed to load image'),
+        );
+      },
+    );
+  }
+
   Widget imageTile(BuildContext context) {
     List<String> arr = (messageData.contents ?? '').split(",");
-    int cnt =
-        messageData.file.isNotEmpty ? messageData.file.length : arr.length;
-
-    if (cnt == 1) {
+    // int cnt =
+    //     messageData.file.isNotEmpty ? messageData.file.length : arr.length;
+    bool isBase64 = false;
+    if (messageData.dataMessage.content['ent'][0]['data']['ref'] != null) {
+      isBase64 = false;
+    } else {
+      isBase64 = true;
+    }
+    String imageUrl =
+     isBase64 ? 
+     Base64Decoder().convert(messageData.dataMessage.content['ent'][0]['data']['val']) as String 
+    :  getFileUrl(messageData.dataMessage,eChatType.IMAGE) ;
+    Widget imageWidget = isBase64 ? getImageBase64Decoder(imageUrl) :  Image.network(getFileUrl(messageData.dataMessage,eChatType.IMAGE), fit: BoxFit.cover,);
+    // getUrltoImage(getFileUrl(messageData.dataMessage,eChatType.IMAGE));
+    // if (cnt == 1) {
       return Container(
         constraints: BoxConstraints(maxWidth: Get.width * 0.65),
         child: Stack(
           children: [
             GestureDetector(
               onTap: () {
-                fullView(context, 0);
+                fullView(context, 0, imageUrl);
+                //  isBase64
+                // ?fullView(
+                //   context, 0,  Base64Decoder().convert(messageData.dataMessage.content['ent'][0]['data']['val']) as String)
+                // : fullView(
+                //   context, 0,   getFileUrl(messageData.dataMessage,eChatType.IMAGE) );
+                //fullView(context, 0);
               },
-              child: messageData.file.isNotEmpty
-                  ? Image.file(
-                      messageData.file[0],
-                      fit: BoxFit.cover,
-                    )
-                  : CachedNetworkImage(imageUrl: arr[0], fit: BoxFit.cover),
+              child: imageWidget,
+              // messageData.file.isNotEmpty
+              //     ? Image.file(
+              //         messageData.file[0],
+              //         fit: BoxFit.cover,
+              //       )
+              //     : CachedNetworkImage(imageUrl: arr[0], fit: BoxFit.cover),
             ),
             if (messageData.fileProgress != null &&
                 messageData.totalProgress != null &&
@@ -366,82 +455,95 @@ class ItemChatMsg extends StatelessWidget {
           ],
         ),
       );
-    }
+    // }
 
-    return Container(
-      constraints: BoxConstraints(maxWidth: Get.width * 0.65),
-      child: Stack(
-        children: [
-          Wrap(
-            alignment: WrapAlignment.start,
-            runSpacing: 4,
-            spacing: 4,
-            children: [
-              ...List.generate(cnt, (index) {
-                return GestureDetector(
-                  onTap: () {
-                    fullView(context, index);
-                  },
-                  child: messageData.file.isNotEmpty
-                      ? Image.file(
-                          messageData.file[index],
-                          width: getImageSize(cnt, index),
-                          height: getImageSize(cnt, index),
-                          fit: BoxFit.cover,
-                        )
-                      : CachedNetworkImage(
-                          imageUrl: arr[index],
-                          fit: BoxFit.cover,
-                          width: getImageSize(cnt, index),
-                          height: getImageSize(cnt, index),
-                        ),
-                );
-              })
-            ],
-          ),
-          if (messageData.fileProgress != null &&
-              messageData.totalProgress != null &&
-              messageData.file != null)
-            Positioned.fill(
-                child: Container(
-              color: Colors.black.withOpacity(0.5),
-              child: Center(
-                  child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  CircularPercentIndicator(
-                    radius: 12.0,
-                    lineWidth: 1.0,
-                    percent: messageData.fileProgress!.toDouble() /
-                        messageData.totalProgress!.toDouble(),
-                    progressColor: Colors.white,
-                  ),
-                  SizedBox(
-                    height: 2,
-                  ),
-                  AppText(
-                    text:
-                        "${sizeStr(messageData.fileProgress!, messageData.totalProgress!)} / ${totalSizeStr(messageData.totalProgress!)}",
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                ],
-              )),
-            )),
-        ],
-      ),
-    );
+    // return Container(
+    //   constraints: BoxConstraints(maxWidth: Get.width * 0.65),
+    //   child: Stack(
+    //     children: [
+    //       Wrap(
+    //         alignment: WrapAlignment.start,
+    //         runSpacing: 4,
+    //         spacing: 4,
+    //         children: [
+    //           ...List.generate(cnt, (index) {
+    //             return GestureDetector(
+    //               onTap: () {
+    //                 fullView(context, index);
+    //               },
+    //               child: messageData.file.isNotEmpty
+    //                   ? Image.file(
+    //                       messageData.file[index],
+    //                       width: getImageSize(cnt, index),
+    //                       height: getImageSize(cnt, index),
+    //                       fit: BoxFit.cover,
+    //                     )
+    //                   : CachedNetworkImage(
+    //                       imageUrl: arr[index],
+    //                       fit: BoxFit.cover,
+    //                       width: getImageSize(cnt, index),
+    //                       height: getImageSize(cnt, index),
+    //                     ),
+    //             );
+    //           })
+    //         ],
+    //       ),
+    //       if (messageData.fileProgress != null &&
+    //           messageData.totalProgress != null &&
+    //           messageData.file != null)
+    //         Positioned.fill(
+    //             child: Container(
+    //           color: Colors.black.withOpacity(0.5),
+    //           child: Center(
+    //               child: Column(
+    //             mainAxisAlignment: MainAxisAlignment.center,
+    //             crossAxisAlignment: CrossAxisAlignment.center,
+    //             children: [
+    //               CircularPercentIndicator(
+    //                 radius: 12.0,
+    //                 lineWidth: 1.0,
+    //                 percent: messageData.fileProgress!.toDouble() /
+    //                     messageData.totalProgress!.toDouble(),
+    //                 progressColor: Colors.white,
+    //               ),
+    //               SizedBox(
+    //                 height: 2,
+    //               ),
+    //               AppText(
+    //                 text:
+    //                     "${sizeStr(messageData.fileProgress!, messageData.totalProgress!)} / ${totalSizeStr(messageData.totalProgress!)}",
+    //                 color: Colors.white,
+    //                 fontSize: 14,
+    //               ),
+    //             ],
+    //           )),
+    //         )),
+    //     ],
+    //   ),
+    // );
   }
 
   Widget videoTile(BuildContext context) {
+     bool isBase64 = false;
+    if (messageData.dataMessage.content['ent'][0]['data']['preref'] != null) {
+      isBase64 = false;
+    } else {
+      isBase64 = true;
+    }
+  
+    Widget thumnailWidget = isBase64
+                ? getImageBase64Decoder(
+                    messageData.dataMessage.content['ent'][0]['data']['preview'])
+                : Image.network(getFileUrl(messageData.dataMessage, eChatType.VIDEO, getVideoThumbnail: true), fit:BoxFit.cover);
+    
     return GestureDetector(
       onTap: () {
         Navigator.push(
             context,
             MaterialPageRoute(
                 builder: (context) => ImageViewer(
-                      images: (messageData.contents ?? '').split(","),
+                      fileUrlList: [getFileUrl(messageData.dataMessage, eChatType.VIDEO, getVideoThumbnail: false),],  //video url
+                      //(messageData.contents ?? '').split(","),
                       selected: 0,
                       isVideo: true,
                       user: getUser(),
@@ -451,21 +553,23 @@ class ItemChatMsg extends StatelessWidget {
           }
         });
       },
+      
       child: Container(
           constraints: BoxConstraints(maxWidth: 240),
           child: Stack(
             children: [
-              messageData.file.isNotEmpty
-                  ? Image.file(
-                      messageData.file[0],
-                      fit: BoxFit.cover,
-                    )
-                  : (messageData.contents ?? '').split(",").length != 2
-                      ? Container(color: Colors.black)
-                      : CachedNetworkImage(
-                          imageUrl: (messageData.contents ?? '').split(",")[1],
-                          fit: BoxFit.cover,
-                        ),
+             thumnailWidget,
+              // messageData.file.isNotEmpty
+              //     ? Image.file(
+              //         messageData.file[0],
+              //         fit: BoxFit.cover,
+              //       )
+              //     : (messageData.contents ?? '').split(",").length != 2
+              //         ? Container(color: Colors.black)
+              //         : CachedNetworkImage(
+              //             imageUrl: (messageData.contents ?? '').split(",")[1],
+              //             fit: BoxFit.cover,
+              //           ),
               if (messageData.fileProgress == null &&
                   messageData.totalProgress == null &&
                   messageData.file.isEmpty)
@@ -540,7 +644,7 @@ class ItemChatMsg extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           color: mine
-              ? ColorConstants.colorOptionBrown
+              ? ColorConstants.colorMain
               : ColorConstants.white5Percent,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -559,6 +663,98 @@ class ItemChatMsg extends StatelessWidget {
             AppText(
               text:
                   "${pad2(Duration(seconds: messageData.audioTime ?? 0).inMinutes.remainder(60))}:${pad2((Duration(seconds: messageData.audioTime ?? 0).inSeconds.remainder(60)))}",
+              fontSize: 14,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget callTile() {
+      late eCallState callState;
+      late eChatType chatType;
+      String callStateStr="";
+      if (messageData.dataMessage.head?['webrtc'] != null) {
+        if (messageData.dataMessage.content['ent'][0]['data']?['aonly'] != null) {
+          chatType = eChatType.VOICE_CALL;
+        } else {
+            chatType = eChatType.VIDEO_CALL;
+        }
+      }
+      switch (messageData.dataMessage.head?['webrtc']) {
+        case 'started':
+        case 'accepted':
+          return Container();
+        case 'declined':
+        callState = eCallState.DECLINED;
+        callStateStr= "통화 거절";
+          break;
+        case 'disconnected':
+        callState = eCallState.DISCONNECTED;
+        callStateStr= "상대방이 통화 받지 않음";
+          break;
+        case 'finished':
+        callState = eCallState.FINISHED;
+        callStateStr= "통화 완료";
+        case 'missed':
+        callState = eCallState.MISSED;
+        callStateStr= "통화 MISSED";
+          break;
+        default:
+          break;
+      }
+    return GestureDetector(
+       // onLongPress: () => {deleteMsgForAllPerson(msgList[index].id ?? -1)},
+       onTap: () => {
+        // if(chatType==eChatType.VOICE_CALL) onVoiceCall
+        // else if(chatType==eChatType.VIDEO_CALL) onVideoCall
+       },
+        child: 
+        Container(
+        height: 36,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: mine
+              ? ColorConstants.colorMain
+              : ColorConstants.white5Percent,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+       
+            if(chatType==eChatType.VOICE_CALL)...[
+              if(callState== eCallState.FINISHED)...[
+                Image.asset(ImageConstants.voiceCallChat,            
+                width: 20,
+                height: 20),
+              ]
+              else if(callState==eCallState.DECLINED || callState == eCallState.DISCONNECTED || callState == eCallState.MISSED  )...[
+                  Image.asset(ImageConstants.voiceCallFail,            
+                width: 20,
+                height: 20),
+              ]
+            ]
+            else ...[ //video call
+              if(callState== eCallState.FINISHED)...[
+                Image.asset(ImageConstants.videoCallChat,            
+                width: 20,
+                height: 20),
+              ]
+              else if(callState==eCallState.DECLINED || callState == eCallState.DISCONNECTED || callState == eCallState.MISSED  )...[
+                  Image.asset(ImageConstants.voiceCallFail,            
+                width: 20,
+                height: 20),
+              ]
+            ]
+            ,
+            SizedBox(
+              width: 5,
+            ),
+            AppText(
+              text: callStateStr,
+                //  "${pad2(Duration(seconds: messageData.audioTime ?? 0).inMinutes.remainder(60))}:${pad2((Duration(seconds: messageData.audioTime ?? 0).inSeconds.remainder(60)))}",
               fontSize: 14,
             ),
           ],
@@ -740,6 +936,10 @@ class ItemChatMsg extends StatelessWidget {
                                     videoTile(context)
                                   else if (messageData.type == eChatType.AUDIO)
                                     audioTile()
+                                  else if (messageData.type == eChatType.VOICE_CALL  && messageData.dataMessage.head?['webrtc'] != 'started' && messageData.dataMessage.head?['webrtc'] != 'accepted')
+                                    callTile()
+                                  else if (messageData.type == eChatType.VIDEO_CALL  && messageData.dataMessage.head?['webrtc'] != 'started' && messageData.dataMessage.head?['webrtc'] != 'accepted')
+                                    callTile()
                                 ],
                               ),
                             ],
@@ -816,9 +1016,12 @@ class ItemChatMsg extends StatelessWidget {
                                             else if (messageData.type ==
                                                 eChatType.VIDEO)
                                               videoTile(context)
-                                            else if (messageData.type ==
-                                                eChatType.AUDIO)
+                                            else if (messageData.type == eChatType.AUDIO)
                                               audioTile()
+                                            else if (messageData.type == eChatType.VOICE_CALL && messageData.dataMessage.head?['webrtc'] != 'started' && messageData.dataMessage.head?['webrtc'] != 'accepted')
+                                                callTile()
+                                            else if (messageData.type == eChatType.VIDEO_CALL  && messageData.dataMessage.head?['webrtc'] != 'started' && messageData.dataMessage.head?['webrtc'] != 'accepted')
+                                                callTile()
                                           ],
                                         ),
                                         const SizedBox(width: 4),
