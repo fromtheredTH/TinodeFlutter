@@ -70,12 +70,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:wav/wav_file.dart';
 
-
 class MessageRoomScreen extends StatefulWidget {
   String clickTopic;
   Topic? roomTopic;
-  MessageRoomScreen(
-      {super.key, required this.clickTopic, this.roomTopic});
+  MessageRoomScreen({super.key, required this.clickTopic, this.roomTopic});
 
   @override
   State<MessageRoomScreen> createState() => _MessageRoomScreenState();
@@ -90,7 +88,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
   TextEditingController inputController = TextEditingController();
   PositionRetainedScrollPhysics physics = PositionRetainedScrollPhysics();
   final ImagePicker _picker = ImagePicker();
-  List<UserModel> joinUserList= [];
+  List<UserModel> joinUserList = [];
   late TopicSubscription roomMetaSubData;
   late Topic roomTopicData;
 
@@ -138,7 +136,6 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
 
   bool isMicPermission = false;
 
-
   @override
   void initState() {
     super.initState();
@@ -150,69 +147,81 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
   @override
   void dispose() {
     super.dispose();
-    
+
     roomTopic.leave(false);
-    if(_metaDescSubscription!=null)_metaDescSubscription?.cancel();
-    if(_dataSubscription!=null)_dataSubscription?.cancel();
+    if (_metaDescSubscription != null) _metaDescSubscription?.cancel();
+    if (_dataSubscription != null) _dataSubscription?.cancel();
   }
-    @override
+
+  @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) {
     // TODO: implement didChangeAppLifecycleState
     return super.didChangeAppLifecycleState(state);
   }
 
   Future<void> getMsgList() async {
-   roomTopic = tinode_global.getTopic(clickTopic);
-   
+    roomTopic = tinode_global.getTopic(clickTopic);
+
     _dataSubscription = roomTopic.onData.listen((data) {
       try {
         if (data != null) {
-          if(data.content is String)
+          if (data.content is String)
             print('DataMessage: ' + data.content);
           else
             print("텍스트가 아닙니다.");
-          
-          if(msgList.length!=0 &&  msgList[0].dataMessage.seq == data.seq) return;
 
-          MessageModel messageModel = MessageModel(id: data.seq ?? -1 , room_id: data.topic ?? "", created_at: data.ts.toString() ?? "", sender_id: data.from ?? "", type: checkMsgType(data), parent_id: -1, dataMessage: data, contents: data.content);
+          if (msgList.length != 0 && msgList[0].dataMessage.seq == data.seq)
+            return;
+
+          MessageModel messageModel = MessageModel(
+              id: data.seq ?? -1,
+              room_id: data.topic ?? "",
+              created_at: data.ts.toString() ?? "",
+              sender_id: data.from ?? "",
+              type: checkMsgType(data),
+              parent_id: -1,
+              dataMessage: data,
+              contents: data.content);
           //msgList.insert(0, data);
           msgList.add(messageModel);
           setState(() {
-            if (data.ts != null) msgList.sort((a, b) => b.dataMessage.ts!.compareTo(a.dataMessage.ts!));
+            if (data.ts != null)
+              msgList.sort(
+                  (a, b) => b.dataMessage.ts!.compareTo(a.dataMessage.ts!));
           });
         }
       } catch (err) {
         print("err roomTopic getMsgList : $err");
       }
     });
- 
-   _metaDescSubscription = roomTopic.onMetaDesc.listen((onMetaDesc) {
-  try {
-    joinUserList = [];
-    roomTopicData = onMetaDesc;
-    var subscribersList = onMetaDesc.subscribers.values.toList();
-    for (int i = 0; i < subscribersList.length; i++) {
-      var subscriber = subscribersList[i];
-      if (subscriber != null) {
-        String pictureUrl = subscriber.public?['photo']?['ref'] != null
-            ? changePathToLink(subscriber.public?['photo']?['ref'])
-            : "";
-        UserModel user = UserModel(
-          id: subscriber.user ?? "",
-          name: subscriber.public?['fn'] ?? "",
-          picture: pictureUrl,
-          isFreind: subscriber.isFriend ?? false,
-        );
-        joinUserList.add(user);
+
+    _metaDescSubscription = roomTopic.onMetaDesc.listen((onMetaDesc) {
+      try {
+        joinUserList = [];
+        roomTopicData = onMetaDesc;
+        var subscribersList = onMetaDesc.subscribers.values.toList();
+        for (int i = 0; i < subscribersList.length; i++) {
+          var subscriber = subscribersList[i];
+          if (subscriber != null) {
+            String pictureUrl = subscriber.public?['photo']?['ref'] != null
+                ? changePathToLink(subscriber.public?['photo']?['ref'])
+                : "";
+            UserModel user = UserModel(
+              id: subscriber.user ?? "",
+              name: subscriber.public?['fn'] ?? "",
+              picture: pictureUrl,
+              isFreind: subscriber.isFriend ?? false,
+            );
+            joinUserList.add(user);
+          }
+        }
+        setState(() {
+          print("list length : ${joinUserList.length}");
+        });
+      } catch (err) {
+        print("meta err : $err");
       }
-    }
-    setState(() {
-      print("list length : ${joinUserList.length}");
     });
-  } catch (err) {
-    print("meta err : $err");
-  }
-});
     //  roomTopic.onMeta.listen((data){
     //   try{
     //     print("$data");
@@ -233,35 +242,42 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
     //     print("meta err : $err");
     //   }
     // });
-     try {
+    try {
       if (!roomTopic.isSubscribed)
         await roomTopic.subscribe(
-            MetaGetBuilder(roomTopic).withData(null, null, null).withSub(null, null, null).withDesc(null).build(), null);
+            MetaGetBuilder(roomTopic)
+                .withData(null, null, null)
+                .withSub(null, null, null)
+                .withDesc(null)
+                .build(),
+            null);
     } catch (err) {
       print("err roomTopic getMsgList : $err");
     }
   }
 
   eChatType checkMsgType(DataMessage dataMessage) {
-  // dynamic data = jsonDecode(dataMessage.content);
+    // dynamic data = jsonDecode(dataMessage.content);
 
     if (dataMessage.content is Map) {
-    if(dataMessage.content?['ent']!=null)
-      switch (dataMessage.content?['ent'][0]['tp']) {
-        case 'IM':
-          print("image");
-          return eChatType.IMAGE;
-        case 'VD':
-          print("video");
-          return eChatType.VIDEO;
-        case 'AU':
-          print("audio");
-          return eChatType.AUDIO;
-        case 'VC':
-          print("call");
-          if(dataMessage.content['ent'][0]['data']?['aonly']!=null) return eChatType.VOICE_CALL;
-          else return eChatType.VIDEO_CALL;
-      }
+      if (dataMessage.content?['ent'] != null)
+        switch (dataMessage.content?['ent'][0]['tp']) {
+          case 'IM':
+            print("image");
+            return eChatType.IMAGE;
+          case 'VD':
+            print("video");
+            return eChatType.VIDEO;
+          case 'AU':
+            print("audio");
+            return eChatType.AUDIO;
+          case 'VC':
+            print("call");
+            if (dataMessage.content['ent'][0]['data']?['aonly'] != null)
+              return eChatType.VOICE_CALL;
+            else
+              return eChatType.VIDEO_CALL;
+        }
       return eChatType.NONE;
     } else {
       return eChatType.TEXT;
@@ -290,49 +306,55 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
   //   }
   // }
 
-  Future<void> checkCallState(DataMessage dataMessage)async
-  {
-    if(dataMessage.from == Constants.user.id) return;  // 내가 걸었던 메시지니깐 따로 처리안함
-    if(dataMessage.head?['webrtc']!=null)
-    {
-      if(dataMessage.content['ent'][0]['data']?['aonly']!=null){CallService.instance.chatType = eChatType.VOICE_CALL;}
-      else {CallService.instance.chatType = eChatType.VIDEO_CALL;}
-     switch(dataMessage.head?['webrtc'])
-     {
+  Future<void> checkCallState(DataMessage dataMessage) async {
+    if (dataMessage.from == Constants.user.id) return; // 내가 걸었던 메시지니깐 따로 처리안함
+    if (dataMessage.head?['webrtc'] != null) {
+      if (dataMessage.content['ent'][0]['data']?['aonly'] != null) {
+        CallService.instance.chatType = eChatType.VOICE_CALL;
+      } else {
+        CallService.instance.chatType = eChatType.VIDEO_CALL;
+      }
+      switch (dataMessage.head?['webrtc']) {
         case 'started':
           CallService.instance.joinUserList = joinUserList;
           CallService.instance.roomTopicName = roomTopic.name ?? "";
           bool isSettingDone = await CallService.instance.initCallService();
-          isSettingDone? CallService.instance.showIncomingCall(roomTopicId: roomTopic.name??"", callerName : joinUserList[0].name ,callerNumber: '', callerAvatar: "") : showToast("fail to call");
-    //        WidgetsBinding.instance.addPostFrameCallback((_) async {
-    //         Get.to(()=>CallScreen(tinode: tinode, roomTopic: roomTopic,joinUserList: joinUserList,));
-    //        //Get.to(AgoraVoiceCallController(channelName: roomTopic?.name ?? ""));
-    // });
-        break;
+          isSettingDone
+              ? CallService.instance.showIncomingCall(
+                  roomTopicId: roomTopic.name ?? "",
+                  callerName: joinUserList[0].name,
+                  callerNumber: '',
+                  callerAvatar: "")
+              : showToast("fail to call");
+          //        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          //         Get.to(()=>CallScreen(tinode: tinode, roomTopic: roomTopic,joinUserList: joinUserList,));
+          //        //Get.to(AgoraVoiceCallController(channelName: roomTopic?.name ?? ""));
+          // });
+          break;
         case 'accepted':
         case 'declined':
         case 'disconnected':
-        break;
+          break;
         case 'finished':
         case 'missed':
-        return;
+          return;
         default:
-        break;
-     }
-
+          break;
+      }
     }
   }
-  bool isDifferenceDateTimeLessOneMinute(DateTime dateTime1, DateTime? dateTime2) {
-  // 두 DateTime 객체의 차이를 Duration 객체로 변환
-  if(dateTime2==null) return false;
-  Duration difference = dateTime1.difference(dateTime2).abs();
 
-  // 차이가 60초 이내인지 확인
-  return difference.inSeconds <= 60;
-}
+  bool isDifferenceDateTimeLessOneMinute(
+      DateTime dateTime1, DateTime? dateTime2) {
+    // 두 DateTime 객체의 차이를 Duration 객체로 변환
+    if (dateTime2 == null) return false;
+    Duration difference = dateTime1.difference(dateTime2).abs();
 
-  Widget callTile(int index, DataMessage dataMessage)
-  {
+    // 차이가 60초 이내인지 확인
+    return difference.inSeconds <= 60;
+  }
+
+  Widget callTile(int index, DataMessage dataMessage) {
     return GestureDetector(
         onLongPress: () => {deleteMsgForAllPerson(msgList[index].id ?? -1)},
         child: Stack(
@@ -343,10 +365,10 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
                 Container(
                   height: 25,
                   color: Colors.grey,
-                  child:AppText(
-                  text: '통화 ${dataMessage.head?['webrtc']}',
-                  color: Colors.black,
-                ), 
+                  child: AppText(
+                    text: '통화 ${dataMessage.head?['webrtc']}',
+                    color: Colors.black,
+                  ),
                 ),
                 SizedBox(
                   width: 10,
@@ -358,7 +380,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
               ]),
             )
           ],
-        )); 
+        ));
   }
 
   // void fullView(BuildContext context, int index, String imageUrl) {
@@ -400,16 +422,20 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
 
   String fileUrl = "";
 
-  String getFileUrl(DataMessage dataMessage, eChatType fileType, {bool getVideoThumbnail =false}) {
-    switch(fileType)
-    { case eChatType.IMAGE:
-        fileUrl ="https://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+  String getFileUrl(DataMessage dataMessage, eChatType fileType,
+      {bool getVideoThumbnail = false}) {
+    switch (fileType) {
+      case eChatType.IMAGE:
+        fileUrl =
+            "https://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
         break;
       case eChatType.VIDEO:
-        if(getVideoThumbnail)
-        fileUrl ="https://$hostAddres/${dataMessage.content['ent'][0]['data']['preref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
-        else{
-          fileUrl ="https://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+        if (getVideoThumbnail)
+          fileUrl =
+              "https://$hostAddres/${dataMessage.content['ent'][0]['data']['preref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
+        else {
+          fileUrl =
+              "https://$hostAddres/${dataMessage.content['ent'][0]['data']['ref']}?apikey=$apiKey&auth=token&secret=$url_encoded_token";
         }
         break;
       default:
@@ -660,8 +686,8 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
     //   ),
     // );
   }
-  
-   Future<void> procAssets(List<AssetEntity>? assets) async {
+
+  Future<void> procAssets(List<AssetEntity>? assets) async {
     if (assets != null) {
       Utils.showDialogWidget(context);
       List<File> fileList = []; //image, audio
@@ -721,9 +747,9 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
         //     onFileSend(audio, eChatType.AUDIO.index);
         //   }
 
-          if (videoList.isNotEmpty && videoList.length == thumbList.length) {
-            uploadVideo(videoList, thumbList, 0);
-          }
+        if (videoList.isNotEmpty && videoList.length == thumbList.length) {
+          uploadVideo(videoList, thumbList, 0);
+        }
         // }).catchError((Object obj) {
         //   setState(() {
         //     List<ChatMsgDto> list = msgList
@@ -744,7 +770,6 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
       }
     }
   }
-
 
   Future<void> procAssetsWithGallery(List<Medium> assets) async {
     Utils.showDialogWidget(context);
@@ -780,7 +805,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
       //   String base64Image = await encodeFileToBase64(item);
       //   imageList.add(base64Image);
       // }
-      
+
       // WriteLog.write(imageList[0], fileName: "base64.txt");
 
       await sendImage(fileList);
@@ -896,21 +921,21 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
         //     msgList.removeAt(index);
         //   }
 
-          // List<FileDto> images =
-          //     value.result.where((element) => element.type == "image").toList();
-          // List<FileDto> audios =
-          //     value.result.where((element) => element.type == "sound").toList();
-          // onFileSend(images, eChatType.IMAGE.index);
+        // List<FileDto> images =
+        //     value.result.where((element) => element.type == "image").toList();
+        // List<FileDto> audios =
+        //     value.result.where((element) => element.type == "sound").toList();
+        // onFileSend(images, eChatType.IMAGE.index);
 
-          // for (int i = 0; i < audios.length; i++) {
-          //   //개별적 메시지로 발송
-          //   List<FileDto> audio = [audios[i]];
-          //   onFileSend(audio, eChatType.AUDIO.index);
-          // }
+        // for (int i = 0; i < audios.length; i++) {
+        //   //개별적 메시지로 발송
+        //   List<FileDto> audio = [audios[i]];
+        //   onFileSend(audio, eChatType.AUDIO.index);
+        // }
 
-          if (videoList.isNotEmpty && videoList.length == thumbList.length) {
-            uploadVideo(videoList, thumbList, 0);
-          }
+        if (videoList.isNotEmpty && videoList.length == thumbList.length) {
+          uploadVideo(videoList, thumbList, 0);
+        }
         // }).catchError((Object obj) {
         //   setState(() {
         //     List<DataMessage> list = msgList
@@ -922,11 +947,10 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
         //     }
         //   });
         // showToast("connection_failed");
-        
-        // );
 
-    }
-       else { // 이미지 선택 안했을 떄 
+        // );
+      } else {
+        // 이미지 선택 안했을 떄
         if (videoList.isNotEmpty && videoList.length == thumbList.length) {
           uploadVideo(videoList, thumbList, 0);
         }
@@ -944,45 +968,48 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
 
     int randid = Random().nextInt(10000);
 
-    for(int i =0 ; i<videoList.length;i++)
-    {
-      try{
-      var videoResult = await DioClient.postUploadFile(videoList[i].path);
-      var thumbResult = await DioClient.postUploadFile(thumbList[i].path);
-      String videoUrlPath = videoResult.data['ctrl']['params']['url'];
-      String thumbnailUrlPath = thumbResult.data['ctrl']['params']['url'];
-      Message message = Message(
+    for (int i = 0; i < videoList.length; i++) {
+      try {
+        var videoResult = await DioClient.postUploadFile(videoList[i].path);
+        var thumbResult = await DioClient.postUploadFile(thumbList[i].path);
+        String videoUrlPath = videoResult.data['ctrl']['params']['url'];
+        String thumbnailUrlPath = thumbResult.data['ctrl']['params']['url'];
+        Message message = Message(
           roomTopic.name,
           {
             "txt": " ",
             "ent": [
               {
                 "tp": "VD",
-                "data": {"mime": "video/mp4","preref":thumbnailUrlPath , "ref": videoUrlPath,
-                "duration": 100, "width":100, "height":100, "size": 100}
+                "data": {
+                  "mime": "video/mp4",
+                  "preref": thumbnailUrlPath,
+                  "ref": videoUrlPath,
+                  "duration": 100,
+                  "width": 100,
+                  "height": 100,
+                  "size": 100
+                }
               }
             ],
-            "fmt": [{"len":1}],
+            "fmt": [
+              {"len": 1}
+            ],
           },
           false, // echo 설정
           head: {"mime": "text/x-drafty"},
         );
-        List<String> videoData = [videoUrlPath,thumbnailUrlPath];
-        Map<String,List<String>> extra = {
-          "attachments": videoData
-        };
+        List<String> videoData = [videoUrlPath, thumbnailUrlPath];
+        Map<String, List<String>> extra = {"attachments": videoData};
 
-        var pub_result = await roomTopic.publishMessage(message, extra:extra );
+        var pub_result = await roomTopic.publishMessage(message, extra: extra);
 
-        if(pub_result?.text =='accepted') showToast('complete video');
-      }
-      catch(err)
-      {
+        if (pub_result?.text == 'accepted') showToast('complete video');
+      } catch (err) {
         print("upload video err : $err");
         showToast('300MB까지 가능합니다.');
       }
     }
-
 
     // apiP.uploadFile(
     //     "Bearer ${await FirebaseAuth.instance.currentUser?.getIdToken()}",
@@ -1032,8 +1059,9 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
     // });
   }
 
-  Future<void> sendImage( //List<String> imageList, 
-  List<File> fileList) async {
+  Future<void> sendImage(
+      //List<String> imageList,
+      List<File> fileList) async {
     try {
       for (int i = 0; i < fileList.length; i++) {
         // Message 객체 생성
@@ -1056,20 +1084,19 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
                 "data": {"mime": "image/png", "ref": urlPath}
               },
             ],
-            "fmt": [{"len":1}],
+            "fmt": [
+              {"len": 1}
+            ],
           },
           false, // echo 설정
           head: {"mime": "text/x-drafty"},
         );
         List<String> imageData = [urlPath];
-        Map<String,List<String>> extra = {
-          "attachments": imageData
-        };
+        Map<String, List<String>> extra = {"attachments": imageData};
 
-        var pub_result = await roomTopic.publishMessage(message,extra:extra);
+        var pub_result = await roomTopic.publishMessage(message, extra: extra);
 
-        if(pub_result?.text =='accepted') showToast('complete');
-        
+        if (pub_result?.text == 'accepted') showToast('complete');
 
         print('이미지가 성공적으로 서버에 전송되었습니다.');
 
@@ -1101,7 +1128,6 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
       showToast('300MB까지 가능합니다.');
     }
   }
-
 
   void _sendMessage(String text, String? mimeType, String? fileUrl) {
     var content = {};
@@ -1165,6 +1191,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
     roomTopic.deleteTopic(false);
     Get.back();
   }
+
   Future<void> deleteChat(int index) async {
     showLoading();
     // apiC
@@ -1190,7 +1217,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
   Future<void> addMsg(String input) async {
     //await roomTopic.subscribe(MetaGetBuilder(roomTopic).withData(null,null,null).build(),null);
 
-     setState(() {
+    setState(() {
       replyIdx = -1;
       inputController.text = "";
       sendString.value = "";
@@ -1205,72 +1232,72 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
       } catch (err) {
         print("err : $err");
       }
-    } else{
+    } else {
       getMsgList();
       // var s = await roomTopic.subscribe(MetaGetBuilder(roomTopic).withData(null,null,null).build(),null);
 
       addMsg(input);
     }
-
   }
 
-  Future<void> requestVoiceCall() async
-  {
+  Future<void> requestVoiceCall() async {
+    Map<String, dynamic> data = {
+      "txt": " ",
+      "ent": [
+        {
+          "tp": "VC",
+          "data": {"aonly": true}
+        }
+      ]
+    };
 
-    Map<String,dynamic> data =  {
-            "txt": " ",
-            "ent": [
-              {
-                "tp": "VC",
-                "data": {"aonly":true}
-              }
-            ]
-          };
-
-       Map<String,dynamic> head = {
-        "aonly":true,
-        "mime": "text/x-drafty",
-        "webrtc" :"started",
-       };
+    Map<String, dynamic> head = {
+      "aonly": true,
+      "mime": "text/x-drafty",
+      "webrtc": "started",
+    };
     var voiceMsg = roomTopic.createMessage(data, false, head: head);
-    try{
+    try {
       await roomTopic.publishMessage(voiceMsg);
-     Get.to(CallScreen(tinode: tinode_global, roomTopic: roomTopic, joinUserList: joinUserList, chatType: eChatType.VOICE_CALL,));
+      Get.to(CallScreen(
+        tinode: tinode_global,
+        roomTopic: roomTopic,
+        joinUserList: joinUserList,
+        chatType: eChatType.VOICE_CALL,
+      ));
       // Get.to(AgoraVoiceCallController(channelName: roomTopic?.name ?? ""));
-
-    }
-    catch(err)
-    {
+    } catch (err) {
       print("voice call request err : $err");
     }
   }
-  Future<void> requestVideoCall() async
-  {
 
-    Map<String,dynamic> data =  {
-            "txt": " ",
-            "ent": [
-              {
-                "tp": "VC",
-               // "data": {"aonly":false}
-              }
-            ]
-          };
+  Future<void> requestVideoCall() async {
+    Map<String, dynamic> data = {
+      "txt": " ",
+      "ent": [
+        {
+          "tp": "VC",
+          // "data": {"aonly":false}
+        }
+      ]
+    };
 
-       Map<String,dynamic> head = {
-        //"aonly":false,
-        "mime": "text/x-drafty",
-        "webrtc" :"started",
-       };
+    Map<String, dynamic> head = {
+      //"aonly":false,
+      "mime": "text/x-drafty",
+      "webrtc": "started",
+    };
     var videoCallMsg = roomTopic.createMessage(data, false, head: head);
-    try{
+    try {
       await roomTopic.publishMessage(videoCallMsg);
-     Get.to(CallScreen(tinode: tinode_global, roomTopic: roomTopic, joinUserList: joinUserList, chatType: eChatType.VIDEO_CALL,));
+      Get.to(CallScreen(
+        tinode: tinode_global,
+        roomTopic: roomTopic,
+        joinUserList: joinUserList,
+        chatType: eChatType.VIDEO_CALL,
+      ));
       // Get.to(AgoraVoiceCallController(channelName: roomTopic?.name ?? ""));
-
-    }
-    catch(err)
-    {
+    } catch (err) {
       print("voice call request err : $err");
     }
   }
@@ -1363,7 +1390,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
     );
   }
 
-   Future<void> download(List<String> files, int idx) async {
+  Future<void> download(List<String> files, int idx) async {
     if (idx == files.length) return;
 
     String file_path = files[idx];
@@ -1389,7 +1416,9 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
       final directory = await getExternalStorageDirectory();
       dir = directory?.path;
     } else {
-      dir = (await getApplicationDocumentsDirectory()).absolute.path; //path provider로 저장할 경로 가져오기
+      dir = (await getApplicationDocumentsDirectory())
+          .absolute
+          .path; //path provider로 저장할 경로 가져오기
     }
     debugPrint(dir);
     if (dir == null) return;
@@ -1399,8 +1428,10 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
         url: file_path, // file url
         savedDir: dir, // 저장할 dir
         fileName: original_file_name, // 파일명
-        showNotification: true, // show download progress in status bar (for Android)
-        openFileFromNotification: true, // click on notification to open downloaded file (for Android)
+        showNotification:
+            true, // show download progress in status bar (for Android)
+        openFileFromNotification:
+            true, // click on notification to open downloaded file (for Android)
         saveInPublicStorage: true, // 동일한 파일 있을 경우 덮어쓰기 없으면 오류발생함!
       );
 
@@ -1411,17 +1442,17 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
     download(files, idx + 1);
   }
 
-  
   Future<bool> onBackPressed() async {
     Navigator.pop(context);
     return false;
   }
-   Future<bool> onHide() async {
+
+  Future<bool> onHide() async {
     hideKeyboard();
     return false;
   }
 
-   Future<void> openTheRecorder() async {
+  Future<void> openTheRecorder() async {
     if (!kIsWeb) {
       var status = await Permission.microphone.request();
       if (status != PermissionStatus.granted) {
@@ -1436,9 +1467,11 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
     await session.configure(AudioSessionConfiguration(
       avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
       avAudioSessionCategoryOptions:
-          AVAudioSessionCategoryOptions.allowBluetooth | AVAudioSessionCategoryOptions.defaultToSpeaker,
+          AVAudioSessionCategoryOptions.allowBluetooth |
+              AVAudioSessionCategoryOptions.defaultToSpeaker,
       avAudioSessionMode: AVAudioSessionMode.spokenAudio,
-      avAudioSessionRouteSharingPolicy: AVAudioSessionRouteSharingPolicy.defaultPolicy,
+      avAudioSessionRouteSharingPolicy:
+          AVAudioSessionRouteSharingPolicy.defaultPolicy,
       avAudioSessionSetActiveOptions: AVAudioSessionSetActiveOptions.none,
       androidAudioAttributes: const AndroidAudioAttributes(
         contentType: AndroidAudioContentType.speech,
@@ -1459,7 +1492,8 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
       if (!kIsWeb) {
         var status = await Permission.microphone.request();
         if (status != PermissionStatus.granted) {
-          throw RecordingPermissionException('Microphone permission not granted');
+          throw RecordingPermissionException(
+              'Microphone permission not granted');
         }
       }
       var path = '';
@@ -1509,7 +1543,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
 
   void stopRecorder() async {
     print("스탑");
-    if(isRecordSending){
+    if (isRecordSending) {
       return;
     }
 
@@ -1541,22 +1575,24 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
     audioFilePath = path;
     uploadAudio();
   }
-  
+
   final GlobalKey _recorderKey = GlobalKey();
   Offset? _getRecorderOffset() {
     if (_recorderKey.currentContext != null) {
       final RenderBox renderBox =
-      _recorderKey.currentContext!.findRenderObject() as RenderBox;
+          _recorderKey.currentContext!.findRenderObject() as RenderBox;
       Offset offset = renderBox.localToGlobal(Offset.zero);
       return offset;
     }
   }
-   void startVoiceTimer() {
+
+  void startVoiceTimer() {
     //Not related to the answer but you should consider resetting the timer when it starts
     voiceTimer?.cancel();
     voiceDuration = const Duration();
     durationString.value = "00:00:0";
-    voiceTimer = Timer.periodic(const Duration(milliseconds: 10), (_) => addVoiceTime());
+    voiceTimer =
+        Timer.periodic(const Duration(milliseconds: 10), (_) => addVoiceTime());
   }
 
   void addVoiceTime() {
@@ -1564,16 +1600,19 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
     voiceDuration = Duration(milliseconds: ms);
     printDuration(voiceDuration);
   }
+
   void printDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, "0");
     String twoRightDigits(int n) => n.toString().padRight(2, "0");
     String oneDigits(int n) => n.toString().padLeft(1, "0");
-    String digitMinutes = oneDigits((duration.inMinutes.remainder(60)).toInt().abs());
-    String digitSeconds = twoDigits((duration.inSeconds.remainder(60)).toInt().abs());
-    String digitMiliSeconds = twoDigits((duration.inMilliseconds.remainder(1000)/10).toInt());
+    String digitMinutes =
+        oneDigits((duration.inMinutes.remainder(60)).toInt().abs());
+    String digitSeconds =
+        twoDigits((duration.inSeconds.remainder(60)).toInt().abs());
+    String digitMiliSeconds =
+        twoDigits((duration.inMilliseconds.remainder(1000) / 10).toInt());
     durationString.value = "$digitMinutes:$digitSeconds:$digitMiliSeconds";
   }
-
 
   Future<void> uploadAudio() async {
     if (audioFilePath == null) return;
@@ -1666,791 +1705,799 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
   //                       );
   // }
 
-  // Widget topMeetBallWidget()
-  // {
-  //   return InkWell(
-  //                         onTap: (){
-  //                           List<BtnBottomSheetModel> items = [];
-  //                           if((roomDto.joined_users?.length ?? 0) >= 1)
-  //                             items.add(BtnBottomSheetModel(ImageConstants.addChatUserIcon, "add_room_member".tr(), 0));
-  //                           if((roomDto.joined_users?.length ?? 0) >= 1 && !closeRoom)
-  //                             items.add(BtnBottomSheetModel(ImageConstants.editRoomIcon, "change_room_name".tr(), 1));
-  //                           if((roomDto.joined_users?.length ?? 0) == 1 && !closeRoom)
-  //                             items.add(BtnBottomSheetModel(ImageConstants.banUserIcon, "user_block".tr(), 2));
-  //                           if((roomDto.joined_users?.length ?? 0) == 1 && !closeRoom)
-  //                             items.add(BtnBottomSheetModel(ImageConstants.reportUserIcon, "report_title".tr(), 3));
-  //                           items.add(BtnBottomSheetModel(ImageConstants.exitRoomIcon, "chat_leave".tr(), 4));
-  //                           Get.bottomSheet(enterBottomSheetDuration: Duration(milliseconds: 100), exitBottomSheetDuration: Duration(milliseconds: 100),BtnBottomSheetWidget(
-  //                             btnItems: items,
-  //                             onTapItem: (menuIndex) async {
-  //                               if(menuIndex == 0){
-  //                                 Navigator.of(context).push(
-  //                                     SwipeablePageRoute(
-  //                                         canOnlySwipeFromEdge: true,
-  //                                         builder: (context) => ChatAddPage(
-  //                                           existUsers: roomDto.joined_users ?? [],
-  //                                           room: roomDto,
-  //                                           roomIdx: roomDto.id,
-  //                                 refresh: (){
-  //                                   getChatRoomInfo();
-  //                                 },changeRoom: (room){
-  //                                     widget.changeRoom(room);
-  //                                   },)))
-  //                                     .then((value) {
-
-  //                                 });
-  //                               }else if(menuIndex == 1){
-  //                                 Get.bottomSheet(enterBottomSheetDuration: Duration(milliseconds: 100), exitBottomSheetDuration: Duration(milliseconds: 100),EditRoomNameBottomSheet(
-  //                                   roomDto: roomDto,
-  //                                   inputName: (name) async {
-  //                                     if (name.isEmpty) {
-  //                                       return;
-  //                                     }
-  //                                     showLoading();
-  //                                     Map<String, dynamic> body = {
-  //                                       "name": name,
-  //                                       "room_id": roomDto.id,
-  //                                     };
-  //                                     apiC
-  //                                         .changeRoomName("Bearer ${await FirebaseAuth
-  //                                         .instance.currentUser?.getIdToken()}",
-  //                                         jsonEncode(body))
-  //                                         .then((value) {
-  //                                       hideLoading();
-  //                                       setState(() {
-  //                                         roomDto.has_name = true;
-  //                                         roomDto.name = name;
-  //                                       });
-  //                                     }).catchError((Object obj) {
-  //                                       hideLoading();
-  //                                       showToast("connection_failed".tr());
-  //                                     });
-  //                                   },
-  //                                 ));
-  //                               }else if(menuIndex == 2){
-  //                                 List<UserModel> users = roomDto.joined_users ?? [];
-  //                                 for(int i=0;i<users.length;i++){
-  //                                   if(users[i].id != Constants.user.id){
-  //                                     var response = await DioClient.postUserBlock(users[i].id);
-  //                                     Utils.showToast("ban_complete".tr());
-  //                                     break;
-  //                                   }
-  //                                 }
-  //                               }else if(menuIndex == 3){
-  //                                 List<UserModel> users = roomDto.joined_users ?? [];
-  //                                 for(int i=0;i<users.length;i++){
-  //                                   if(users[i].id != Constants.user.id){
-  //                                     showModalBottomSheet<dynamic>(
-  //                                         isScrollControlled: true,
-  //                                         context: context,
-  //                                         useRootNavigator: true,
-  //                                         backgroundColor: Colors.transparent,
-  //                                         builder: (BuildContext bc) {
-  //                                           return ReportUserDialog(onConfirm: (reportList, reason) async {
-  //                                             var response = await DioClient.reportUser(users[i].id, reportList, reason);
-  //                                             Utils.showToast("report_complete".tr());
-  //                                           },);
-  //                                         }
-  //                                     );
-  //                                     break;
-  //                                   }
-  //                                 }
-  //                               }else {
-  //                                 AppDialog.showConfirmDialog(context, "leave_title".tr(), "leave_content".tr(), () {
-  //                                   chatRoomLeave();
-  //                                 });
-  //                               }
-  //                             },
-  //                           ));
-  //                         },
-  //                         child: Container(
-  //                             width: 24,
-  //                             height: 24,
-  //                             margin: EdgeInsets.only(right: 10),
-  //                             child: Center(
-  //                               child: Image.asset(ImageConstants.moreWhite, width: 24, height: 24),
-  //                             )),
-  //                       );
-  // }
-
-  Widget audioButtonWidget()
+  Widget topMeetBallWidget()
   {
+    return InkWell(
+                          onTap: (){
+                            // List<BtnBottomSheetModel> items = [];
+                            // if((roomDto.joined_users?.length ?? 0) >= 1)
+                            //   items.add(BtnBottomSheetModel(ImageConstants.addChatUserIcon, "add_room_member".tr(), 0));
+                            // if((roomDto.joined_users?.length ?? 0) >= 1 && !closeRoom)
+                            //   items.add(BtnBottomSheetModel(ImageConstants.editRoomIcon, "change_room_name".tr(), 1));
+                            // if((roomDto.joined_users?.length ?? 0) == 1 && !closeRoom)
+                            //   items.add(BtnBottomSheetModel(ImageConstants.banUserIcon, "user_block".tr(), 2));
+                            // if((roomDto.joined_users?.length ?? 0) == 1 && !closeRoom)
+                            //   items.add(BtnBottomSheetModel(ImageConstants.reportUserIcon, "report_title".tr(), 3));
+                            // items.add(BtnBottomSheetModel(ImageConstants.exitRoomIcon, "chat_leave".tr(), 4));
+                            // Get.bottomSheet(enterBottomSheetDuration: Duration(milliseconds: 100), exitBottomSheetDuration: Duration(milliseconds: 100),BtnBottomSheetWidget(
+                            //   btnItems: items,
+                            //   onTapItem: (menuIndex) async {
+                            //     if(menuIndex == 0){
+                            //       Navigator.of(context).push(
+                            //           SwipeablePageRoute(
+                            //               canOnlySwipeFromEdge: true,
+                            //               builder: (context) => ChatAddPage(
+                            //                 existUsers: roomDto.joined_users ?? [],
+                            //                 room: roomDto,
+                            //                 roomIdx: roomDto.id,
+                            //       refresh: (){
+                            //         getChatRoomInfo();
+                            //       },changeRoom: (room){
+                            //           widget.changeRoom(room);
+                            //         },)))
+                            //           .then((value) {
+
+                            //       });
+                            //     }else if(menuIndex == 1){
+                            //       Get.bottomSheet(enterBottomSheetDuration: Duration(milliseconds: 100), exitBottomSheetDuration: Duration(milliseconds: 100),EditRoomNameBottomSheet(
+                            //         roomDto: roomDto,
+                            //         inputName: (name) async {
+                            //           if (name.isEmpty) {
+                            //             return;
+                            //           }
+                            //           showLoading();
+                            //           Map<String, dynamic> body = {
+                            //             "name": name,
+                            //             "room_id": roomDto.id,
+                            //           };
+                            //           apiC
+                            //               .changeRoomName("Bearer ${await FirebaseAuth
+                            //               .instance.currentUser?.getIdToken()}",
+                            //               jsonEncode(body))
+                            //               .then((value) {
+                            //             hideLoading();
+                            //             setState(() {
+                            //               roomDto.has_name = true;
+                            //               roomDto.name = name;
+                            //             });
+                            //           }).catchError((Object obj) {
+                            //             hideLoading();
+                            //             showToast("connection_failed".tr());
+                            //           });
+                            //         },
+                            //       ));
+                            //     }else if(menuIndex == 2){
+                            //       List<UserModel> users = roomDto.joined_users ?? [];
+                            //       for(int i=0;i<users.length;i++){
+                            //         if(users[i].id != Constants.user.id){
+                            //           var response = await DioClient.postUserBlock(users[i].id);
+                            //           Utils.showToast("ban_complete".tr());
+                            //           break;
+                            //         }
+                            //       }
+                            //     }else if(menuIndex == 3){
+                            //       List<UserModel> users = roomDto.joined_users ?? [];
+                            //       for(int i=0;i<users.length;i++){
+                            //         if(users[i].id != Constants.user.id){
+                            //           showModalBottomSheet<dynamic>(
+                            //               isScrollControlled: true,
+                            //               context: context,
+                            //               useRootNavigator: true,
+                            //               backgroundColor: Colors.transparent,
+                            //               builder: (BuildContext bc) {
+                            //                 return ReportUserDialog(onConfirm: (reportList, reason) async {
+                            //                   var response = await DioClient.reportUser(users[i].id, reportList, reason);
+                            //                   Utils.showToast("report_complete".tr());
+                            //                 },);
+                            //               }
+                            //           );
+                            //           break;
+                            //         }
+                            //       }
+                            //     }else {
+                            //       AppDialog.showConfirmDialog(context, "leave_title".tr(), "leave_content".tr(), () {
+                            //         chatRoomLeave();
+                            //       });
+                            //     }
+                            //   },
+                            // ));
+                          },
+                          child: Container(
+                              width: 24,
+                              height: 24,
+                              margin: EdgeInsets.only(right: 10),
+                              child: Center(
+                                child: Image.asset(ImageConstants.moreWhite, width: 24, height: 24, color: Colors.black,),
+                              )),
+                        );
+  }
+
+  Widget audioButtonWidget() {
     return Container(
-                                          width: double.maxFinite,
-                                          child: Row(
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children:[
-                                              Container(),
+      width: double.maxFinite,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(),
+          Obx(() => GestureDetector(
+                child: Container(
+                    width: _isRecording.value ? 200 : 40,
+                    height: 30,
+                    color: Colors.transparent,
+                    child: Stack(
+                      children: [
+                        if (_isRecording.value)
+                          Positioned(
+                            top: 0,
+                            bottom: 0,
+                            left: 0,
+                            child: Image.asset(
+                              ImageConstants.micSlideGuide,
+                              fit: BoxFit.cover,
+                              height: 45,
+                            ),
+                          ),
+                        if (!_isRecording.value)
+                          Positioned(
+                              top: 0,
+                              bottom: 0,
+                              right: 10,
+                              child: Container(
+                                width: 30,
+                                height: 30,
+                                key: _recorderKey,
+                                child: Image.asset(
+                                    closeRoom
+                                        ? ImageConstants.chatMicDisable
+                                        : !_isRecording.value
+                                            ? ImageConstants.chatMic
+                                            : ImageConstants.micPressed,
+                                    width: 30,
+                                    height: 30),
+                              ))
+                      ],
+                    )),
+                onHorizontalDragEnd: (detail) {
+                  if (closeRoom) return;
+                  if (_isRecordLock.value) {
+                    lockX!.value = micFirstX!.dx;
+                    lockY!.value = micFirstX!.dy;
+                  }
+                },
+                onHorizontalDragUpdate: (detail) {
+                  print("왼쪽으로??");
+                  if (closeRoom || !_isRecordLock.value) return;
+                  if (micFirstX!.dx - detail.globalPosition.dx >= 10) {
+                    if (micFirstX!.dx - detail.globalPosition.dx <= 80) {
+                      print("이동");
+                      // if(changedX == null){
+                      //   changedX = lockX;
+                      // }
+                      // if(changedY == null){
+                      //   changedY = lockY;
+                      // }
+                      lockX!.value = detail.globalPosition.dx;
+                      lockY!.value = micFirstX!.dy;
+                      print(
+                          "${micFirstX!.dx - detail.globalPosition.dx}만큼 왼쪽으로 움직여서 ${lockX!.value}");
+                    }
 
-                                              Obx(() => GestureDetector(
-                                                child: Container(
-                                                    width: _isRecording.value ? 200 : 40,
-                                                    height: 30,
-                                                    color: Colors.transparent,
-                                                    child: Stack(
-                                                      children: [
-                                                        if(_isRecording.value)
-                                                          Positioned(
-                                                            top:0,
-                                                            bottom: 0,
-                                                            left: 0,
-                                                            child: Image.asset(ImageConstants.micSlideGuide, fit: BoxFit.cover,
-                                                              height: 45,),
-                                                          ),
+                    // 취소
+                    if (micFirstX!.dx - detail.globalPosition.dx >= 80) {
+                      _isRecording.value = false;
+                      _isRecordLock.value = false;
+                      _isRecordCancel = true;
+                      changedX = null;
+                      changedY = null;
+                      lockX = null;
+                      lockY = null;
+                      micFirstX = null;
+                      cancelRecorder();
+                      inputController.text = tempString;
+                    }
+                  }
+                },
+                onLongPressMoveUpdate: (detail) {
+                  if (closeRoom) return;
+                  if (micFirstX != null) {
+                    // 왼쪽 취소부터 체크
+                    print(
+                        "이동1 ${micFirstX!.dx} - ${detail.globalPosition.dx} = ${micFirstX!.dx - detail.globalPosition.dx}");
+                    if (micFirstX!.dx - detail.globalPosition.dx >= 10) {
+                      if (micFirstX!.dx - detail.globalPosition.dx <= 80) {
+                        print("이동");
+                        // if(changedX == null){
+                        //   changedX = lockX;
+                        // }
+                        // if(changedY == null){
+                        //   changedY = lockY;
+                        // }
+                        lockX!.value = detail.globalPosition.dx;
+                        lockY!.value = micFirstX!.dy;
+                        changedX!.value = detail.globalPosition.dx;
+                        changedY!.value = micFirstX!.dy;
+                        print(
+                            "${micFirstX!.dx - detail.globalPosition.dx}만큼 왼쪽으로 움직여서 ${lockX!.value}");
+                      }
 
-                                                        if(!_isRecording.value)
-                                                          Positioned(
-                                                              top: 0,
-                                                              bottom:0,
-                                                              right: 10,
-                                                              child: Container(
-                                                                width: 30,
-                                                                height: 30,
-                                                                key: _recorderKey,
-                                                                child: Image.asset(closeRoom ? ImageConstants.chatMicDisable : !_isRecording.value ? ImageConstants.chatMic : ImageConstants.micPressed, width: 30, height: 30),
-                                                              )
-                                                          )
-                                                      ],
-                                                    )
-                                                ),
-                                                onHorizontalDragEnd: (detail) {
-                                                  if(closeRoom)
-                                                    return;
-                                                  if(_isRecordLock.value){
-                                                    lockX!.value = micFirstX!.dx;
-                                                    lockY!.value = micFirstX!.dy;
-                                                  }
-                                                },
-                                                onHorizontalDragUpdate: (detail) {
-                                                  print("왼쪽으로??");
-                                                  if(closeRoom || !_isRecordLock.value)
-                                                    return;
-                                                  if (micFirstX!.dx -
-                                                      detail.globalPosition.dx >= 10) {
-                                                    if (micFirstX!.dx -
-                                                        detail.globalPosition.dx <=
-                                                        80) {
-                                                      print("이동");
-                                                      // if(changedX == null){
-                                                      //   changedX = lockX;
-                                                      // }
-                                                      // if(changedY == null){
-                                                      //   changedY = lockY;
-                                                      // }
-                                                      lockX!.value = detail.globalPosition.dx;
-                                                      lockY!.value = micFirstX!.dy;
-                                                      print("${micFirstX!.dx -
-                                                          detail.globalPosition
-                                                              .dx}만큼 왼쪽으로 움직여서 ${lockX!.value}");
-                                                    }
-
-                                                    // 취소
-                                                    if (micFirstX!.dx -
-                                                        detail.globalPosition.dx >=
-                                                        80) {
-                                                      _isRecording.value = false;
-                                                      _isRecordLock.value = false;
-                                                      _isRecordCancel = true;
-                                                      changedX = null;
-                                                      changedY = null;
-                                                      lockX = null;
-                                                      lockY = null;
-                                                      micFirstX = null;
-                                                      cancelRecorder();
-                                                      inputController.text = tempString;
-                                                    }
-                                                  }
-                                               },
-                                                onLongPressMoveUpdate: (detail) {
-                                                  if(closeRoom)
-                                                    return;
-                                                  if (micFirstX != null) {
-                                                    // 왼쪽 취소부터 체크
-                                                    print("이동1 ${micFirstX!.dx} - ${detail.globalPosition.dx} = ${micFirstX!.dx - detail.globalPosition.dx}");
-                                                    if (micFirstX!.dx -
-                                                        detail.globalPosition.dx >= 10) {
-                                                      if (micFirstX!.dx -
-                                                          detail.globalPosition.dx <=
-                                                          80) {
-                                                        print("이동");
-                                                        // if(changedX == null){
-                                                        //   changedX = lockX;
-                                                        // }
-                                                        // if(changedY == null){
-                                                        //   changedY = lockY;
-                                                        // }
-                                                        lockX!.value = detail.globalPosition.dx;
-                                                        lockY!.value = micFirstX!.dy;
-                                                        changedX!.value = detail.globalPosition.dx;
-                                                        changedY!.value = micFirstX!.dy;
-                                                        print("${micFirstX!.dx -
-                                                            detail.globalPosition
-                                                                .dx}만큼 왼쪽으로 움직여서 ${lockX!.value}");
-                                                      }
-
-                                                      // 취소
-                                                      if (micFirstX!.dx -
-                                                          detail.globalPosition.dx >=
-                                                          80) {
-                                                        _isRecording.value = false;
-                                                        _isRecordLock.value = false;
-                                                        _isRecordCancel = true;
-                                                        changedX = null;
-                                                        changedY = null;
-                                                        lockX = null;
-                                                        lockY = null;
-                                                        micFirstX = null;
-                                                        cancelRecorder();
-                                                        inputController.text = tempString;
-                                                      }
-                                                    }else if (micFirstX!.dy -
-                                                        detail.globalPosition.dy >= 10 && micFirstX!.dx -
-                                                        detail.globalPosition.dx < 10 && !_isRecordLock.value) {
-                                                      print("${micFirstX!.dy -
-                                                          detail.globalPosition
-                                                              .dy}만큼 위쪽으로 움직임");
-                                                      if(micFirstX!.dy -
-                                                          detail.globalPosition
-                                                              .dy <= 100) {
-                                                        print("이동");
-                                                        changedX!.value = micFirstX!.dx;
-                                                        changedY!.value = detail.globalPosition.dy;
-                                                      }else {
-                                                        _isRecordLock.value = true;
-                                                        changedX = lockX;
-                                                        changedY = lockY;
-                                                        print("녹음 락");
-                                                      }
-                                                    }
-                                                  }
-                                                },
-                                                onTap: (){
-                                                  print("호옹??");
-                                                  if(closeRoom)
-                                                    return;
-                                                  if(!_isRecordLock.value && !_isRecordCancel) {
-                                                    showToast("audio_tap_toast".tr());
-                                                  }else{
-
-                                                  }
-                                                },
-                                                onLongPressStart: (detail) async {
-                                                  if(closeRoom)
-                                                    return;
-                                                  if(_isRecordCancel) {
-                                                    return;
-                                                  }
-                                                  if(!isMicPermission){
-                                                    isMicPermission = (await Permission.microphone.request()).isGranted;
-                                                    return;
-                                                  }
-                                                  if(!_isRecording.value){
-                                                    voiceDuration = const Duration();
-                                                    durationString.value = "00:00:0";
-                                                    openTheRecorder();
-                                                    _isRecording.value = true;
-                                                    _isRecordLock.value = false;
-                                                    print("글로벌 포지션 ${micFirstX}");
-                                                    Offset? recorderOffset = _getRecorderOffset();
-                                                    if(recorderOffset != null){
-                                                      changedX = recorderOffset!.dx.obs;
-                                                      changedY = recorderOffset!.dy.obs;
-                                                      lockX = recorderOffset!.dx.obs;
-                                                      lockY = recorderOffset!.dy.obs;
-                                                      micFirstX = recorderOffset!;
-                                                    }else {
-                                                      changedX =
-                                                          detail.globalPosition.dx
-                                                              .obs;
-                                                      changedY =
-                                                          detail.globalPosition.dy
-                                                              .obs;
-                                                      lockX = detail.globalPosition.dx
-                                                          .obs;
-                                                      lockY = detail.globalPosition.dy
-                                                          .obs;
-                                                      micFirstX = detail.globalPosition;
-                                                    }
-                                                  }
-                                                  tempString = inputController.text;
-                                                  inputController.text = " ";
-                                                },
-                                                onLongPressEnd: (detail){
-                                                  print("gg?");
-                                                  if(closeRoom)
-                                                    return;
-                                                  if(_isRecordCancel) {
-                                                    _isRecordCancel = false;
-                                                    return;
-                                                  }
-                                                  if(!_isRecordLock.value) {
-                                                    _isRecording.value = false;
-                                                    stopRecorder();
-                                                    inputController.text = tempString;
-                                                  }else{
-
-                                                    lockX!.value = micFirstX!.dx;
-                                                    lockY!.value = micFirstX!.dy;
-                                                  }
-                                                },
-                                                onTapUp: (detail){
-                                                  if(closeRoom)
-                                                    return;
-                                                  if(_isRecordLock.value){
-                                                    _isRecording.value = false;
-                                                    _isRecordLock.value = false;
-                                                    micFirstX = null;
-                                                    changedX = null;
-                                                    changedY = null;
-                                                    _isRecordCancel = true;
-                                                    stopRecorder();
-                                                    inputController.text = tempString;
-                                                  }else{
-                                                    print("gg?");
-                                                    lockX!.value = micFirstX!.dx;
-                                                    lockY!.value = micFirstX!.dy;
-                                                  }
-                                                },
-                                              )
-                                              )
-
-
-                                            ],
-                                          ),
-                                        );
+                      // 취소
+                      if (micFirstX!.dx - detail.globalPosition.dx >= 80) {
+                        _isRecording.value = false;
+                        _isRecordLock.value = false;
+                        _isRecordCancel = true;
+                        changedX = null;
+                        changedY = null;
+                        lockX = null;
+                        lockY = null;
+                        micFirstX = null;
+                        cancelRecorder();
+                        inputController.text = tempString;
+                      }
+                    } else if (micFirstX!.dy - detail.globalPosition.dy >= 10 &&
+                        micFirstX!.dx - detail.globalPosition.dx < 10 &&
+                        !_isRecordLock.value) {
+                      print(
+                          "${micFirstX!.dy - detail.globalPosition.dy}만큼 위쪽으로 움직임");
+                      if (micFirstX!.dy - detail.globalPosition.dy <= 100) {
+                        print("이동");
+                        changedX!.value = micFirstX!.dx;
+                        changedY!.value = detail.globalPosition.dy;
+                      } else {
+                        _isRecordLock.value = true;
+                        changedX = lockX;
+                        changedY = lockY;
+                        print("녹음 락");
+                      }
+                    }
+                  }
+                },
+                onTap: () {
+                  print("호옹??");
+                  if (closeRoom) return;
+                  if (!_isRecordLock.value && !_isRecordCancel) {
+                    showToast("audio_tap_toast".tr());
+                  } else {}
+                },
+                onLongPressStart: (detail) async {
+                  if (closeRoom) return;
+                  if (_isRecordCancel) {
+                    return;
+                  }
+                  if (!isMicPermission) {
+                    isMicPermission =
+                        (await Permission.microphone.request()).isGranted;
+                    return;
+                  }
+                  if (!_isRecording.value) {
+                    voiceDuration = const Duration();
+                    durationString.value = "00:00:0";
+                    openTheRecorder();
+                    _isRecording.value = true;
+                    _isRecordLock.value = false;
+                    print("글로벌 포지션 ${micFirstX}");
+                    Offset? recorderOffset = _getRecorderOffset();
+                    if (recorderOffset != null) {
+                      changedX = recorderOffset!.dx.obs;
+                      changedY = recorderOffset!.dy.obs;
+                      lockX = recorderOffset!.dx.obs;
+                      lockY = recorderOffset!.dy.obs;
+                      micFirstX = recorderOffset!;
+                    } else {
+                      changedX = detail.globalPosition.dx.obs;
+                      changedY = detail.globalPosition.dy.obs;
+                      lockX = detail.globalPosition.dx.obs;
+                      lockY = detail.globalPosition.dy.obs;
+                      micFirstX = detail.globalPosition;
+                    }
+                  }
+                  tempString = inputController.text;
+                  inputController.text = " ";
+                },
+                onLongPressEnd: (detail) {
+                  print("gg?");
+                  if (closeRoom) return;
+                  if (_isRecordCancel) {
+                    _isRecordCancel = false;
+                    return;
+                  }
+                  if (!_isRecordLock.value) {
+                    _isRecording.value = false;
+                    stopRecorder();
+                    inputController.text = tempString;
+                  } else {
+                    lockX!.value = micFirstX!.dx;
+                    lockY!.value = micFirstX!.dy;
+                  }
+                },
+                onTapUp: (detail) {
+                  if (closeRoom) return;
+                  if (_isRecordLock.value) {
+                    _isRecording.value = false;
+                    _isRecordLock.value = false;
+                    micFirstX = null;
+                    changedX = null;
+                    changedY = null;
+                    _isRecordCancel = true;
+                    stopRecorder();
+                    inputController.text = tempString;
+                  } else {
+                    print("gg?");
+                    lockX!.value = micFirstX!.dx;
+                    lockY!.value = micFirstX!.dy;
+                  }
+                },
+              ))
+        ],
+      ),
+    );
   }
 
-
-  Widget inputBox()
-  {
-    return   Padding(
-                      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-                    child: StatefulBuilder(
-                      builder: (BuildContext context, StateSetter setState) {
-                        return Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
+  Widget inputBox() {
+    return Padding(
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                    child: Container(
+                        constraints: BoxConstraints(minHeight: 50),
+                        margin: const EdgeInsets.only(
+                            left: 10, top: 15, bottom: 15, right: 5),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(4),
+                            color: ColorConstants.black10Percent),
+                        width: double.infinity,
+                        child: Stack(
+                          alignment: Alignment.center,
                           children: [
-                            Expanded(
-                                child: Container(
-                                    constraints: BoxConstraints(
-                                        minHeight: 50),
-                                    margin: const EdgeInsets.only(left: 10, top: 15, bottom: 15, right: 5),
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(4),
-                                        color: ColorConstants.black10Percent
-                                    ),
-                                    width: double.infinity,
-                                    child: Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-
-                                        Container(
-                                          width: double.maxFinite,
-                                          margin: EdgeInsets.only(right: 30),
-                                          child: Row(
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            children: [
-
-                                            Obx(() => _isRecording.value || _isRecordLock.value ?
-                                                Row(
-                                                  children:[
-                                                    SizedBox(width: 10),
-                                                    Container(
-                                                      width: 6,
-                                                      height: 6,
-                                                      decoration: BoxDecoration(
-                                                          color: Color(0xffeb5757),
-                                                          borderRadius: BorderRadius.circular(3)
-                                                      ),
-                                                    ),
-
-                                                    SizedBox(width: 5,),
-                                                    Obx(() => AppText(
-                                                      text: durationString.value,
-                                                      color: ColorConstants.halfWhite,
-                                                      fontSize: 14,
-                                                    ))
-                                                  ]
-                                                ) : Row(
-                                              children: [
-                                                const SizedBox(width: 7),
-                                                // InkWell(
-                                                //   onTap: () async {
-                                                //     if (closeRoom) return;
-                                                //     if (await _promptPermissionSetting()) {
-                                                //       List<BtnBottomSheetModel> items = [];
-                                                //       items.add(BtnBottomSheetModel(ImageConstants.cameraIcon, "camera".tr(), 0));
-                                                //       items.add(BtnBottomSheetModel(ImageConstants.albumIcon, "gallery".tr(), 1));
-
-                                                //       Get.bottomSheet(enterBottomSheetDuration: Duration(milliseconds: 100), exitBottomSheetDuration: Duration(milliseconds: 100),BtnBottomSheetWidget(
-                                                //         btnItems: items,
-                                                //         onTapItem: (sheetIdx) async {
-                                                //           if(sheetIdx == 0){
-                                                //             AssetEntity? assets = await MyAssetPicker.pickCamera(context, true);
-                                                //             if (assets != null) {
-                                                //               procAssets([assets]);
-                                                //             }
-                                                //           }else {
-                                                //             if (await _promptPermissionSetting()) {
-                                                //               showModalBottomSheet(
-                                                //                   context: context,
-                                                //                   isScrollControlled: true,
-                                                //                   isDismissible: true,
-                                                //                   backgroundColor: Colors.transparent,
-                                                //                   constraints: BoxConstraints(
-                                                //                     minHeight: 0.4,
-                                                //                     maxHeight: Get.height*0.95,
-                                                //                   ),
-                                                //                   builder: (BuildContext context) {
-                                                //                     return DraggableScrollableSheet(
-                                                //                         initialChildSize: 0.5,
-                                                //                         minChildSize: 0.4,
-                                                //                         maxChildSize: 0.9,
-                                                //                         expand: false,
-                                                //                         builder: (_, controller) => GalleryBottomSheet(
-                                                //                           controller: controller,
-                                                //                           onTapSend: (results){
-                                                //                             procAssetsWithGallery(results);
-                                                //                           },
-                                                //                         )
-                                                //                     );
-                                                //                   }
-                                                //               );
-                                                //             }
-                                                //           }
-                                                //         },
-                                                //       ));
-                                                //     }
-                                                //   },
-                                                //   child: Container(
-                                                //     width: 35,
-                                                //     height: 35,
-                                                //     child: Center(
-                                                //       child: Image.asset(
-                                                //         closeRoom ? "assets/image/ic_add_disable.png" : ImageConstants.chatPlus,
-                                                //         width: 20,
-                                                //         height: 20,
-                                                //         color: Colors.black,
-                                                //       ),
-                                                //     ),
-                                                //   ),
-                                                // ),
-                                                const SizedBox(width: 10),
-                                              ],
-                                            )
-                                            ),
-
-                                              Expanded(
-                                                child:
-                                                Obx(() => TextField(
-                                                  focusNode: myFocusNode,
-                                                  maxLines: 4,
-                                                  minLines: 1,
-                                                  maxLength: 5000,
-                                                  enabled: !closeRoom,
-                                                  style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontFamily: FontConstants.AppFont,
-                                                      fontSize: 14
-                                                  ),
-                                                  showCursor: !_isRecording.value,
-                                                  controller: inputController,
-                                                  decoration: InputDecoration(
-                                                      counterText: "",
-                                                      hintText: closeRoom ? "disable_chat".tr() : "input_msg".tr(),
-                                                      hintStyle: TextStyle(
-                                                          color: ColorConstants.halfBlack,
-                                                          fontSize: 14,
-                                                          fontFamily: FontConstants.AppFont,
-                                                          fontWeight: FontWeight.w400,
-                                                      ),
-                                                      border: InputBorder.none,
-                                                      contentPadding: const EdgeInsets.only(bottom: 5)
-                                                  ),
-                                                  onChanged: (text) {
-                                                    sendString.value = text;
-                                                  },
-                                                ))
-                                              ),
-                                              const SizedBox(width: 10),
-                                            ],
-                                          ),
-                                        ),
-                                        // audio
-                                        //audioButtonWidget(),
-                                      ],
-                                    )
-                                )
-                            ),
-
-                            GestureDetector(
-                              onTap: onTextSend,
-                              child: Obx(() => Container(
-                                width: 40,
-                                height: 40,
-                                child: Center(
-                                    child: sendString.value.replaceAll(" ", "").isNotEmpty ? Image.asset(ImageConstants.sendChatBnt, width: 30, height: 30, ) : Image.asset(ImageConstants.sendChatDisableBnt, width: 30, height: 30)
-                                ),
-                              ),)
-                            ),
-
-                            SizedBox(width: 5,)
-                          ],
-                        );
-                      },
-                    )
-                  );
-  }
-
-  Widget replyPreviewWidget()
-  {
-    return   Container(
-                      child: Column(
-                        children: [
-                          Container(
-                            height: 0.3,
-                            width: double.maxFinite,
-                            color: ColorConstants.halfWhite,
-                          ),
-                          SizedBox(height: 10,),
-                          Row(
-                            children: [
-                              SizedBox(width: 20,),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    AppText(
-                                      text: "replied_top_message".tr(args: ["${msgList[replyIdx].sender_id}"]),
-                                      fontSize: 10,
-                                      color: ColorConstants.halfWhite,
-                                    ),
-                                    AppText(
-                                      text: msgList[replyIdx]?.unsended_at != null ? "deleted_msg".tr() : chatContent(msgList[replyIdx].contents ?? '', msgList[replyIdx].type),
-                                      fontSize: 12,
-                                      maxLine: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      color: Colors.white70,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      replyIdx = -1;
-                                    });
-                                  },
-                                  child: Image.asset(ImageConstants.chatX, width: 24, height: 24)),
-                              SizedBox(width: 50,)
-                            ],
-                          ),
-                        ],
-                      )
-                    );
-  }
-
-  Widget messageDisplaySpaceWidget()
-  {
-    return Expanded(
-                          child: ListView.builder(
-                            cacheExtent: double.infinity,
-                            padding: const EdgeInsets.all(10),
-                            controller: mainController,
-                            itemCount: msgList.length,
-                            reverse: true,
-                            // physics: const ClampingScrollPhysics(),
-                            physics: physics,
-                            itemBuilder: (BuildContext context, int index) {
-                              // print('testtest itemchatmsg index : ${index}');
-                              // WriteLog.write("itemchatmsg index ${index} t : ${DateTime.now()}",fileName: "itemchatmsg.txt");
-                              // if(msgList[index].type >= 5){
-                              //   return Container();
-                              // }
-                              Key key = Key(msgList[index].id.toString());
-                              return SwipeTo(
-                                key: key,
-                                  onLeftSwipe: (details){
-                                   // print("스와이프 인덱스 ${index}번째 ${msgList[index].contents}");
-                                    if (msgList[index].id == -1) return;
-                                    setState(() {
-                                      replyIdx = index;
-                                    });
-                                    myFocusNode.requestFocus();
-                                  },
-                                  swipeSensitivity: 5,
-                                  child: Padding(
-                                    padding: EdgeInsets.only(top: msgList.length-1 > index && msgList[index+1].dataMessage.from != msgList[index].sender_id ? 15 : 0),
-                                    child: AutoScrollTag(
-                                      key: ValueKey(index),
-                                      controller: mainController,
-                                      index: index,
-                                      child: ItemChatMsg(
-                                          users: joinUserList, //roomDto.joined_users!,
-                                          info: msgList[index],
-                                        //  unread: unreadList,
-                                          me: Constants.user!,
-                                          before: index == msgList.length - 1 ? null : msgList[index + 1],
-                                          next: index == 0 ? null : msgList[index - 1],
-                                          parentNick: parentChatNick(
-                                              joinUserList, Constants.user, msgList, msgList[index].parent_chat?.id ?? 0),
-                                          bNewMsg: msgList[index].id == unread_start_id,
-                                          playerModule:
-                                          msgList[index].type != eChatType.AUDIO.index ? null : playerModule,
-                                          setState: () {
-                                            setState(() {
-
-                                            });
-                                          },
-                                          onProfile: () async {
-                                            Utils.showDialogWidget(context);
-                                            try {
-                                              // var response = await DioClient
-                                              //     .getUser(msgList[index].sender
-                                              //     ?.nickname ?? "");
-                                              // UserModel user = UserModel
-                                              //     .fromJson(response
-                                              //     .data["result"]["target"]);
-                                              // Get.back();
-                                              // if(user.id != 0) {
-                                              //   Get.to(ProfileScreen(user: user));
-                                              // }
-                                            }catch(e){
-                                              Get.back();
-                                            }
-                                          },
-                                          onDelete: () {
-                                            if (msgList[index].id == -1) return;
-                                            deleteChat(index);
-                                          },
-                                          onTap: () {
-                                            if (msgList[index].id == -1) {
-                                              List<BtnBottomSheetModel> items = [];
-                                              items.add(BtnBottomSheetModel(ImageConstants.resendIcon, "resend".tr(), 0));
-                                              items.add(BtnBottomSheetModel(ImageConstants.cancelSendIcon, "send_cancel".tr(), 1));
-
-                                              Get.bottomSheet(enterBottomSheetDuration: Duration(milliseconds: 100), exitBottomSheetDuration: Duration(milliseconds: 100),BtnBottomSheetWidget(
-                                                btnItems: items,
-                                                onTapItem: (menuIndex) async {
-                                                  if(menuIndex == 0){
-                                                    this.setState(() {
-                                                      MessageModel messageModel = msgList[index];
-                                                      msgList.removeAt(index);
-
-                                                     // addChat(messageModel.contents ?? '', messageModel.type, messageModel);
-                                                    });
-                                                  }else {
-                                                    this.setState(() {
-                                                      msgList.removeAt(index);
-                                                    });
-                                                  }
-                                                },
-                                              ));
-                                              return;
-                                            }
-                                            if (msgList[index].parent_id > 0) {
-                                              List<MessageModel> list = msgList
-                                                  .where((element) => element.id == msgList[index].parent_id)
-                                                  .toList();
-                                              if (list.isNotEmpty) {
-                                                mainController.scrollToIndex(msgList.indexOf(list.first));
-                                              }
-                                            }
-                                          },
-                                          onReply: () {
-                                            if (msgList[index].id == -1) return;
-                                            setState(() {
-                                              replyIdx = index;
-                                            });
-                                          },
-                                          onLongPress: () {
-                                            if (msgList[index].id == -1) return;
-                                            List<BtnBottomSheetModel> items = [];
-                                            if(msgList[index].type == eChatType.IMAGE.index) {
-                                              items.add(BtnBottomSheetModel(
-                                                  ImageConstants.imgDownload,
-                                                  "save".tr(), 0));
-                                            }else if(msgList[index].type != eChatType.AUDIO.index){
-                                              items.add(BtnBottomSheetModel(
-                                                  ImageConstants.copyIcon,
-                                                  "copy".tr(), 0));
-                                            }
-                                            items.add(BtnBottomSheetModel(ImageConstants.replyIcon, "reply".tr(), 1));
-                                            if(msgList[index].sender_id == Constants.user!.id)
-                                              items.add(BtnBottomSheetModel(ImageConstants.deleteIcon, "delete".tr(), 2));
-
-                                            Get.bottomSheet(enterBottomSheetDuration: Duration(milliseconds: 100), exitBottomSheetDuration: Duration(milliseconds: 100),BtnBottomSheetWidget(
-                                              btnItems: items,
-                                              onTapItem: (sheetIdx) async {
-                                                if(sheetIdx == 0){
-                                                  if(msgList[index].type == eChatType.IMAGE.index) {
-                                                    List<String> images = (msgList[index].contents ?? '').split(",");
-                                                    download(images, 0);
-                                                  }else{
-                                                    await Clipboard.setData(
-                                                        ClipboardData(text: (msgList[index].contents ?? '')));
-                                                  }
-                                                }else if(sheetIdx == 1){
-                                                  this.setState(() {
-                                                    replyIdx = index;
-                                                  });
-                                                }else{
-                                                  deleteChat(index);
-                                                }
-                                              },
-                                            ));
-                                          }),
-                                    ),
-                                  )
-                              );
-                            },
-                          ),
-                        );
-  }
-
-  Widget messagePreviewWidget()
-  {
-    return GestureDetector(
-                            onTap: () {
-                              mainController.scrollToIndex(0);
-                            },
-                            child: Container(
+                            Container(
                               width: double.maxFinite,
-                              margin: EdgeInsets.only(left: 10,right: 10),
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: ColorConstants.white5Percent,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
+                              margin: EdgeInsets.only(right: 30),
                               child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  ImageUtils.ProfileImage(msgList.first.sender?.picture ?? "", 42, 42),
-                                  const SizedBox(width: 10),
-                                  AppText(
-                                    text: msgList.first.sender?.name ?? '',
-                                    fontSize: 13,
-                                    color: ColorConstants.halfWhite,
-                                  ),
-                                  const SizedBox(width: 10),
+                                  Obx(() => _isRecording.value ||
+                                          _isRecordLock.value
+                                      ? Row(children: [
+                                          SizedBox(width: 10),
+                                          Container(
+                                            width: 6,
+                                            height: 6,
+                                            decoration: BoxDecoration(
+                                                color: Color(0xffeb5757),
+                                                borderRadius:
+                                                    BorderRadius.circular(3)),
+                                          ),
+                                          SizedBox(
+                                            width: 5,
+                                          ),
+                                          Obx(() => AppText(
+                                                text: durationString.value,
+                                                color: ColorConstants.halfWhite,
+                                                fontSize: 14,
+                                              ))
+                                        ])
+                                      : Row(
+                                          children: [
+                                            const SizedBox(width: 7),
+                                            // InkWell(
+                                            //   onTap: () async {
+                                            //     if (closeRoom) return;
+                                            //     if (await _promptPermissionSetting()) {
+                                            //       List<BtnBottomSheetModel> items = [];
+                                            //       items.add(BtnBottomSheetModel(ImageConstants.cameraIcon, "camera".tr(), 0));
+                                            //       items.add(BtnBottomSheetModel(ImageConstants.albumIcon, "gallery".tr(), 1));
+
+                                            //       Get.bottomSheet(enterBottomSheetDuration: Duration(milliseconds: 100), exitBottomSheetDuration: Duration(milliseconds: 100),BtnBottomSheetWidget(
+                                            //         btnItems: items,
+                                            //         onTapItem: (sheetIdx) async {
+                                            //           if(sheetIdx == 0){
+                                            //             AssetEntity? assets = await MyAssetPicker.pickCamera(context, true);
+                                            //             if (assets != null) {
+                                            //               procAssets([assets]);
+                                            //             }
+                                            //           }else {
+                                            //             if (await _promptPermissionSetting()) {
+                                            //               showModalBottomSheet(
+                                            //                   context: context,
+                                            //                   isScrollControlled: true,
+                                            //                   isDismissible: true,
+                                            //                   backgroundColor: Colors.transparent,
+                                            //                   constraints: BoxConstraints(
+                                            //                     minHeight: 0.4,
+                                            //                     maxHeight: Get.height*0.95,
+                                            //                   ),
+                                            //                   builder: (BuildContext context) {
+                                            //                     return DraggableScrollableSheet(
+                                            //                         initialChildSize: 0.5,
+                                            //                         minChildSize: 0.4,
+                                            //                         maxChildSize: 0.9,
+                                            //                         expand: false,
+                                            //                         builder: (_, controller) => GalleryBottomSheet(
+                                            //                           controller: controller,
+                                            //                           onTapSend: (results){
+                                            //                             procAssetsWithGallery(results);
+                                            //                           },
+                                            //                         )
+                                            //                     );
+                                            //                   }
+                                            //               );
+                                            //             }
+                                            //           }
+                                            //         },
+                                            //       ));
+                                            //     }
+                                            //   },
+                                            //   child: Container(
+                                            //     width: 35,
+                                            //     height: 35,
+                                            //     child: Center(
+                                            //       child: Image.asset(
+                                            //         closeRoom ? "assets/image/ic_add_disable.png" : ImageConstants.chatPlus,
+                                            //         width: 20,
+                                            //         height: 20,
+                                            //         color: Colors.black,
+                                            //       ),
+                                            //     ),
+                                            //   ),
+                                            // ),
+                                            const SizedBox(width: 10),
+                                          ],
+                                        )),
                                   Expanded(
-                                    child: AppText(
-                                      text: chatContent(msgList.first.contents ?? '', msgList.first.type ?? eChatType.NONE),
-                                      fontSize: 14,
-                                      maxLine: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  Image.asset(
-                                      ImageConstants.chatUnderWhite,
-                                      height: 24,
-                                      width: 24),
+                                      child: Obx(() => TextField(
+                                            focusNode: myFocusNode,
+                                            maxLines: 4,
+                                            minLines: 1,
+                                            maxLength: 5000,
+                                            enabled: !closeRoom,
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontFamily:
+                                                    FontConstants.AppFont,
+                                                fontSize: 14),
+                                            showCursor: !_isRecording.value,
+                                            controller: inputController,
+                                            decoration: InputDecoration(
+                                                counterText: "",
+                                                hintText: closeRoom
+                                                    ? "disable_chat".tr()
+                                                    : "input_msg".tr(),
+                                                hintStyle: TextStyle(
+                                                  color:
+                                                      ColorConstants.halfBlack,
+                                                  fontSize: 14,
+                                                  fontFamily:
+                                                      FontConstants.AppFont,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                                border: InputBorder.none,
+                                                contentPadding:
+                                                    const EdgeInsets.only(
+                                                        bottom: 5)),
+                                            onChanged: (text) {
+                                              sendString.value = text;
+                                            },
+                                          ))),
+                                  const SizedBox(width: 10),
                                 ],
                               ),
                             ),
-                          );
+                            // audio
+                            //audioButtonWidget(),
+                          ],
+                        ))),
+                GestureDetector(
+                    onTap: onTextSend,
+                    child: Obx(
+                      () => Container(
+                        width: 40,
+                        height: 40,
+                        child: Center(
+                            child: sendString.value
+                                    .replaceAll(" ", "")
+                                    .isNotEmpty
+                                ? Image.asset(
+                                    ImageConstants.sendChatBnt,
+                                    width: 30,
+                                    height: 30,
+                                  )
+                                : Image.asset(ImageConstants.sendChatDisableBnt,
+                                    width: 30, height: 30)),
+                      ),
+                    )),
+                SizedBox(
+                  width: 5,
+                )
+              ],
+            );
+          },
+        ));
   }
 
+  Widget replyPreviewWidget() {
+    return Container(
+        child: Column(
+      children: [
+        Container(
+          height: 0.3,
+          width: double.maxFinite,
+          color: ColorConstants.halfWhite,
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Row(
+          children: [
+            SizedBox(
+              width: 20,
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText(
+                    text: "replied_top_message"
+                        .tr(args: ["${msgList[replyIdx].sender_id}"]),
+                    fontSize: 10,
+                    color: ColorConstants.halfWhite,
+                  ),
+                  AppText(
+                    text: msgList[replyIdx]?.unsended_at != null
+                        ? "deleted_msg".tr()
+                        : chatContent(msgList[replyIdx].contents ?? '',
+                            msgList[replyIdx].type),
+                    fontSize: 12,
+                    maxLine: 1,
+                    overflow: TextOverflow.ellipsis,
+                    color: Colors.white70,
+                  ),
+                ],
+              ),
+            ),
+            GestureDetector(
+                onTap: () {
+                  setState(() {
+                    replyIdx = -1;
+                  });
+                },
+                child:
+                    Image.asset(ImageConstants.chatX, width: 24, height: 24)),
+            SizedBox(
+              width: 50,
+            )
+          ],
+        ),
+      ],
+    ));
+  }
+
+  Widget messageDisplaySpaceWidget() {
+    return Expanded(
+      child: ListView.builder(
+        cacheExtent: double.infinity,
+        padding: const EdgeInsets.all(10),
+        controller: mainController,
+        itemCount: msgList.length,
+        reverse: true,
+        // physics: const ClampingScrollPhysics(),
+        physics: physics,
+        itemBuilder: (BuildContext context, int index) {
+          // print('testtest itemchatmsg index : ${index}');
+          // WriteLog.write("itemchatmsg index ${index} t : ${DateTime.now()}",fileName: "itemchatmsg.txt");
+          // if(msgList[index].type >= 5){
+          //   return Container();
+          // }
+          Key key = Key(msgList[index].id.toString());
+          return SwipeTo(
+              key: key,
+              onLeftSwipe: (details) {
+                // print("스와이프 인덱스 ${index}번째 ${msgList[index].contents}");
+                if (msgList[index].id == -1) return;
+                setState(() {
+                  replyIdx = index;
+                });
+                myFocusNode.requestFocus();
+              },
+              swipeSensitivity: 5,
+              child: Padding(
+                padding: EdgeInsets.only(
+                    top: msgList.length - 1 > index &&
+                            msgList[index + 1].dataMessage.from !=
+                                msgList[index].sender_id
+                        ? 15
+                        : 0),
+                child: AutoScrollTag(
+                  key: ValueKey(index),
+                  controller: mainController,
+                  index: index,
+                  child: ItemChatMsg(
+                      users: joinUserList, //roomDto.joined_users!,
+                      messageData: msgList[index],
+                      //  unread: unreadList,
+                      me: Constants.user!,
+                      beforeMessage: index == msgList.length - 1
+                          ? null
+                          : msgList[index + 1],
+                      nextMessage: index == 0 ? null : msgList[index - 1],
+                      parentNick: parentChatNick(joinUserList, Constants.user,
+                          msgList, msgList[index].parent_chat?.id ?? 0),
+                      bNewMsg: msgList[index].id == unread_start_id,
+                      playerModule: msgList[index].type != eChatType.AUDIO.index
+                          ? null
+                          : playerModule,
+                      setState: () {
+                        setState(() {});
+                      },
+                      onProfile: () async {
+                        Utils.showDialogWidget(context);
+                        try {
+                          // var response = await DioClient
+                          //     .getUser(msgList[index].sender
+                          //     ?.nickname ?? "");
+                          // UserModel user = UserModel
+                          //     .fromJson(response
+                          //     .data["result"]["target"]);
+                          // Get.back();
+                          // if(user.id != 0) {
+                          //   Get.to(ProfileScreen(user: user));
+                          // }
+                        } catch (e) {
+                          Get.back();
+                        }
+                      },
+                      onDelete: () {
+                        if (msgList[index].id == -1) return;
+                        deleteChat(index);
+                      },
+                      onTap: () {
+                        if (msgList[index].id == -1) {
+                          List<BtnBottomSheetModel> items = [];
+                          items.add(BtnBottomSheetModel(
+                              ImageConstants.resendIcon, "resend".tr(), 0));
+                          items.add(BtnBottomSheetModel(
+                              ImageConstants.cancelSendIcon,
+                              "send_cancel".tr(),
+                              1));
+
+                          Get.bottomSheet(
+                              enterBottomSheetDuration:
+                                  Duration(milliseconds: 100),
+                              exitBottomSheetDuration:
+                                  Duration(milliseconds: 100),
+                              BtnBottomSheetWidget(
+                                btnItems: items,
+                                onTapItem: (menuIndex) async {
+                                  if (menuIndex == 0) {
+                                    this.setState(() {
+                                      MessageModel messageModel =
+                                          msgList[index];
+                                      msgList.removeAt(index);
+
+                                      // addChat(messageModel.contents ?? '', messageModel.type, messageModel);
+                                    });
+                                  } else {
+                                    this.setState(() {
+                                      msgList.removeAt(index);
+                                    });
+                                  }
+                                },
+                              ));
+                          return;
+                        }
+                        if (msgList[index].parent_id > 0) {
+                          List<MessageModel> list = msgList
+                              .where((element) =>
+                                  element.id == msgList[index].parent_id)
+                              .toList();
+                          if (list.isNotEmpty) {
+                            mainController
+                                .scrollToIndex(msgList.indexOf(list.first));
+                          }
+                        }
+                      },
+                      onReply: () {
+                        if (msgList[index].id == -1) return;
+                        setState(() {
+                          replyIdx = index;
+                        });
+                      },
+                      onLongPress: () {
+                        if (msgList[index].id == -1) return;
+                        List<BtnBottomSheetModel> items = [];
+                        if (msgList[index].type == eChatType.IMAGE.index) {
+                          items.add(BtnBottomSheetModel(
+                              ImageConstants.imgDownload, "save".tr(), 0));
+                        } else if (msgList[index].type !=
+                            eChatType.AUDIO.index) {
+                          items.add(BtnBottomSheetModel(
+                              ImageConstants.copyIcon, "copy".tr(), 0));
+                        }
+                        items.add(BtnBottomSheetModel(
+                            ImageConstants.replyIcon, "reply".tr(), 1));
+                        if (msgList[index].sender_id == Constants.user!.id)
+                          items.add(BtnBottomSheetModel(
+                              ImageConstants.deleteIcon, "delete".tr(), 2));
+
+                        Get.bottomSheet(
+                            enterBottomSheetDuration:
+                                Duration(milliseconds: 100),
+                            exitBottomSheetDuration:
+                                Duration(milliseconds: 100),
+                            BtnBottomSheetWidget(
+                              btnItems: items,
+                              onTapItem: (sheetIdx) async {
+                                if (sheetIdx == 0) {
+                                  if (msgList[index].type ==
+                                      eChatType.IMAGE.index) {
+                                    List<String> images =
+                                        (msgList[index].contents ?? '')
+                                            .split(",");
+                                    download(images, 0);
+                                  } else {
+                                    await Clipboard.setData(ClipboardData(
+                                        text: (msgList[index].contents ?? '')));
+                                  }
+                                } else if (sheetIdx == 1) {
+                                  this.setState(() {
+                                    replyIdx = index;
+                                  });
+                                } else {
+                                  deleteChat(index);
+                                }
+                              },
+                            ));
+                      }),
+                ),
+              ));
+        },
+      ),
+    );
+  }
+
+  Widget messagePreviewWidget() {
+    return GestureDetector(
+      onTap: () {
+        mainController.scrollToIndex(0);
+      },
+      child: Container(
+        width: double.maxFinite,
+        margin: EdgeInsets.only(left: 10, right: 10),
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: ColorConstants.white5Percent,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Row(
+          children: [
+            ImageUtils.ProfileImage(
+                msgList.first.sender?.picture ?? "", 42, 42),
+            const SizedBox(width: 10),
+            AppText(
+              text: msgList.first.sender?.name ?? '',
+              fontSize: 13,
+              color: ColorConstants.halfWhite,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: AppText(
+                text: chatContent(msgList.first.contents ?? '',
+                    msgList.first.type ?? eChatType.NONE),
+                fontSize: 14,
+                maxLine: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Image.asset(ImageConstants.chatUnderWhite, height: 24, width: 24),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2461,109 +2508,128 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
         isAvoidResize: false,
         isLoading: isLoading,
         child: SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-          child: Stack(
-            children: [
-              Column(
-                children: [
-                  SizedBox(
-                    height: 64,
-                    child: Row(
-                      children: [
-                        InkWell(
-                          onTap: onBackPressed,
-                          child: Container(
-                              width: 24,
-                              height: 24,
-                              margin: const EdgeInsets.only(left: 10),
-                              child: Center(
-                                child: Image.asset(ImageConstants.backWhite, width: 24, height: 24, color: Colors.black,),
-                              )
+            width: double.infinity,
+            height: double.infinity,
+            child: Stack(
+              children: [
+                Column(
+                  children: [
+                    SizedBox(
+                      height: 64,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          InkWell(
+                            onTap: onBackPressed,
+                            child: Container(
+                                width: 24,
+                                height: 24,
+                                margin: const EdgeInsets.only(left: 10),
+                                child: Center(
+                                  child: Image.asset(
+                                    ImageConstants.backWhite,
+                                    width: 24,
+                                    height: 24,
+                                    color: Colors.black,
+                                  ),
+                                )),
                           ),
+                          // SizedBox( width: 10,),
+                          //messageRoomNameWidget(),
+                          AppText(
+                            text: '$clickTopic',
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          topMeetBallWidget(),
+                         // SizedBox(width: 10),
+                        ],
+                      ),
+                    ),
+                    const Divider(
+                      height: 1,
+                    ),
+
+                    //   isInit ?
+                    Expanded(
+                      child: Column(
+                        children: [
+                          messageDisplaySpaceWidget(),
+                          if (bPreview) messagePreviewWidget(),
+                        ],
+                      ),
+                    ),
+                    // : Expanded(
+                    //   child: Center(
+                    //     child: SizedBox(
+                    //       child: Center(
+                    //           child: CircularProgressIndicator(
+                    //               color: ColorConstants.colorMain)
+                    //       ),
+                    //       height: 20.0,
+                    //       width: 20.0,
+                    //     ),
+                    //   ),
+                    // ),
+
+                    if (replyIdx != -1) replyPreviewWidget(),
+
+                    inputBox(),
+                  ],
+                ),
+                Obx(() => (_isRecording.value &&
+                        changedY != null &&
+                        changedX != null &&
+                        !_isRecordLock.value)
+                    ? Transform.translate(
+                        offset: Offset(
+                          changedX!.value,
+                          changedY!.value - MediaQuery.of(context).padding.top,
                         ),
-                        SizedBox(width: 10,),
-                        //messageRoomNameWidget(),
-                        AppText(text: '$clickTopic' ,fontSize: 15, fontWeight: FontWeight.w700,),
-                        SizedBox(width: 10),                        
-                      ],
-                    ), 
-                  ),
-                  const Divider(height: 1,),
-
-
-               //   isInit ?
-                  Expanded(
-                    child: Column(
-                      children: [
-                        messageDisplaySpaceWidget(),
-                        if (bPreview) messagePreviewWidget(),
-                          
-                      ],
-                    ),
-                  ),
-                  // : Expanded(
-                  //   child: Center(
-                  //     child: SizedBox(
-                  //       child: Center(
-                  //           child: CircularProgressIndicator(
-                  //               color: ColorConstants.colorMain)
-                  //       ),
-                  //       height: 20.0,
-                  //       width: 20.0,
-                  //     ),
-                  //   ),
-                  // ),
-
-                  if (replyIdx != -1) replyPreviewWidget(),
-                  
-                  inputBox(),
-                ],
-              ),
-
-              Obx(() => (_isRecording.value && changedY != null && changedX != null && !_isRecordLock.value) ?
-              Transform.translate(
-                  offset: Offset(
-                    changedX!.value,
-                    changedY!.value - MediaQuery.of(context).padding.top,
-                  ),
-                  child: Container(
-                    width: 30,
-                    height: 30,
-                    child: Image.asset(ImageConstants.micPressed, width: 30, height: 30),
-                  )
-              ) : Container()),
-
-              Obx(() => (_isRecording.value && lockY != null && lockX != null && _isRecordLock.value) ?
-              Transform.translate(
-                  offset: Offset(
-                    lockX!.value,
-                    lockY!.value - MediaQuery.of(context).padding.top,
-                  ),
-                  child: IgnorePointer(
-                    child: Container(
-                      width: 30,
-                      height: 30,
-                      child: Image.asset(ImageConstants.micPressed, width: 30, height: 30),
-                    ),
-                  )
-              ) : Container()),
-
-              Obx(() => (_isRecording.value && changedY != null && changedX != null && !_isRecordLock.value) ?
-              Transform.translate(
-                  offset: Offset(
-                    lockX!.value,
-                    lockY!.value - MediaQuery.of(context).padding.top - 80,
-                  ),
-                  child: Container(
-                    width: 30,
-                    height: 60,
-                    child: Image.asset(ImageConstants.audioLock, width: 30, height: 60),
-                  )
-              ) : Container())
-            ],
-          )
-        )
-    );
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          child: Image.asset(ImageConstants.micPressed,
+                              width: 30, height: 30),
+                        ))
+                    : Container()),
+                Obx(() => (_isRecording.value &&
+                        lockY != null &&
+                        lockX != null &&
+                        _isRecordLock.value)
+                    ? Transform.translate(
+                        offset: Offset(
+                          lockX!.value,
+                          lockY!.value - MediaQuery.of(context).padding.top,
+                        ),
+                        child: IgnorePointer(
+                          child: Container(
+                            width: 30,
+                            height: 30,
+                            child: Image.asset(ImageConstants.micPressed,
+                                width: 30, height: 30),
+                          ),
+                        ))
+                    : Container()),
+                Obx(() => (_isRecording.value &&
+                        changedY != null &&
+                        changedX != null &&
+                        !_isRecordLock.value)
+                    ? Transform.translate(
+                        offset: Offset(
+                          lockX!.value,
+                          lockY!.value -
+                              MediaQuery.of(context).padding.top -
+                              80,
+                        ),
+                        child: Container(
+                          width: 30,
+                          height: 60,
+                          child: Image.asset(ImageConstants.audioLock,
+                              width: 30, height: 60),
+                        ))
+                    : Container())
+              ],
+            )));
   }
 }
