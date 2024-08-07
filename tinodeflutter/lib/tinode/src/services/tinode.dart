@@ -388,8 +388,8 @@ class TinodeService {
   }
 
   /// Update topic's metadata: description, subscriptions
-  Future setMeta(String topicName, SetParams params) {
-    var packet = _packetGenerator.generate(packet_types.Set, topicName);
+  Future setMeta(String topicName, SetParams params, {Map<String, List<String>> ? extra=null}) {
+    var packet = _packetGenerator.generate(packet_types.Set, topicName , extra: extra);
     var data = packet.data as SetPacketData;
 
     var what = [];

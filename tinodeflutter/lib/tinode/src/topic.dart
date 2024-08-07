@@ -331,13 +331,13 @@ class Topic {
   }
 
   /// Update topic metadata
-  Future<CtrlMessage> setMeta(SetParams params) async {
+  Future<CtrlMessage> setMeta(SetParams params, {Map<String, List<String>> ? extra=null}) async {
     if (params.tags != null && params.tags!.isNotEmpty) {
       params.tags = Tools.normalizeArray(params.tags!);
     }
 
     // Send Set message, handle async response.
-    var ctrl = await _tinodeService.setMeta(name ?? '', params);
+    var ctrl = await _tinodeService.setMeta(name ?? '', params, extra: extra);
 
     if (ctrl.code! >= 300) {
       // Not modified

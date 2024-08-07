@@ -38,7 +38,7 @@ class TopicFnd extends Topic {
 
   /// setMeta to TopicFnd resets contact list in addition to sending the message
   @override
-  Future<CtrlMessage> setMeta(SetParams params) async {
+  Future<CtrlMessage> setMeta(SetParams params, {Map<String, List<String>>? extra=null}) async {
     var ctrl = await super.setMeta(params);
     if (_contacts.isNotEmpty) {
       _contacts = {};
