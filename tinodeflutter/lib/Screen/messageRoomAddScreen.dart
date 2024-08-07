@@ -31,7 +31,7 @@ class MessageRoomAddScreen extends StatefulWidget {
   MessageRoomAddScreen(
       {super.key,  this.roomTopic, this.existUserList});
   Topic? roomTopic;
-  late TopicFnd _fndTopic;
+ // late TopicFnd _fndMessageAddUserTopic;
 
   List<UserModel>? existUserList;
 
@@ -42,11 +42,11 @@ class MessageRoomAddScreen extends StatefulWidget {
 class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
   Topic? roomTopic;
   late Topic me;
-  late TopicFnd _fndTopic;
+  late TopicFnd _fndMessageAddUserTopic;
 
   List<UserModel> friendList = [];
   List<UserModel> selectList = [];
-  List<UserModel> searchUserList = [];
+  List<UserModel> _searchUserList = [];
 
   bool isInit = false;
   bool isSearchingLoading = false;
@@ -82,15 +82,16 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
     _initializeFndTopic();
     _getFriendList();
 
-    Future.delayed(Duration(milliseconds: 100), () {
-      FocusScope.of(context).requestFocus(_focusNode);
-    });
+    // 키보드 자동 띄우기
+    // Future.delayed(Duration(milliseconds: 100), () {
+    //   FocusScope.of(context).requestFocus(_focusNode);
+    // });
   }
 
   @override
   void dispose() {
     if(_metaSubscription!=null) _metaSubscription?.cancel();
-    _fndTopic.leave(true); 
+    _fndMessageAddUserTopic.leave(true); 
     super.dispose();
   }
 
@@ -105,7 +106,7 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
   void searchUser() {
     if (!isSearchComplete) {
       setState(() {
-        searchUserList.clear();
+        _searchUserList.clear();
         if (searchTextController.text.isNotEmpty) {
           isSearchingLoading = true;
           _searchUsers(searchTextController.text);
@@ -131,46 +132,50 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
   }
 
   void _initializeFndTopic() async {
-    _fndTopic = tinode_global.getTopic('fnd') as TopicFnd;
-    _metaSubscription = _fndTopic.onMeta.listen((value) {
+   _fndMessageAddUserTopic = tinode_global.getTopic('fnd') as TopicFnd;
+    _metaSubscription = _fndMessageAddUserTopic.onMeta.listen((value) {
       _handleMetaMessage(value);
     });
-    if (!_fndTopic.isSubscribed)
-      await _fndTopic.subscribe(
-          MetaGetBuilder(_fndTopic).withData(null, null, null).build(), null);
+    if (!_fndMessageAddUserTopic.isSubscribed)
+      await _fndMessageAddUserTopic.subscribe(
+          MetaGetBuilder(_fndMessageAddUserTopic).withData(null, null, null).build(), null);
   }
 
   void _handleMetaMessage(MetaMessage msg) {
     if (msg.sub != null) {
-      setState(() {
-        try {
-          print("search list :");
-          for (int i = 0; i < msg.sub!.length; i++) {
-            String pictureUrl = msg.sub?[i].public['photo']?['ref'] != null
-                ? changePathToLink(msg.sub?[i].public['photo']['ref'])
-                : "";
-            UserModel user = UserModel(
-                id: msg.sub?[i].user ?? "",
-                name: msg.sub?[i].public['fn'],
-                picture: pictureUrl,
-                isFreind: msg.sub?[i].isFriend ?? false);
-            searchUserList.add(user);
+        try{
+        print("search list :");
+        for(int i = 0 ; i<msg.sub!.length ;i++)
+          {
+            bool hasPublic=true;
+            if(msg.sub?[i].public ==null) hasPublic=false;
+            UserModel user =UserModel(id: msg.sub?[i].user ?? '', 
+            name: hasPublic? (msg.sub?[i].public['fn'] ?? "") : "", 
+            picture: hasPublic? (msg.sub?[i].public['photo']!=null ? (msg.sub?[i].public['photo']['ref']!=null ? (msg.sub?[i].public['photo']['ref'] ?? "" ) : (msg.sub?[i].public['photo'] ?? "")):""): "", 
+            isFreind: msg.sub?[i].isFriend ?? false);
+            // String pictureUrl = msg.sub?[i].public['photo']?['ref'] != null ? changePathToLink(msg.sub?[i].public['photo']['ref']) : "";
+            // UserModel user = UserModel(id: msg.sub?[i].user ?? "" , name : msg.sub?[i].public['fn'], picture : pictureUrl, isFreind: msg.sub?[i].isFriend ?? false);
+            _searchUserList.add(user);
           }
-          
-            isLoading = false;
+          setState(() {
+                  isLoading = false;
             isSearchingLoading = false;
           
-        } catch (err) {
+          });
+        }
+        catch(err)
+        {
           print("err : $err");
         }
-      });
-    } else {
-      setState(() {
-        isLoading = false;
-        isSearchingLoading = false;
-      });
     }
-  }
+    else{ showToast('검색한 유저가 없습니다.');
+          isLoading = false;
+            isSearchingLoading = false;
+          setState(() {
+            
+          });
+    }
+   }
 
   Future<void> _searchUsers(String query) async {
     isInit = false;
@@ -183,21 +188,31 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
         ),
       );
       // fnd 토픽에 메타데이터 설정 요청 보내기
-      var ctrl = await _fndTopic.setMeta(setParams);
+      var ctrl = await _fndMessageAddUserTopic.setMeta(setParams);
 
       // GetQuery 객체를 생성하여 검색 결과 요청
       GetQuery getQuery = GetQuery(
-        topic: _fndTopic.name,
+        topic: _fndMessageAddUserTopic.name,
         what: 'sub',
         //sub: GetOptsType(user: query), // 적절한 GetOptsType 설정
       );
       // fnd 토픽에 메타데이터 요청 보내기
-      var meta = await _fndTopic.getMeta(getQuery);
+      var meta = await _fndMessageAddUserTopic.getMeta(getQuery);
+
+       if(meta.runtimeType==CtrlMessage){
+          if(meta.text !=null && meta.text =="no content") 
+            {
+              showToast('해당 유저는 친구가 아닙니다.');
+               setState(() {
+                isLoading = false;
+                isSearchingLoading = false;
+          });
+        }
+        }else{
+          //_handleFriendMetaMessage(meta);
+        }
       if (meta?.text == "no content") {
-        setState(() {
-          isLoading = false;
-          isSearchingLoading = false;
-        });
+       
       }
     } catch (err) {
       print("err search : $err");
@@ -226,14 +241,12 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
       if (data.fri != null) {
         friendList.clear();
         for (int i = 0; i < data.fri.length; i++) {
-          String pictureUrl = data.fri?[i].public['photo']?['ref'] != null
-              ? changePathToLink(data.fri[i].public['photo']['ref'])
-              : "";
-          UserModel user = UserModel(
-              id: data.fri[i].user,
-              name: data.fri[i].public['fn'],
-              picture: pictureUrl,
-              isFreind: true);
+          bool hasPublic=true;
+            if(data.fri?[i].public ==null) hasPublic=false;
+            UserModel user =UserModel(id: data.fri?[i].user ?? '', 
+            name: hasPublic? (data.fri?[i].public['fn'] ?? "") : "", 
+            picture: hasPublic? (data.fri?[i].public['photo']!=null ? (data.fri?[i].public['photo']['ref']!=null ? (data.fri?[i].public['photo']['ref'] ?? "" ) : (data.fri?[i].public['photo'] ?? "")):""): "", 
+            isFreind: true);
           //friendList.add(user);
           setState(() {
             friendList.add(user);
@@ -762,45 +775,45 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
 
                           ) 
                          
-                          : searchUserList.isNotEmpty
+                          : _searchUserList.isNotEmpty
                               ? ListView.builder(
                                   shrinkWrap: true,
                                   itemBuilder:
                                       (BuildContext context, int index) {
                                     return ItemUser(
-                                      user: searchUserList[index],
+                                      user: _searchUserList[index],
                                       selected: selectList
                                           .map((item) => item.id)
-                                          .contains(searchUserList[index].id),
+                                          .contains(_searchUserList[index].id),
                                       isDisabled: widget.existUserList
                                               ?.map((item) => item.id)
                                               .contains(
-                                                  searchUserList[index].id) ??
+                                                  _searchUserList[index].id) ??
                                           false,
                                       onClick: () {
                                         setState(() {
                                           if (selectList
                                               .map((user) => user.id)
                                               .contains(
-                                                  searchUserList[index].id)) {
+                                                  _searchUserList[index].id)) {
                                             for (int i = 0;
                                                 i < selectList.length;
                                                 i++) {
                                               if (selectList[i].id ==
-                                                  searchUserList[index].id) {
+                                                  _searchUserList[index].id) {
                                                 selectList.removeAt(i);
                                                 break;
                                               }
                                             }
                                           } else {
                                             selectList
-                                                .add(searchUserList[index]);
+                                                .add(_searchUserList[index]);
                                           }
                                         });
                                       },
                                     );
                                   },
-                                  itemCount: searchUserList.length)
+                                  itemCount: _searchUserList.length)
                               : Container(
                                   width: double.maxFinite,
                                   height: 100,
