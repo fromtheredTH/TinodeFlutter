@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tinodeflutter/Constants/ImageUtils.dart';
 import 'package:tinodeflutter/app_text.dart';
+import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 
 import '../../../Constants/ImageConstants.dart';
@@ -48,7 +49,8 @@ class ItemUser extends StatelessWidget {
               ClipOval(
                   child: Opacity(
                     opacity: isDisabled ? 0.3 : 1,
-                    child: ImageUtils.ProfileImage(user.picture ?? "", 45, 45)
+                    child: ImageUtils.ProfileImage(
+                     user.picture!="" ? (user.picture.contains('https://') ? user.picture :  changePathToLink(user.picture)) : "", 45, 45)
                   )
               ),
               

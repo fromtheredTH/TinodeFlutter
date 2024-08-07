@@ -153,6 +153,8 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
             name: hasPublic? (msg.sub?[i].public['fn'] ?? "") : "", 
             picture: hasPublic? (msg.sub?[i].public['photo']!=null ? (msg.sub?[i].public['photo']['ref']!=null ? (msg.sub?[i].public['photo']['ref'] ?? "" ) : (msg.sub?[i].public['photo'] ?? "")):""): "", 
             isFreind: msg.sub?[i].isFriend ?? false);
+            print("user :  ${hasPublic? (msg.sub?[i].public['fn']) : ""}  count: $i  photourl: ${user.picture}");
+
             // String pictureUrl = msg.sub?[i].public['photo']?['ref'] != null ? changePathToLink(msg.sub?[i].public['photo']['ref']) : "";
             // UserModel user = UserModel(id: msg.sub?[i].user ?? "" , name : msg.sub?[i].public['fn'], picture : pictureUrl, isFreind: msg.sub?[i].isFriend ?? false);
             _searchUserList.add(user);
@@ -211,9 +213,7 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
         }else{
           //_handleFriendMetaMessage(meta);
         }
-      if (meta?.text == "no content") {
-       
-      }
+    
     } catch (err) {
       print("err search : $err");
       setState(() {
@@ -237,7 +237,7 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
     );
     try {
       var data = await me.getMeta(getQuery);
-
+      if(data.text =="no content") return;
       if (data.fri != null) {
         friendList.clear();
         for (int i = 0; i < data.fri.length; i++) {
@@ -498,7 +498,7 @@ class _MessageRoomAddScreenState extends BaseState<MessageRoomAddScreen> {
                           cursorColor: Colors.black,
                           focusNode: _focusNode,
                           style: TextStyle(
-                            color: Colors.white,
+                            color: Colors.black,
                             fontWeight: FontWeight.w400,
                             fontFamily: FontConstants.AppFont,
                             fontSize: 14,

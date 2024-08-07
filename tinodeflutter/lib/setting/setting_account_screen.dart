@@ -11,6 +11,7 @@ import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:tinodeflutter/Constants/ImageUtils.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
+import 'package:tinodeflutter/global/global.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/page/base/base_state.dart';
 import 'package:tinodeflutter/page/base/page_layout.dart';
@@ -36,7 +37,7 @@ class _SettingAccountScreen extends BaseState<SettingAccountScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController idController = TextEditingController();
-
+  late Topic me;
   RxBool isTapIdOkBtn = false.obs;
   RxBool isNicknameEmpty = false.obs;
   RxBool isIdCorrect = true.obs;
@@ -52,7 +53,9 @@ class _SettingAccountScreen extends BaseState<SettingAccountScreen> {
     super.initState();
     emailController.text = Constants.user.email ?? "";
     nameController.text = Constants.user.name;
-    idController.text = Constants.user.id;
+    idController.text = Constants.user.searchId;
+    me = tinode_global.getMeTopic();
+
   }
 
   @override
@@ -67,19 +70,46 @@ class _SettingAccountScreen extends BaseState<SettingAccountScreen> {
     isTapIdOkBtn.value = true;
     isTapNameOkBtn.value = true;
 
-    if (idController.text.isEmpty ||
-        !isIdCorrect.value ||
-        nameController.text.isEmpty ||
-        !isNameCorrect.value) {
+    if (idController.text.isEmpty || !isIdCorrect.value || nameController.text.isEmpty || !isNameCorrect.value) {
       return;
+    }
+    if(nameController.text != Constants.user.name)
+    {
+       Map<String,dynamic> publicData = {
+        'fn' : nameController.text,
+      };
+      SetParams setParams = SetParams(
+        desc: TopicDescription(
+          public: publicData, 
+          ),
+      );
+      var response = await me.setMeta(setParams);
+      if(response.text =='ok'){
+        Constants.user.name = nameController.text;
+      }
     }
 
     if (idController.text != Constants.user.id) {
-      var idResponse =
-          await DioClient.checkNickname(idController.text);
-      if (idResponse.data["result"]["success"]) {
-        isNicknameNotDuplicate.value = false;
-        return;
+      // var idResponse = await DioClient.checkNickname(idController.text);
+      try{
+        List<String> tagList = Constants.user.tags;
+        tagList[1] = "search:${idController.text}";
+        SetParams setParams = SetParams(
+          tags: tagList
+        );
+        var response = await me.setMeta(setParams);
+        if(response.text=='ok'){
+          Constants.user.tags = tagList;
+          Constants.user.searchId = idController.text;
+        }
+      //   if (response) {
+      //     isNicknameNotDuplicate.value = false;
+      //     return;
+      // }
+      }
+      catch(err)
+      {
+        print("err");
       }
     }
 
@@ -88,6 +118,8 @@ class _SettingAccountScreen extends BaseState<SettingAccountScreen> {
     Utils.showToast("edit_account_complete".tr());
     Get.back();
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -330,7 +362,7 @@ class _SettingAccountScreen extends BaseState<SettingAccountScreen> {
                                       ? "nickname_incorrect".tr()
                                       : isIdCorrect.value &&
                                               isNicknameNotDuplicate.value
-                                          ? "nickname_enable".tr()
+                                          ? "사용할 수 있는 ID입니다"
                                           : !isIdCorrect.value
                                               ? "nickname_length".tr()
                                               : "nickname_disable".tr(),

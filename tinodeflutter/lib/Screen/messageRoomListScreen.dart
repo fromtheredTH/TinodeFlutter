@@ -57,7 +57,7 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
     _messageRoomListScreenController.initHome = initHome;
   }
   //late Topic roomTopic;
-  late Topic me;
+  late Topic _meTopic;
   AutoScrollController mainController = AutoScrollController();
   TextEditingController inputController = TextEditingController();
   TextEditingController searchController = TextEditingController();
@@ -86,7 +86,7 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
   @override
   void initState() {
     super.initState();
-    me = tinode_global.getMeTopic();
+    _meTopic = tinode_global.getMeTopic();
     _setupListeners();
     // pingListen();
   //  _initializeTopic();
@@ -104,14 +104,14 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
   }
 
    void _initializeTopic() async {
-    me = tinode_global.getMeTopic();
-    var result = await me.subscribe(MetaGetBuilder(me).withLaterSub(null).build(), null);
+    _meTopic = tinode_global.getMeTopic();
+    var result = await _meTopic.subscribe(MetaGetBuilder(_meTopic).withLaterSub(null).build(), null);
     //_loadRooms();
     _setupListeners();
   }
 
   void _loadRooms() {
-    var subs = me.subscribers;
+    var subs = _meTopic.subscribers;
     setState(() {
       roomList = subs.values.toList();
        roomList.sort((a, b) => b.touched!.compareTo(a.touched!));
@@ -152,7 +152,7 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
 
   void _setupListeners() async{
     try{
-    me.onSubsUpdated.listen((value) {
+    _meTopic.onSubsUpdated.listen((value) {
       print("Subs updated: $value");
       count = 0; 
       setState(() {
@@ -197,7 +197,7 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
       });
     });
 
-    me.onPres.listen((value) async{
+    _meTopic.onPres.listen((value) async{
       print("Presence value: $value");
       String topic = value.src ?? "";
       int seq = value.seq ?? -1;
@@ -249,7 +249,7 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
      GetQuery getQuery = GetQuery(
       what: 'sub',
     );
-    var meta = await me.getMeta(getQuery);
+    var meta = await _meTopic.getMeta(getQuery);
     print("ee");
     //await me.subscribe(MetaGetBuilder(me).withSub(null,null,null).build(), null);
 
@@ -272,8 +272,8 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
       what: 'membership',
     );
     // fnd 토픽에 메타데이터 요청 보내기
-    var meta = await me.getMeta(getQuery);
-    var membershipMeta = await me.getMeta(getMembershipQuery);
+    var meta = await _meTopic.getMeta(getQuery);
+    var membershipMeta = await _meTopic.getMeta(getMembershipQuery);
 
     var userId = tinode_global.getCurrentUserId();
     String pictureUrl = meta.desc?.public['photo']?['ref'] != null ? changePathToLink(meta.desc?.public['photo']['ref']) : "";
@@ -307,7 +307,7 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
       //   // 필요한 경우 데이터를 처리할 수 있습니다.
       //   print("Data received: $data");
       // });
-      var result = await me.subscribe(MetaGetBuilder(me).withLaterSub(null).build(), null);
+      var result = await _meTopic.subscribe(MetaGetBuilder(_meTopic).withLaterSub(null).build(), null);
     } catch (err) {
       print("err : $err");
     }

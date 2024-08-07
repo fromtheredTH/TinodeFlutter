@@ -90,7 +90,9 @@ class ItemChatRoom extends StatelessWidget {
       return Container(
         width: size,
         height: size,
-        child: ImageUtils.ProfileImage(users[0].picture ?? "", size, size),
+        child: ImageUtils.ProfileImage(
+          users[0].picture!="" ? (users[0].picture.contains('https://') ? users[0].picture :  changePathToLink(users[0].picture)) : "",
+           size, size),
       );
     }else if(users.length == 2){
       users.sort((a, b) => (a.name ?? "").compareTo(b.name ?? ""));

@@ -7,8 +7,8 @@ class UserModel {
    bool isFreind=false;
    dynamic? membership;
    bool selected=false;
-
-  UserModel({required this.id, required this.name, required this.picture, required this.isFreind , this.membership, this.searchId="", this.selected=false});
+    dynamic? tags;
+  UserModel({required this.id, required this.name, required this.picture, required this.isFreind , this.membership, this.searchId="", this.tags, this.selected=false});
 
 
    UserModel.fromJson(Map<String, dynamic> json)

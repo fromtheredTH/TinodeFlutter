@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:http_parser/http_parser.dart';
 import 'package:photo_gallery/photo_gallery.dart';
+import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:video_player/video_player.dart';
 
@@ -28,7 +29,8 @@ class GalleryBottomSheet extends StatefulWidget {
   int limitCnt;
   String sendText;
   bool onlyImage;
-  GalleryBottomSheet({Key? key, this.controller, required this.onTapSend, this.limitCnt = 10 , this.sendText = "", this.onlyImage = false}) : super(key: key);
+  bool isProfile;
+  GalleryBottomSheet({Key? key, this.controller, required this.onTapSend, this.limitCnt = 10 , this.sendText = "", this.onlyImage = false, this.isProfile=false,}) : super(key: key);
 
   @override
   State<GalleryBottomSheet> createState() => _GalleryBottomSheet();
@@ -213,7 +215,7 @@ class _GalleryBottomSheet extends State<GalleryBottomSheet> {
         maxHeight: Get.height*0.9
       ),
       decoration: BoxDecoration(
-          color: ColorConstants.colorBg1,
+          color: const Color.fromARGB(255, 53, 53, 53),
           borderRadius: BorderRadius.only(topRight: Radius.circular(24), topLeft: Radius.circular(24))
       ),
       child: Stack(
@@ -343,7 +345,7 @@ class _GalleryBottomSheet extends State<GalleryBottomSheet> {
                   width: double.maxFinite,
                   height: 40,
                   decoration: BoxDecoration(
-                      color: ColorConstants.colorSub,
+                      color: const Color.fromARGB(255, 53, 53, 53),
                       borderRadius: BorderRadius.only(topRight: Radius.circular(24), topLeft: Radius.circular(24))
                   ),
                   child: Center(
@@ -361,7 +363,7 @@ class _GalleryBottomSheet extends State<GalleryBottomSheet> {
                 ),
               )
           ),
-
+          if(widget.isProfile==false)
           Positioned(
             bottom: 0,
               left: 0,
@@ -369,7 +371,32 @@ class _GalleryBottomSheet extends State<GalleryBottomSheet> {
               child: Container(
                 height: 90,
                 width: double.maxFinite,
-                  color: ColorConstants.colorSub,
+                  color: const Color.fromARGB(255, 53, 53, 53),
+                child: Center(
+                  child: AppButton(
+                      text: widget.sendText.isEmpty ? "send_image".tr(args: ["${getSelectedCount()}"]) : widget.sendText,
+                      disabled: getSelectedCount() == 0,
+                      onTap: (){
+                        List<Medium> results = [];
+                        for(int i=0;i<selectedIndexes.length;i++){
+                          results.add(_media[selectedIndexes.elementAt(i)]);
+                        }
+                        widget.onTapSend(results);
+                        Get.back();
+                      }
+                  ),
+                )
+              )
+          )
+          else
+           Positioned(
+            bottom: Constants.navBarHeight,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 90,
+                width: double.maxFinite,
+                  color: const Color.fromARGB(255, 53, 53, 53),
                 child: Center(
                   child: AppButton(
                       text: widget.sendText.isEmpty ? "send_image".tr(args: ["${getSelectedCount()}"]) : widget.sendText,
@@ -381,11 +408,14 @@ class _GalleryBottomSheet extends State<GalleryBottomSheet> {
                         }
                         Get.back();
                         widget.onTapSend(results);
+
                       }
                   ),
                 )
               )
           )
+          // if(widget.isProfile) SizedBox(height: Constants.navBarHeight,),
+
 
         ],
       )

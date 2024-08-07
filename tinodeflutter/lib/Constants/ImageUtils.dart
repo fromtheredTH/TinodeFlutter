@@ -83,7 +83,7 @@ class ImageUtils {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(width/2),
         child: CachedNetworkImage(
-            imageUrl: "https://$hostAddres/${src}?apikey=$apiKey&auth=token&secret=$url_encoded_token",
+            imageUrl: src,// "https://$hostAddres/${src}?apikey=$apiKey&auth=token&secret=$url_encoded_token",
             errorWidget: (context, url, error) =>
                 Container(
                   width: width,

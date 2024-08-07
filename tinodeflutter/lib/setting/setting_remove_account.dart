@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-
-
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -31,7 +29,6 @@ import '../../../Constants/utils.dart';
 
 import '../../components/MyAssetPicker.dart';
 
-
 class SettingRemoveAccountScreen extends StatefulWidget {
   SettingRemoveAccountScreen({
     super.key,
@@ -42,8 +39,7 @@ class SettingRemoveAccountScreen extends StatefulWidget {
       _SettingRemoveAccountScreen();
 }
 
-class _SettingRemoveAccountScreen
-    extends State<SettingRemoveAccountScreen> {
+class _SettingRemoveAccountScreen extends State<SettingRemoveAccountScreen> {
   TextEditingController msgController = TextEditingController();
   bool isSelected = false;
 
@@ -57,7 +53,7 @@ class _SettingRemoveAccountScreen
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: ColorConstants.colorBg1,
+        backgroundColor: ColorConstants.backgroundGrey,
         resizeToAvoidBottomInset: true,
         body: Column(
           children: [
@@ -76,7 +72,7 @@ class _SettingRemoveAccountScreen
                             Get.back();
                           },
                           child:
-                              Icon(Icons.arrow_back_ios, color: Colors.white)),
+                              Icon(Icons.arrow_back_ios, color: Colors.black)),
                       AppText(
                         text: "remove_account".tr(),
                         fontSize: 16,
@@ -113,7 +109,7 @@ class _SettingRemoveAccountScreen
                               AppText(
                                 text: "·",
                                 fontSize: 13,
-                                color: ColorConstants.halfWhite,
+                                color: ColorConstants.halfBlack,
                               ),
                               SizedBox(
                                 width: 5,
@@ -122,7 +118,7 @@ class _SettingRemoveAccountScreen
                                 child: AppText(
                                   text: "resignup_limit_desc_1".tr(),
                                   fontSize: 13,
-                                  color: ColorConstants.halfWhite,
+                                  color: ColorConstants.halfBlack,
                                 ),
                               )
                             ],
@@ -134,7 +130,7 @@ class _SettingRemoveAccountScreen
                           //     AppText(
                           //       text: "·",
                           //       fontSize: 13,
-                          //       color: ColorConstants.halfWhite,
+                          //       color: ColorConstants.halfBlack,
                           //     ),
 
                           //     SizedBox(width: 5,),
@@ -205,7 +201,7 @@ class _SettingRemoveAccountScreen
                               AppText(
                                 text: "·",
                                 fontSize: 13,
-                                color: ColorConstants.halfWhite,
+                                color: ColorConstants.halfBlack,
                               ),
                               SizedBox(
                                 width: 5,
@@ -214,7 +210,7 @@ class _SettingRemoveAccountScreen
                                 child: AppText(
                                   text: "remove_account_info_desc_1".tr(),
                                   fontSize: 13,
-                                  color: ColorConstants.halfWhite,
+                                  color: ColorConstants.halfBlack,
                                 ),
                               )
                             ],
@@ -228,7 +224,7 @@ class _SettingRemoveAccountScreen
                               AppText(
                                 text: "·",
                                 fontSize: 13,
-                                color: ColorConstants.halfWhite,
+                                color: ColorConstants.halfBlack,
                               ),
                               SizedBox(
                                 width: 5,
@@ -237,7 +233,7 @@ class _SettingRemoveAccountScreen
                                 child: AppText(
                                   text: "remove_account_info_desc_2".tr(),
                                   fontSize: 13,
-                                  color: ColorConstants.halfWhite,
+                                  color: ColorConstants.halfBlack,
                                 ),
                               )
                             ],
@@ -270,7 +266,7 @@ class _SettingRemoveAccountScreen
                                 counterText: "",
                                 hintText: "input".tr(),
                                 hintStyle: TextStyle(
-                                    color: ColorConstants.halfWhite,
+                                    color: ColorConstants.halfBlack,
                                     fontSize: 13,
                                     fontFamily: FontConstants.AppFont,
                                     fontWeight: FontWeight.w400),
@@ -278,14 +274,14 @@ class _SettingRemoveAccountScreen
                                   borderRadius: BorderRadius.circular(4),
                                   gapPadding: 5,
                                   borderSide: BorderSide(
-                                      color: ColorConstants.halfWhite,
+                                      color: ColorConstants.halfBlack,
                                       width: 0.5),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(4),
                                   gapPadding: 5,
                                   borderSide: BorderSide(
-                                      color: ColorConstants.halfWhite,
+                                      color: ColorConstants.halfBlack,
                                       width: 0.0),
                                 ),
                                 contentPadding: const EdgeInsets.all(10)),
@@ -303,7 +299,7 @@ class _SettingRemoveAccountScreen
                               });
                             },
                             child: Container(
-                              height: 35,
+                              height: 40,
                               margin: EdgeInsets.only(bottom: 5, top: 15),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -317,7 +313,7 @@ class _SettingRemoveAccountScreen
                                       : Icon(
                                           Icons.check_box_outline_blank_rounded,
                                           size: 24,
-                                          color: ColorConstants.halfWhite,
+                                          color: ColorConstants.halfBlack,
                                         ),
                                   SizedBox(
                                     width: 5,
@@ -327,7 +323,7 @@ class _SettingRemoveAccountScreen
                                       text: "delete_account_agree".tr(),
                                       color: isSelected
                                           ? ColorConstants.colorMain
-                                          : ColorConstants.halfWhite,
+                                          : ColorConstants.halfBlack,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -353,7 +349,14 @@ class _SettingRemoveAccountScreen
                     // Constants.localChatRooms.clear();
                     //await DioClient.deleteFCM(gPushKey);
                     await FirebaseMessaging.instance.deleteToken();
-                  //  var response = await DioClient.postDeleteAccount(reason);
+                    var response = await tinode_global.deleteCurrentUser(true);
+                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                    prefs.remove('login_type');
+                    prefs.remove('basic_id');
+                    prefs.remove('basic_pw');
+                    prefs.remove('token');
+                    prefs.remove('url_encoded_token');
+                    //  var response = await DioClient.postDeleteAccount(reason);
                     // if (response.statusCode == 200) {
                     //   showToast("회원 탈퇴하셨습니다.");
                     // } else {
@@ -362,13 +365,11 @@ class _SettingRemoveAccountScreen
                     //Get.offAll(SplashPage());
                     try {
                       await FirebaseAuth.instance.signOut(); // 토큰 삭제
-                      if(isLoading) Get.back();
-
+                      if (isLoading) Get.back();
                     } catch (err) {
                       print("err $err");
-                      if(isLoading) Get.back();
+                      if (isLoading) Get.back();
                     }
-
                   }),
             )
           ],

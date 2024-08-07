@@ -10,6 +10,7 @@ import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:tinodeflutter/Screen/ProfileScreen.dart';
 import 'package:tinodeflutter/app_text.dart';
 import 'package:tinodeflutter/components/widget/BtnBottomSheetWidget.dart';
+import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:tinodeflutter/model/btn_bottom_sheet_model.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
@@ -104,7 +105,7 @@ class _UserListItemWidget extends State<UserListItemWidget> {
                                 shape: BoxShape.circle,
                             ),
                             child: ImageUtils.ProfileImage(
-                                user.picture,
+                                 user.picture!="" ? (user.picture.contains('https://') ? user.picture :  changePathToLink(user.picture)) : "",
                                 widget.isMini ? 24 : 45,
                                 widget.isMini ? 24 : 45
                             ),

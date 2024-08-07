@@ -104,7 +104,7 @@ class Constants {
     var userId = tinode_global.getCurrentUserId();
     String pictureUrl = meta.desc?.public['photo']?['ref'] != null ? changePathToLink(meta.desc?.public['photo']['ref']) : "";
     String searchId = tagData.tags.last.replaceFirst("search:", "");
-    Constants.user = UserModel(id: userId, name: meta.desc.public['fn'], membership: membershipMeta.membership, picture: pictureUrl,searchId: searchId, isFreind: false);
+    Constants.user = UserModel(id: userId, name: meta.desc.public['fn'], membership: membershipMeta.membership, picture: pictureUrl,searchId: searchId, tags: tagData.tags, isFreind: false);
 
   }
 

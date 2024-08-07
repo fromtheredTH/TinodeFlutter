@@ -17,6 +17,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 
@@ -40,11 +41,13 @@ class ImageViewer extends StatefulWidget {
   final bool isVideo;
  // final Image img;
   final UserModel? user;
+  final bool isProfile;
 
   ImageViewer(
       {super.key, required this.fileUrlList, this.selected = 0, required this.isVideo, 
       //required this.img,
-      required this.user
+      required this.user,
+      this.isProfile=false,
       });
 
   @override
@@ -226,6 +229,7 @@ class _ImageViewerState extends State<ImageViewer> {
           child: SafeArea(
             child: Column(
               children: [
+                if(widget.isProfile) SizedBox(height: Constants.navBarHeight*0.5,),
                 SizedBox(
                   height: 64,
                   child: Row(
@@ -358,7 +362,12 @@ class _ImageViewerState extends State<ImageViewer> {
                 //     ),
                 //   ),
                 // ),
-                Container(
+                Visibility(
+                  visible: widget.isProfile==true,
+                  child: SizedBox(height: Constants.navBarHeight*0.5,),),
+                Visibility(
+                  visible: widget.isProfile==false,
+                  child:  Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -392,6 +401,7 @@ class _ImageViewerState extends State<ImageViewer> {
                       ),
 
                       Visibility(
+                        // visible: widget.isProfile==false,
                         //visible: (widget.user?.id ?? 0) == Constants.user.id,
                           child: GestureDetector(
                             onTap: () {
@@ -414,6 +424,8 @@ class _ImageViewerState extends State<ImageViewer> {
                     ],
                   ),
                 )
+                  ),
+               
               ],
             ),
           )

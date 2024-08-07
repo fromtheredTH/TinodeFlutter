@@ -17,7 +17,7 @@ const String API_PLATFORM_URL = "https://api.jade-chat.com/api/v1";
 int gLang = 0; //Overall language: if isLogin user.lang else local_service.lang
 String gPushKey = "";
 int gPushClickMsgId=-1;
-int gChatRoomUid = 0;
+String gCurrentTopic = "";
 String gCurrentId = "";
 bool gPushClick = false;
 

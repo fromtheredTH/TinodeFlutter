@@ -336,7 +336,7 @@ void  _joinChannel() async {
       "what": "call",
     };
     try{
-      tinode_global.note(roomTopic?.name ?? "", "call", 1, callState);
+      tinode_global.note(roomTopic?.name ?? "", "call", 1, event:callState);
 
     }
     catch(err)

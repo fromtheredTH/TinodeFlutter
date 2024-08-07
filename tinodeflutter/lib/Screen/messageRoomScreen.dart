@@ -35,6 +35,7 @@ import 'package:tinodeflutter/components/widget/GalleryBottomSheet.dart';
 import 'package:tinodeflutter/components/MyAssetPicker.dart';
 import 'package:tinodeflutter/components/widget/dialog.dart';
 import 'package:tinodeflutter/model/MessageModel.dart';
+import 'package:tinodeflutter/model/MessageRoomModel.dart';
 import 'package:tinodeflutter/model/btn_bottom_sheet_model.dart';
 import 'package:tinodeflutter/components/widget/image_viewer.dart';
 import 'package:tinodeflutter/dto/file_dto.dart';
@@ -72,8 +73,8 @@ import 'package:wav/wav_file.dart';
 
 class MessageRoomScreen extends StatefulWidget {
   String clickTopic;
-  Topic? roomTopic;
-  MessageRoomScreen({super.key, required this.clickTopic, this.roomTopic});
+  MessageRoomModel? roomData;
+  MessageRoomScreen({super.key, required this.clickTopic,  this.roomData});
 
   @override
   State<MessageRoomScreen> createState() => _MessageRoomScreenState();
@@ -82,6 +83,8 @@ class MessageRoomScreen extends StatefulWidget {
 class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
   late Topic roomTopic;
   late Topic me;
+  late MessageRoomModel? roomData;
+
   String clickTopic = "";
   List<MessageModel> msgList = [];
   AutoScrollController mainController = AutoScrollController();
@@ -140,7 +143,8 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
   void initState() {
     super.initState();
     clickTopic = widget.clickTopic;
-    // if(widget.roomTopic!=null) roomTopic = widget.roomTopic!;
+    roomData = widget.roomData;
+    gCurrentTopic = clickTopic;
     getMsgList();
   }
 
@@ -196,7 +200,9 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
               msgList.sort(
                   (a, b) => b.dataMessage.ts!.compareTo(a.dataMessage.ts!));
           });
+          messageReadNote(msgList.first);
         }
+        print(" first : ${msgList.first.id} last: ${msgList.last.id}");
       } catch (err) {
         print("err roomTopic getMsgList : $err");
       }
@@ -260,6 +266,19 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
             null);
     } catch (err) {
       print("err roomTopic getMsgList : $err");
+    }
+  }
+
+  messageReadNote(MessageModel message)async
+  {
+   
+    try{
+      var response = tinode_global.note(roomTopic.name ?? "", "recv", message.id);
+      print("11");
+    }
+    catch(err)
+    {
+      print("recv note err $err");
     }
   }
 

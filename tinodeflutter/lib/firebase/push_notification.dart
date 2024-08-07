@@ -10,6 +10,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tinodeflutter/Constants/Constants.dart';
+import 'package:tinodeflutter/Screen/messageRoomScreen.dart';
 import 'package:tinodeflutter/call/CallService.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
 import 'package:tinodeflutter/global/app_get_it.dart';
@@ -411,6 +412,8 @@ class PushNotificationService {
   static void onClick(Map<String, dynamic> data) async {
     print(data);
     gPushClick = true;
+
+    Get.to(MessageRoomScreen(clickTopic: data['topic']));
     // final meta = jsonDecode(data['meta']);
     // int fcmType = meta['fcmType'];
     // String link = data['link'];
@@ -481,6 +484,7 @@ class PushNotificationService {
           return;
         }
         
+        
         if(message.data['xfrom'] == tinode_global.userId) return;  // 내 메시지
         if(message.data['seq']==null) return; // 메시지 번호가 없는 의미 없는 데이터
         String _fcmType =  message.data['what'];
@@ -489,7 +493,7 @@ class PushNotificationService {
         String ts = message.data['ts'];
         dynamic rc = jsonDecode(message.data['rc']);
         eChatType chatType = eChatType.NONE;
-
+        if(topic == gCurrentTopic) return; // 현재 접속 방이면 푸시안띄워줌
         if(rc['txt']==" ")
         {
           if(rc['ent']!=null)

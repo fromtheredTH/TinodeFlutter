@@ -84,7 +84,7 @@ class _LoginState extends BaseState<Login> {
   void id_pw_loginProcesss() async {
     final prefs = await SharedPreferences.getInstance();
 
-    id = idController.value.text == "" ? "test500" : idController.value.text;
+    id = idController.value.text == "" ? "test2" : idController.value.text;
     pw = pwController.value.text == "" ? "qwer123!" : pwController.value.text;
  
   try {

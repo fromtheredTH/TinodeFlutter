@@ -25,7 +25,9 @@ import 'package:tinodeflutter/components/widget/BottomProfileWidget.dart';
 import 'package:tinodeflutter/components/widget/BtnBottomSheetWidget.dart';
 import 'package:tinodeflutter/components/widget/GalleryBottomSheet.dart';
 import 'package:tinodeflutter/components/MyAssetPicker.dart';
+import 'package:tinodeflutter/components/widget/image_viewer.dart';
 import 'package:tinodeflutter/global/global.dart';
+import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:tinodeflutter/model/btn_bottom_sheet_model.dart';
 import 'package:tinodeflutter/global/DioClient.dart';
 import 'package:tinodeflutter/model/userModel.dart';
@@ -50,7 +52,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends BaseState<ProfileScreen> {
   late Topic roomTopic;
-  late Topic me;
+  late Topic _meTopic;
   //late TopicSubscription userTopicSub;
   late UserModel user;
 
@@ -58,6 +60,8 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
   void initState() {
     super.initState();
     user = widget.user;
+    _meTopic = tinode_global.getMeTopic();
+
   }
     @override
   void dispose() {
@@ -112,7 +116,7 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
       await Future.forEach<AssetEntity>(assets, (file) async {
         File? f = await file.originFile;
         if (file.type == AssetType.image && f != null) {
-          var response = await DioClient.updateUserProfile(f, null, null, null);
+          sendImage(f);
           Constants.cachingKey =
               DateTime.now().millisecondsSinceEpoch.toString();
           // getUserInfo();
@@ -125,10 +129,63 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
     await Future.forEach<Medium>(assets, (file) async {
       File? f = await file.getFile();
       if (file.mediumType == MediumType.image && f != null) {
-        var response = await DioClient.updateUserProfile(f, null, null, null);
+        sendImage(f);
         Constants.cachingKey = DateTime.now().millisecondsSinceEpoch.toString();
         //getUserInfo();
       }
+    });
+  }
+
+   Future<void> sendImage(File file) async {
+    try {
+        // Message 객체 생성
+
+        // 메시지를 발행하여 서버에 전송
+        var result = await DioClient.postUploadFile(file.path);
+
+        if (result.data['ctrl']['code'] == 200)
+          print("${result.data['ctrl']['params']['url'].toString()}");
+        String extension="";
+        String urlPath = result.data['ctrl']['params']['url'];
+        List<String> parts = urlPath.split('.');
+        if (parts.length > 1) {
+          extension = parts.last;
+          print(extension); 
+        }
+        Map<String,dynamic> photoData = {
+        'data' : 'DEL',
+        'ref' : urlPath,
+        'type' : extension
+        };
+         Map<String,dynamic> publicData = {
+        'photo' : photoData,
+        };
+       
+        SetParams setParams = SetParams(
+        desc: TopicDescription(
+          public: publicData, 
+          ),
+      );
+      
+        List<String> imageData = [urlPath];
+        Map<String, List<String>> extra = {"attachments": imageData};
+
+      var response = await _meTopic.setMeta(setParams, extra: extra);
+
+      print('이미지가 성공적으로 서버에 전송되었습니다.');
+      updateUserInfo();
+      showToast('변경완료');
+    } catch (err) {
+      print("image send err: $err");
+      showToast('300MB까지 가능합니다.');
+    }
+  }
+
+  void updateUserInfo() async
+  {
+    await Constants.getMyInfo(_meTopic);
+    setState(() {
+      user = Constants.user;
     });
   }
 
@@ -233,8 +290,24 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
     return Stack(
             children: [
               Center(
-                child: ImageUtils.ProfileImage(user.picture ?? "", 100, 100),
-              ),
+                child:GestureDetector(
+                  onTap: ()=>{
+                     Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ImageViewer(
+                                    fileUrlList: [user.picture],//(messageData.contents ?? '').split(","),
+                                    selected: 0,
+                                    isVideo: false,
+                                    user: user,
+                                    isProfile: true,
+                                  ))).then((value) {
+                      
+                      }),
+                  },
+                   child: ImageUtils.ProfileImage(user.picture ?? "", 100, 100),
+                ),
+               ),
               if (user.id == Constants.user.id)
                 Positioned(
                   bottom: -10, // 프로필 이미지와 겹치도록 조정
@@ -289,6 +362,7 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
                                           limitCnt: 1,
                                           sendText: "profile_change".tr(),
                                           onlyImage: true,
+                                          isProfile: true,
                                           onTapSend: (results) {
                                             procAssetsWithGallery(results);
                                           },
@@ -314,7 +388,7 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
                           //   border: Border.all(color: Colors.grey, width: 1), // 테두리 추가
                           // ),
                           child: Center(
-                            child: ImageUtils.setImage(ImageConstants.editProfile, 20, 20),
+                            child: ImageUtils.setImage(ImageConstants.editProfile, 25, 25),
                           ),
                         ),
                       ),
