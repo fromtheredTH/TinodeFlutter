@@ -95,7 +95,8 @@ class Tools {
       for (var i = 0, l = arr.length; i < l; i++) {
         var t = arr[i];
         if (t != null && t != '') {
-          t = t.trim().toLowerCase();
+          //t = t.trim().toLowerCase();
+          t = t.trim(); // jadechat only change code , not lowercase only
           if (t.length > 1) {
             out.add(t);
           }
