@@ -23,7 +23,7 @@ abstract class BaseState<T extends StatefulWidget> extends State<T>
   bool isLoading = false;
   // final event = getIt<EventBus>();
   // final dio = getIt<Dio>();
-  
+  bool isMessageRoomScreenOn=false;
 
   late StreamSubscription<int> pingSubscription;
   RxInt base_pingMiliSeconds =0.obs;
@@ -112,7 +112,11 @@ abstract class BaseState<T extends StatefulWidget> extends State<T>
                 }
                 Get.back();
                 showToast('웹 소켓 연결 완료!');
-              } else {
+              }else if(tinode_global.isConnected&& isConnectProcessing_global)
+              {
+                showToast('연결중..');
+              }
+               else {
                 showToast('웹소켓 연결 OK 상태...');
               }
             } catch (err) {

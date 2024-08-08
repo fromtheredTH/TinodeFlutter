@@ -7,6 +7,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_rx/get_rx.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tinodeflutter/Screen/SplashScreen.dart';
+import 'package:tinodeflutter/Screen/messageRoomListScreen.dart';
 import 'package:tinodeflutter/helpers/common_util.dart';
 import 'package:tinodeflutter/tinode/tinode.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,6 +21,7 @@ int gPushClickMsgId=-1;
 String gCurrentTopic = "";
 String gCurrentId = "";
 bool gPushClick = false;
+bool isMessageRoom=false;
 
 const apiKey = "AQAAAAABAAC5Ym2pu9wKC_cbu2omxbD6";
 const hostAddres = "api.jade-chat.com";

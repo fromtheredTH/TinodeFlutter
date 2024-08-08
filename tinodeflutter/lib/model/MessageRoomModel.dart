@@ -3,6 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:tinodeflutter/helpers/bind_json.dart';
 import 'package:tinodeflutter/model/MessageModel.dart';
 import 'package:tinodeflutter/model/userModel.dart';
+import 'package:tinodeflutter/tinode/src/models/topic-subscription.dart';
 
 
 
@@ -24,6 +25,7 @@ class MessageRoomModel {
   int? read;
   int? recv;
   int? seq;
+  TopicSubscription? topicSubscription;
 
    MessageRoomModel(
       {required this.id,
@@ -41,6 +43,7 @@ class MessageRoomModel {
       this.read,
       this.recv,
       this.seq,
+      this.topicSubscription,
       this.userList});
 
 

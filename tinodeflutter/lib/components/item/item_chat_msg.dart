@@ -15,6 +15,7 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:tinodeflutter/Constants/Constants.dart';
 import 'package:tinodeflutter/global/global.dart';
 import 'package:tinodeflutter/model/MessageModel.dart';
+import 'package:tinodeflutter/model/UnreadModel.dart';
 import 'package:tinodeflutter/model/userModel.dart';
 import 'package:tinodeflutter/tinode/src/database/model.dart';
 
@@ -28,7 +29,7 @@ import '../widget/image_viewer.dart';
 class ItemChatMsg extends StatelessWidget {
   List<UserModel> users;
   MessageModel messageData;
-  //List<UnreadDto> unread;
+  List<UnreadModel> unread;
   MessageModel? beforeMessage;
   MessageModel? nextMessage;
   String? parentNick;
@@ -56,7 +57,7 @@ class ItemChatMsg extends StatelessWidget {
       {Key? key,
       required this.users,
       required this.messageData,
-      //required this.unread,
+      required this.unread,
       this.beforeMessage,
       this.nextMessage,
       this.parentNick,
@@ -108,18 +109,18 @@ class ItemChatMsg extends StatelessWidget {
   }
 
   void getUnreadCount(dynamic messageData) {
-    // print("chat id : ${messageData.id}, timetime : ${DateTime.now()}");
-    // if (unread.isEmpty || (users.isEmpty)) return;
-    // int count = 0;
-    // for (var e in unread) {
-    //   if (e.last_read_id != null &&
-    //       users.map((e) => e.id).contains(e.user_id)) {
-    //     if (e.last_read_id! < messageData.id) {
-    //       count++;
-    //     }
-    //   }
-    // }
-    // messageData.unread_count = count;
+    print("chat id : ${messageData.id}, timetime : ${DateTime.now()}");
+    if (unread.isEmpty || (users.isEmpty)) return;
+    int count = 0;
+    for (var e in unread) {
+      if (e.readId != null &&
+          users.map((e) => e.id).contains(e.userId)) {
+        if (e.readId! < messageData.id) {
+          count++;
+        }
+      }
+    }
+    messageData.unread_count = count;
   }
 
   Future<void> loadAudio() async {
@@ -143,17 +144,20 @@ class ItemChatMsg extends StatelessWidget {
     setState();
   }
 
+
+
   UserModel? getUser() {
-    List<UserModel> list =
-        users.where((element) => element.id == messageData.sender_id).toList();
-    if (list.isEmpty && me.id == messageData.sender_id) {
+    List<UserModel> nowUserList = users.where((element) => element.id == messageData.sender_id).toList();
+    if (nowUserList.isEmpty && me.id == messageData.sender_id) {
       return me;
-    } else if (messageData.sender != null) {
-      return messageData.sender;
-    } else if (list.isEmpty) {
+    }
+     else if (!nowUserList.isEmpty) {
+      return nowUserList.first;
+    }
+     else if (nowUserList.isEmpty) {
       return null;
     }
-    return list.first;
+    return nowUserList.first;
   }
 
   void fullView(BuildContext context, int index, String imageUrl) {
@@ -800,7 +804,7 @@ class ItemChatMsg extends StatelessWidget {
           padding: const EdgeInsets.only(left: 6),
           child: AppText(
             text: "reply_from_other".tr(
-                args: [getUser()?.name ?? "unknown".tr(), parentNick ?? '']),
+                args: [getUser()?.name ?? "나간 유저", parentNick ?? '']),
             fontSize: 10,
             color: ColorConstants.halfBlack,
           ),
@@ -818,6 +822,8 @@ class ItemChatMsg extends StatelessWidget {
       ],
     );
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -972,7 +978,8 @@ class ItemChatMsg extends StatelessWidget {
                                   child: InkWell(
                                       onTap: onProfile,
                                       child: ImageUtils.ProfileImage(
-                                          (messageData.sender?.picture ?? ''),
+                                          (
+                                            getUser()?.picture ?? ''),
                                           profileWidth,
                                           profileHeight)),
                                 ),
@@ -991,8 +998,7 @@ class ItemChatMsg extends StatelessWidget {
                                                 child: InkWell(
                                                   onTap: onProfile,
                                                   child: AppText(
-                                                    text: getUser()?.name ??
-                                                        "unknown".tr(),
+                                                    text: getUser()?.name ?? "나간 유저",//"unknown".tr(),
                                                     fontSize: 13,
                                                     color: ColorConstants
                                                         .halfBlack,

@@ -25,6 +25,7 @@ import 'package:tinodeflutter/Constants/FontConstants.dart';
 import 'package:tinodeflutter/Constants/ImageConstants.dart';
 import 'package:tinodeflutter/Constants/ImageUtils.dart';
 import 'package:tinodeflutter/Constants/utils.dart';
+import 'package:tinodeflutter/Screen/MessageRoomInfoScreen.dart';
 import 'package:tinodeflutter/Screen/ProfileScreen.dart';
 import 'package:tinodeflutter/call/CallScreen.dart';
 import 'package:tinodeflutter/call/CallService.dart';
@@ -36,6 +37,7 @@ import 'package:tinodeflutter/components/MyAssetPicker.dart';
 import 'package:tinodeflutter/components/widget/dialog.dart';
 import 'package:tinodeflutter/model/MessageModel.dart';
 import 'package:tinodeflutter/model/MessageRoomModel.dart';
+import 'package:tinodeflutter/model/UnreadModel.dart';
 import 'package:tinodeflutter/model/btn_bottom_sheet_model.dart';
 import 'package:tinodeflutter/components/widget/image_viewer.dart';
 import 'package:tinodeflutter/dto/file_dto.dart';
@@ -92,11 +94,13 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
   PositionRetainedScrollPhysics physics = PositionRetainedScrollPhysics();
   final ImagePicker _picker = ImagePicker();
   List<UserModel> joinUserList = [];
+  List<UnreadModel> unreadList = [];
   late TopicSubscription roomMetaSubData;
   late Topic roomTopicData;
 
   StreamSubscription? _metaDescSubscription;
   StreamSubscription? _dataSubscription;
+  StreamSubscription? _subSubscription;
 
   FocusNode myFocusNode = FocusNode();
   int replyIdx = -1;
@@ -139,29 +143,34 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
 
   bool isMicPermission = false;
 
+  int nowReadIndex = -1;
+
   @override
   void initState() {
     super.initState();
     clickTopic = widget.clickTopic;
     roomData = widget.roomData;
     gCurrentTopic = clickTopic;
+  
     getMsgList();
   }
 
   @override
   void dispose() {
     super.dispose();
-
-    roomTopic.leave(false);
+    if(roomTopic.isSubscribed) roomTopic.leave(false);
     if (_metaDescSubscription != null) _metaDescSubscription?.cancel();
     if (_dataSubscription != null) _dataSubscription?.cancel();
+    if (_subSubscription != null) _subSubscription?.cancel();
   }
 
-  @override
+   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) {
     // TODO: implement didChangeAppLifecycleState
+    print("didchange message room screen ");
     return super.didChangeAppLifecycleState(state);
   }
+
 
   Future<void> getMsgList() async {
     roomTopic = tinode_global.getTopic(clickTopic);
@@ -200,11 +209,21 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
               msgList.sort(
                   (a, b) => b.dataMessage.ts!.compareTo(a.dataMessage.ts!));
           });
-          messageReadNote(msgList.first);
+          if(nowReadIndex<msgList.first.id) messageReadNote(msgList.first);
         }
         print(" first : ${msgList.first.id} last: ${msgList.last.id}");
       } catch (err) {
         print("err roomTopic getMsgList : $err");
+      }
+    });
+
+    _subSubscription = roomTopic.onMetaSub.listen((onMetaSub){
+      try{
+        var data = onMetaSub;
+        print("ddd");
+      }
+      catch(err){
+
       }
     });
 
@@ -226,6 +245,10 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
               isFreind: subscriber.isFriend ?? false,
             );
             joinUserList.add(user);
+            print("join user id : ${joinUserList[i].id}, name : ${joinUserList[i].name} ");
+
+            UnreadModel unreadModel = UnreadModel(userId: user.id, unreadCount: ((subscriber.recv??0) - (subscriber.read ?? 0)) , recvId: subscriber.recv??0, readId: subscriber.read??0);
+            unreadList.add(unreadModel);
           }
         }
         setState(() {
@@ -273,8 +296,9 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
   {
    
     try{
-      var response = tinode_global.note(roomTopic.name ?? "", "recv", message.id);
-      print("11");
+      nowReadIndex = message.id;
+      tinode_global.note(roomTopic.name ?? "", "recv", message.id);
+      tinode_global.note(roomTopic.name ?? "", "read", message.id);
     }
     catch(err)
     {
@@ -1519,6 +1543,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
   {
     return InkWell(
                           onTap: (){
+                            Get.to(MessageRoomInfoScreen(roomTopic: roomTopic,));
                             // List<BtnBottomSheetModel> items = [];
                             // if((roomDto.joined_users?.length ?? 0) >= 1)
                             //   items.add(BtnBottomSheetModel(ImageConstants.addChatUserIcon, "add_room_member".tr(), 0));
@@ -2147,6 +2172,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
                       messageData: msgList[index],
                       //  unread: unreadList,
                       me: Constants.user!,
+                      unread: unreadList,
                       beforeMessage: index == msgList.length - 1
                           ? null
                           : msgList[index + 1],
@@ -2173,6 +2199,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
                           // if(user.id != 0) {
                           //   Get.to(ProfileScreen(user: user));
                           // }
+                          Get.back();
                         } catch (e) {
                           Get.back();
                         }
@@ -2366,7 +2393,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
                           // SizedBox( width: 10,),
                           //messageRoomNameWidget(),
                           AppText(
-                            text: '$clickTopic',
+                            text: '${roomTopic.isGroup()? '그룹(${joinUserList.length})' :  (joinUserList.length!=0 ? (joinUserList.where((element) => element.id != Constants.user.id).toList())[0].name : '')}',
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                           ),

@@ -100,12 +100,14 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) {
     // TODO: implement didChangeAppLifecycleState
+    print("didchange message room ListListList ");
+    
     return super.didChangeAppLifecycleState(state);
   }
 
    void _initializeTopic() async {
     _meTopic = tinode_global.getMeTopic();
-    var result = await _meTopic.subscribe(MetaGetBuilder(_meTopic).withLaterSub(null).build(), null);
+   // var result = await _meTopic.subscribe(MetaGetBuilder(_meTopic).withLaterSub(null).build(), null);
     //_loadRooms();
     _setupListeners();
   }
@@ -119,43 +121,44 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
   }
   
   int count = 0;
-  int compareRoomList(TopicSubscription a, TopicSubscription b)
+  int compareRoomList(MessageRoomModel a, MessageRoomModel b)
   {
     
-    if(a.public?['fn'] == null)
+    if(a.topicSubscription!.public?['fn'] == null)
     {
        Map<String,dynamic> publicData = {
         'fn' : "New Room",
         'description' :"New  Room"
       };
-      a.public = publicData;
+      a.topicSubscription!.public = publicData;
     }
-    if(b.public?['fn'] == null)
+    if(b.topicSubscription!.public?['fn'] == null)
     {
       Map<String,dynamic> publicData = {
         'fn' : "New Room",
         'description' :"New Room"
       };
-      b.public = publicData;
+      b.topicSubscription!.public = publicData;
     }
-    if(a.touched ==null)
+    if(a.topicSubscription!.touched ==null)
     {
-      a.touched= DateTime.now();
+      a.topicSubscription!.touched= DateTime.now();
     }
-    if(b.touched ==null)
+    if(b.topicSubscription!.touched ==null)
     {
-      b.touched= DateTime.now();
+      b.topicSubscription!.touched= DateTime.now();
     }
-    print("${a.topic} : ${a.touched} , ${b.topic} : ${b.touched}     count : ${count++}   , a fn : ${a.public?['fn']?? "null"} , b fn : ${b.public?['fn']??"null"}");
-    return b.touched!.compareTo(a.touched!);    
+    print("${a.topicSubscription!.topic} : ${a.topicSubscription!.touched} , ${b.topicSubscription!.topic} : ${b.topicSubscription!.touched}     count : ${count++}   , a fn : ${a.topicSubscription!.public?['fn']?? "null"} , b fn : ${b.topicSubscription!.public?['fn']??"null"}");
+    return b.topicSubscription!.touched!.compareTo(a.topicSubscription!.touched!);    
   }
 
   void _setupListeners() async{
     try{
     _meTopic.onSubsUpdated.listen((value) {
+      tempRoomList.clear();
       print("Subs updated: $value");
       count = 0; 
-      setState(() {
+      
         //roomList = value;
         value.forEach((item){
           try{
@@ -179,9 +182,12 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
             read : item.read??0,
             recv : item.recv ?? 0,
             seq : item.seq??0,
+            topicSubscription: item,
             userList: [p2pUserData],
-            unread_count: item.unread ?? 0);
+            unread_count: item.unread ?? 0); 
             tempRoomList.add(messageRoomModel);
+
+            print("topic: ${item.topic}   unread count : ${(item.seq??0) - (item.read??0)}    unread : ${item.unread}");
           }
           catch(err)
           {
@@ -189,15 +195,15 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
           }
         
         });
-
-        roomFilterList = tempRoomList.reversed.toList();
-        tempRoomList.clear();
-        // roomFilterList = roomAllList.reversed.toList();
-        //roomList.sort(compareRoomList);
+        setState(() {
+        tempRoomList.sort(compareRoomList);
+        roomFilterList = List.from(tempRoomList);
+        });
       });
-    });
+   
 
     _meTopic.onPres.listen((value) async{
+      tempRoomList.clear();
       print("Presence value: $value");
       String topic = value.src ?? "";
       int seq = value.seq ?? -1;
@@ -214,11 +220,36 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
          {
           await roomTopic.subscribe(MetaGetBuilder(roomTopic).withData(null, null, null).withSub(null, null, null).withDesc(null).build(), null);
           TopicSubscription topicSubscription = TopicSubscription(topic: roomTopic.name, acs: roomTopic.acs, public: roomTopic.public, seq: roomTopic.maxSeq,created: roomTopic.created, updated: roomTopic.updated, touched: roomTopic.touched );
-          roomList.insert(0,topicSubscription);
+          //roomList.insert(0,topicSubscription);
+
+          bool hasPublic=true;
+          if(topicSubscription.public ==null) hasPublic=false;
+          UserModel p2pUserData = topicSubscription.topic?[0] == 'u' ? UserModel(id: topicSubscription.topic ?? '', 
+            name: hasPublic? (topicSubscription.public['fn'] ?? "") : "", 
+            picture: hasPublic? (topicSubscription.public['photo']!=null ? (topicSubscription.public['photo']['ref']!=null ? (topicSubscription.public['photo']['ref'] ?? "" ) : (topicSubscription.public['photo'] ?? "")):""): "", 
+            isFreind: topicSubscription.isFriend ?? false) 
+            : UserModel(id: "", name: "", picture: "", isFreind: false);
+           MessageRoomModel messageRoomModel = 
+            MessageRoomModel(id: topicSubscription.topic??"",
+            name: hasPublic ? (topicSubscription.public['fn']?? "") : "",
+             created_at: topicSubscription.created.toString() ?? "",  
+             updated_at: topicSubscription.updated.toString() ?? "",  
+             deleted_at: topicSubscription.deleted.toString() ?? "",  
+             touched_at: topicSubscription.touched.toString() ?? "",  
+            is_group_room: topicSubscription.topic?[0] == 'g' , 
+            is_my_room: topicSubscription.topic == tinode_global.userId,
+            read : topicSubscription.read??0,
+            recv : topicSubscription.recv ?? 0,
+            seq : topicSubscription.seq??0,
+            topicSubscription: topicSubscription,
+            userList: [p2pUserData],
+            unread_count: topicSubscription.unread ?? 0);
+            roomFilterList.insert(0,messageRoomModel);
           
           setState(() {
             
-             roomList.sort(compareRoomList);
+            //roomFilterList.sort(compareRoomList);
+            //roomFilterList = tempRoomList;
           });
          }
           
@@ -315,10 +346,10 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
 
 
   String clickTopic = "";
-  void onClickMsgRoom(String clickTopic) {
+  void onClickMsgRoom(String clickTopic, int index) {
     this.clickTopic = clickTopic;
     Get.to(()=>MessageRoomScreen(
-  
+      roomData: roomFilterList[index],
       clickTopic: this.clickTopic,
     ));
   }
@@ -424,7 +455,7 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
                                 return ItemChatRoom(
                                   info: roomFilterList[index],
                                   onClick: () {
-                                    onClickMsgRoom(roomFilterList[index].id.toString());
+                                    onClickMsgRoom(roomFilterList[index].id.toString(), index);
                                   },
                                   onLongPress: () {
                                     MessageRoomModel roomModel = roomFilterList[index];
@@ -446,7 +477,7 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
                                               SwipeablePageRoute(
                                                   canOnlySwipeFromEdge: true,
                                                   builder: (context) => MessageRoomAddScreen(
-                                                      existUserList: roomModel.userList ?? [],
+                                                      existUserList: roomModel.userList ?? [],                                            
                                                       // roomIdx: roomModel.id,
                                                       // room: roomModel,
                                                       // refresh: (){

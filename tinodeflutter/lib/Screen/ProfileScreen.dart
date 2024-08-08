@@ -305,7 +305,9 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
                       
                       }),
                   },
-                   child: ImageUtils.ProfileImage(user.picture ?? "", 100, 100),
+                   child: ImageUtils.ProfileImage(
+                     user.picture!="" ? (user.picture.contains('https://') ? user.picture :  changePathToLink(user.picture)) : "",
+                     100, 100),
                 ),
                ),
               if (user.id == Constants.user.id)
