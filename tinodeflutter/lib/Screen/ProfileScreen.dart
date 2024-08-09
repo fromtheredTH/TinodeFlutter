@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -12,6 +13,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_gallery/photo_gallery.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:tinodeflutter/Constants/ColorConstants.dart';
 import 'package:tinodeflutter/Constants/Constants.dart';
@@ -56,17 +58,29 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
   //late TopicSubscription userTopicSub;
   late UserModel user;
 
+  late StreamSubscription<dynamic> myInfoChangeSubscription;
+
+  void userDataChangeListen()
+  {
+     myInfoChangeSubscription = Constants.userDataChangeSubject.listen((value) {
+      setState(() {
+        user = Constants.user;
+      });
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     user = widget.user;
     _meTopic = tinode_global.getMeTopic();
-
+    userDataChangeListen();
   }
     @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
+    myInfoChangeSubscription.cancel();
   }
 
   @override

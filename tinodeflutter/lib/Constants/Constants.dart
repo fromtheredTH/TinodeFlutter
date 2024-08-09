@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Trans;
 import 'package:get/get_core/src/get_main.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tinodeflutter/InAppPurchase/purchaseScreen.dart';
 import 'package:tinodeflutter/Screen/BottomNavBarScreen.dart';
@@ -37,6 +38,8 @@ class Constants {
   static String translationName = "";
   static String cachingKey = "";
   static late UserModel user;
+  static PublishSubject<bool> userDataChangeSubject = PublishSubject<bool>();
+
 
   static late TopicSubscription mytopicSubscription;
 

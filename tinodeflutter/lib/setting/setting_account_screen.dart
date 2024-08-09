@@ -86,6 +86,7 @@ class _SettingAccountScreen extends BaseState<SettingAccountScreen> {
       var response = await me.setMeta(setParams);
       if(response.text =='ok'){
         Constants.user.name = nameController.text;
+        Constants.userDataChangeSubject.add(true);
       }
     }
 
@@ -101,6 +102,7 @@ class _SettingAccountScreen extends BaseState<SettingAccountScreen> {
         if(response.text=='ok'){
           Constants.user.tags = tagList;
           Constants.user.searchId = idController.text;
+          Constants.userDataChangeSubject.add(true);
         }
       //   if (response) {
       //     isNicknameNotDuplicate.value = false;

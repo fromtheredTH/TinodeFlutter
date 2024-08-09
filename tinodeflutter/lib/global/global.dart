@@ -81,7 +81,7 @@ String gBackgroundFcmTopic="";
         String firebaseToken =
             "${await FirebaseAuth.instance.currentUser?.getIdToken()}";
         // print("firebase login token : $firebaseToken ");
-        if (token != "") {
+        if (firebaseToken != "") {
           var response = await tinode_global.firebaseLogin(firebaseToken);
           token = response.params['token'];
           url_encoded_token = Uri.encodeComponent(response.params['token']);
@@ -90,7 +90,7 @@ String gBackgroundFcmTopic="";
           showToast('파이어베이스 재 로그인 완료');
             } else {
           print("일로 오면 안돼");
-          showToast('파이어베이스 로그인 미구현');
+          showToast('파이어베이스 유저는 등록되어있는데 토큰값이 ');
     
           Get.offAll(SplashPage(), transition: Transition.rightToLeft);
         }

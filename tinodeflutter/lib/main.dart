@@ -138,6 +138,7 @@ Future<void> main() async {
 
 void _tryWsReconnect() async
 {
+  
    try {
               if (!tinode_global.isConnected && !isConnectProcessing_global) {
           //     showToast('웹 소켓 연결 시도 중 ...');
@@ -151,13 +152,13 @@ void _tryWsReconnect() async
                   return;
                   }
                 try {
-              //    showToast('re login 중 ...');
+                 showToast('re login 중 ...');
                   var response = await tinode_global.loginWithAccessToken(token);
                   token = response.params['token'];
                   url_encoded_token = Uri.encodeComponent(response.params['token']);
                   prefs.setString('token', token);
                   prefs.setString('url_encoded_token', url_encoded_token);
-            //      showToast('re login 완료...');
+                 showToast('re login 완료...');
                 } catch (err) {
                   showToast('기존 토큰 만료 최초 로그인 프로세스 relogin');
                   reLogin();
@@ -173,7 +174,8 @@ void _tryWsReconnect() async
                 showToast('웹소켓 연결 OK 상태...');
               }
             } catch (err) {
-              showToast('웹소켓 연결 실패/ 재연결 해야함');
+              if(isConnectProcessing_global==false && tinode_global.isConnected) showToast('웹소켓은 연결되어있는 상태인데 그 이후에서 에러발생');
+              else showToast('ws 재연결 프로세스 실패, 다시 시도');
               _tryWsReconnect();
               //Get.offAll(SplashPage());
             }

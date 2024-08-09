@@ -40,7 +40,9 @@ abstract class BaseState<T extends StatefulWidget> extends State<T>
     });
   }
 
+
   void showLoading() {
+    if(isLoading) return; //이미 로딩도는중
     Utils.showDialogWidget(context);
     isLoading = true;
   }
@@ -106,7 +108,7 @@ abstract class BaseState<T extends StatefulWidget> extends State<T>
               if (!tinode_global.isConnected && !isConnectProcessing_global) {
           //     showToast('웹 소켓 연결 시도 중 ...');
                 isConnectProcessing_global = true;
-                Utils.showDialogWidget(context);
+                showLoading();
                 await tinode_global.connect();
                 isConnectProcessing_global=false;
                 final prefs = await SharedPreferences.getInstance();
@@ -114,18 +116,19 @@ abstract class BaseState<T extends StatefulWidget> extends State<T>
                 if(!prefs.containsKey('login_type'))return;
                 
                 try {
-              //    showToast('re login 중 ...');
+                  showToast('기존 토큰으로 re login 중 ...');
                   var response = await tinode_global.loginWithAccessToken(token);
                   token = response.params['token'];
                   url_encoded_token = Uri.encodeComponent(response.params['token']);
                   prefs.setString('token', token);
                   prefs.setString('url_encoded_token', url_encoded_token);
-            //      showToast('re login 완료...');
+                 showToast('토큰 re login 완료...');
+                  hideLoading();
                 } catch (err) {
                   showToast('기존 토큰 만료 최초 로그인 프로세스 relogin');
-                  reLogin();
+                  await reLogin();
+                  hideLoading();
                 }
-                Get.back();
                 showToast('웹 소켓 연결 완료!');
               }else if(tinode_global.isConnected&& isConnectProcessing_global)
               {
@@ -135,7 +138,14 @@ abstract class BaseState<T extends StatefulWidget> extends State<T>
                 showToast('웹소켓 연결 OK 상태...');
               }
             } catch (err) {
-              showToast('재연결 프로세스 실패, 다시 시도');
+              if(isConnectProcessing_global==false && tinode_global.isConnected){
+                 showToast('웹소켓은 연결되어있는 상태인데 그 이후에서 에러발생');
+                 
+              }
+              else showToast('ws 재연결 프로세스 실패, 다시 시도');
+
+              hideLoading();
+              showLoading();
               _wsRecoonect();
               //Get.offAll(SplashPage());
             }
