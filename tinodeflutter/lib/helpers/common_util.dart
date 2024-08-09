@@ -329,3 +329,10 @@ Future<String> encodeStringToBase64(String originStr) async {
   String base64String = base64.encode(utf8.encode(originStr));
   return base64String;
 }
+
+  String truncateString(String input, int maxLength) {
+  if (input.length > maxLength) {
+    return input.substring(0, maxLength) + '...';
+  }
+  return input;
+}

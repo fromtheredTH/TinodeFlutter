@@ -93,8 +93,8 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
   TextEditingController inputController = TextEditingController();
   PositionRetainedScrollPhysics physics = PositionRetainedScrollPhysics();
   final ImagePicker _picker = ImagePicker();
-  List<UserModel> joinUserList = [];
-  List<UnreadModel> unreadList = [];
+  List<UserModel> _joinUserList = [];
+  List<UnreadModel> _unreadList = [];
   late TopicSubscription roomMetaSubData;
   late Topic roomTopicData;
 
@@ -109,7 +109,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
   String tempString = "";
 
   //unread timer
-  // List<UnreadDto> unreadList = [];
+  // List<UnreadDto> _unreadList = [];
   Timer? unreadTimer;
 
   //audio
@@ -229,12 +229,12 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
 
     _metaDescSubscription = roomTopic.onMetaDesc.listen((onMetaDesc) {
       try {
-        joinUserList = [];
+        _joinUserList = [];
         roomTopicData = onMetaDesc;
         var subscribersList = onMetaDesc.subscribers.values.toList();
         for (int i = 0; i < subscribersList.length; i++) {
           var subscriber = subscribersList[i];
-          if (subscriber != null) {
+          
             String pictureUrl = subscriber.public?['photo']?['ref'] != null
                 ? changePathToLink(subscriber.public?['photo']?['ref'])
                 : "";
@@ -244,15 +244,15 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
               picture: pictureUrl,
               isFreind: subscriber.isFriend ?? false,
             );
-            joinUserList.add(user);
-            print("join user id : ${joinUserList[i].id}, name : ${joinUserList[i].name} ");
+            _joinUserList.add(user);
+            print("join user id : ${_joinUserList[i].id}, name : ${_joinUserList[i].name} ");
 
             UnreadModel unreadModel = UnreadModel(userId: user.id, unreadCount: ((subscriber.recv??0) - (subscriber.read ?? 0)) , recvId: subscriber.recv??0, readId: subscriber.read??0);
-            unreadList.add(unreadModel);
-          }
+            _unreadList.add(unreadModel);
+          
         }
         setState(() {
-          print("list length : ${joinUserList.length}");
+          print("list length : ${_joinUserList.length}");
         });
       } catch (err) {
         print("meta err : $err");
@@ -347,7 +347,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
   //           index);
   //     case eChatType.VOICE_CALL:
   //     case eChatType.VIDEO_CALL:
-  //       //Get.to(CallScreen(tinode: tinode, roomTopic: roomTopic, joinUserList: joinUserList,));
+  //       //Get.to(CallScreen(tinode: tinode, roomTopic: roomTopic, _joinUserList: _joinUserList,));
   //      // if(isDifferenceDateTimeLessOneMinute(DateTime.now(),dataMessage.ts)) checkCallState(dataMessage);
   //       return callTile(index,dataMessage);
 
@@ -366,18 +366,18 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
       }
       switch (dataMessage.head?['webrtc']) {
         case 'started':
-          CallService.instance.joinUserList = joinUserList;
+          CallService.instance.joinUserList = _joinUserList;
           CallService.instance.roomTopicName = roomTopic.name ?? "";
           bool isSettingDone = await CallService.instance.initCallService();
           isSettingDone
               ? CallService.instance.showIncomingCall(
                   roomTopicId: roomTopic.name ?? "",
-                  callerName: joinUserList[0].name,
+                  callerName: _joinUserList[0].name,
                   callerNumber: '',
                   callerAvatar: "")
               : showToast("fail to call");
           //        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          //         Get.to(()=>CallScreen(tinode: tinode, roomTopic: roomTopic,joinUserList: joinUserList,));
+          //         Get.to(()=>CallScreen(tinode: tinode, roomTopic: roomTopic,_joinUserList: _joinUserList,));
           //        //Get.to(AgoraVoiceCallController(channelName: roomTopic?.name ?? ""));
           // });
           break;
@@ -1164,7 +1164,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
       Get.to(CallScreen(
         tinode: tinode_global,
         roomTopic: roomTopic,
-        joinUserList: joinUserList,
+        joinUserList: _joinUserList,
         chatType: eChatType.VOICE_CALL,
       ));
       // Get.to(AgoraVoiceCallController(channelName: roomTopic?.name ?? ""));
@@ -1195,7 +1195,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
       Get.to(CallScreen(
         tinode: tinode_global,
         roomTopic: roomTopic,
-        joinUserList: joinUserList,
+        joinUserList: _joinUserList,
         chatType: eChatType.VIDEO_CALL,
       ));
       // Get.to(AgoraVoiceCallController(channelName: roomTopic?.name ?? ""));
@@ -1543,7 +1543,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
   {
     return InkWell(
                           onTap: (){
-                            Get.to(MessageRoomInfoScreen(roomTopic: roomTopic,));
+                            Get.to(MessageRoomInfoScreen(roomTopic: roomTopic, userList: _joinUserList,));
                             // List<BtnBottomSheetModel> items = [];
                             // if((roomDto.joined_users?.length ?? 0) >= 1)
                             //   items.add(BtnBottomSheetModel(ImageConstants.addChatUserIcon, "add_room_member".tr(), 0));
@@ -1926,7 +1926,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
                                                   List<BtnBottomSheetModel> items = [];
                                                   items.add(BtnBottomSheetModel(ImageConstants.cameraIcon, "camera".tr(), 0));
                                                   items.add(BtnBottomSheetModel(ImageConstants.albumIcon, "gallery".tr(), 1));
-                                                  if(joinUserList.length==2)
+                                                  if(_joinUserList.length==2)
                                                   {
                                                     items.add(BtnBottomSheetModel(ImageConstants.voiceCallIcon, "음성 통화", 2));
                                                     items.add(BtnBottomSheetModel(ImageConstants.videoCallIcon, "영상 통화", 3));  
@@ -2168,16 +2168,15 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
                   controller: mainController,
                   index: index,
                   child: ItemChatMsg(
-                      users: joinUserList, //roomDto.joined_users!,
+                      users: _joinUserList, //roomDto.joined_users!,
                       messageData: msgList[index],
-                      //  unread: unreadList,
                       me: Constants.user!,
-                      unread: unreadList,
+                      unread: _unreadList,
                       beforeMessage: index == msgList.length - 1
                           ? null
                           : msgList[index + 1],
                       nextMessage: index == 0 ? null : msgList[index - 1],
-                      parentNick: parentChatNick(joinUserList, Constants.user,
+                      parentNick: parentChatNick(_joinUserList, Constants.user,
                           msgList, msgList[index].parent_chat?.id ?? 0),
                       bNewMsg: msgList[index].id == unread_start_id,
                       playerModule: msgList[index].type != eChatType.AUDIO.index
@@ -2393,7 +2392,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
                           // SizedBox( width: 10,),
                           //messageRoomNameWidget(),
                           AppText(
-                            text: '${roomTopic.isGroup()? '그룹(${joinUserList.length})' :  (joinUserList.length!=0 ? (joinUserList.where((element) => element.id != Constants.user.id).toList())[0].name : '')}',
+                            text: '${roomTopic.isGroup()? '그룹(${_joinUserList.length})' :  (_joinUserList.length!=0 ? (_joinUserList.where((element) => element.id != Constants.user.id).toList())[0].name : '')}',
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                           ),
