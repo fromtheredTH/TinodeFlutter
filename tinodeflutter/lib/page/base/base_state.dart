@@ -88,9 +88,21 @@ abstract class BaseState<T extends StatefulWidget> extends State<T>
       //  showToast("forground resumed");
         if (_lastPausedTime != null) {
           final difference = DateTime.now().difference(_lastPausedTime!);
-          if(difference.inSeconds>10) // 10초 이상 백그라운드 상태일 때
+          if(difference.inSeconds>300) // 5분 이상 백그라운드 상태일 때
           {
-          try {
+          _wsRecoonect();
+          }
+          _lastPausedTime=null;
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  void _wsRecoonect()async
+  {
+    try {
               if (!tinode_global.isConnected && !isConnectProcessing_global) {
           //     showToast('웹 소켓 연결 시도 중 ...');
                 isConnectProcessing_global = true;
@@ -123,16 +135,10 @@ abstract class BaseState<T extends StatefulWidget> extends State<T>
                 showToast('웹소켓 연결 OK 상태...');
               }
             } catch (err) {
-              showToast('fail to connect');
-              Get.offAll(SplashPage());
+              showToast('재연결 프로세스 실패, 다시 시도');
+              _wsRecoonect();
+              //Get.offAll(SplashPage());
             }
-          }
-          _lastPausedTime=null;
-        }
-        break;
-      default:
-        break;
-    }
   }
 
   // Future<bool> reLogin() async {
