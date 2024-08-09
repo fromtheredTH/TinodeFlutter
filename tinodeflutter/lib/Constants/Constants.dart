@@ -64,13 +64,20 @@ class Constants {
 
   static Future<void> initSetting() async
   {
+    try{
     Topic me = tinode_global.getMeTopic();
     await setMyTopicSubscribe(me);
     await getMyInfo(me);
     PurchaseScreen.instance.initPurchaseState(); // purchase item init
     gCurrentId = Constants.user.id;
     Get.offAll(BottomNavBarScreen(),transition: Transition.rightToLeft);
-  }
+  
+    }
+    catch(err)
+    {
+      print("constants err : $err");
+    }
+    }
 
 
   static Future<void> setMyTopicSubscribe(Topic me) async{
@@ -86,6 +93,8 @@ class Constants {
 
   static Future<void> getMyInfo(Topic me) async
   {
+    try{
+
     //내 data 받아오기
     GetQuery getQuery = GetQuery(
       what: 'sub desc cred',
@@ -106,6 +115,11 @@ class Constants {
     String searchId = tagData.tags.last.replaceFirst("search:", "");
     Constants.user = UserModel(id: userId, name: meta.desc.public['fn'], membership: membershipMeta.membership, picture: pictureUrl,searchId: searchId, tags: tagData.tags, isFreind: false);
 
+    }
+    catch(err)
+    {
+      print("myinfo err : $err");
+    }
   }
 
 

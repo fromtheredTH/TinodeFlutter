@@ -64,7 +64,8 @@ String gBackgroundFcmTopic="";
         firebaseLogin(prefs);
         return true;
       }
-      showToast('여기는 들어오는 곳 아님');
+
+      showToast('로그아웃되어있는 상황에서 재연결시 들어옴');
       return false; // 여기는 들어오면 안됨
     } catch (err) {
       print("re login err : $err");

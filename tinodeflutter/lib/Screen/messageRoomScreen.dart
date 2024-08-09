@@ -162,6 +162,7 @@ class _MessageRoomScreenState extends BaseState<MessageRoomScreen> {
     if (_metaDescSubscription != null) _metaDescSubscription?.cancel();
     if (_dataSubscription != null) _dataSubscription?.cancel();
     if (_subSubscription != null) _subSubscription?.cancel();
+    if(voiceTimer!=null) voiceTimer?.cancel();
   }
 
    @override

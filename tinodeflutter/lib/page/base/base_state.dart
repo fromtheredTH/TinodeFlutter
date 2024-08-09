@@ -97,10 +97,13 @@ abstract class BaseState<T extends StatefulWidget> extends State<T>
                 Utils.showDialogWidget(context);
                 await tinode_global.connect();
                 isConnectProcessing_global=false;
+                final prefs = await SharedPreferences.getInstance();
+                if(tinode_global.isAuthenticated)print("already auth");
+                if(!prefs.containsKey('login_type'))return;
+                
                 try {
               //    showToast('re login 중 ...');
                   var response = await tinode_global.loginWithAccessToken(token);
-                  final prefs = await SharedPreferences.getInstance();
                   token = response.params['token'];
                   url_encoded_token = Uri.encodeComponent(response.params['token']);
                   prefs.setString('token', token);

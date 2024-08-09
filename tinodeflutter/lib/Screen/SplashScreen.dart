@@ -162,8 +162,14 @@ class SplashPageState extends BaseState<SplashPage> {
         Constants.initSetting();
        }
        else{
-          print("일로 오면 안돼");
+          // print("일로 오면 안돼");
           showToast('파이어베이스 로그인 미구현');
+          //   prefs.remove('login_type');
+          //   tinode_global.logout(); //ws 연결은 유지
+          //   prefs.remove('basic_id');
+          //   prefs.remove('basic_pw');
+          //   prefs.remove('token');
+          //   prefs.remove('url_encoded_token');
           Get.offAll(DefaultScreen(),transition: Transition.rightToLeft);
        }
        

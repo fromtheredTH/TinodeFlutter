@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -69,6 +70,10 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
   List<MessageRoomModel> roomAllList = [];
   List<MessageRoomModel> tempRoomList = [];
   List<MessageRoomModel> roomFilterList = [];
+
+  StreamSubscription? _onPresSubscription;
+  StreamSubscription? _onSubSubscription;
+
   bool isInit = false;
 
   void onDelete(int index) {}
@@ -96,6 +101,9 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
   void dispose() {
     // pingSubscription.cancel();
     super.dispose();
+    _meTopic.leave(true);
+    if(_onSubSubscription!=null)_onSubSubscription?.cancel();
+    if(_onPresSubscription!=null)_onPresSubscription?.cancel();
   }
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) {
@@ -154,7 +162,7 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
 
   void _setupListeners() async{
     try{
-    _meTopic.onSubsUpdated.listen((value) {
+    _onSubSubscription=_meTopic.onSubsUpdated.listen((value) {
       tempRoomList.clear();
       print("Subs updated: $value");
       count = 0; 
@@ -202,7 +210,7 @@ class _MessageRoomListScreenState extends BaseState<MessageRoomListScreen> {
       });
    
 
-    _meTopic.onPres.listen((value) async{
+    _onPresSubscription = _meTopic.onPres.listen((value) async{
       tempRoomList.clear();
       print("Presence value: $value");
       String topic = value.src ?? "";

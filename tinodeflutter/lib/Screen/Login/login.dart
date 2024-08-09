@@ -88,6 +88,7 @@ class _LoginState extends BaseState<Login> {
     pw = pwController.value.text == "" ? "qwer123!" : pwController.value.text;
  
   try {
+      if(tinode_global.isAuthenticated)print("already auth");
       var result = await tinode_global.loginBasic(id, pw, null);
       prefs.setString('basic_id', id);
       prefs.setString('basic_pw', pw);

@@ -463,16 +463,28 @@ class _ProfileScreenState extends BaseState<ProfileScreen> {
                                       },
                                       logout: () async {
                                         Utils.showDialogWidget(context);
-                                        tinode_global.jadechatLogout(); //ws 연결은 유지
+                                        //tinode_global.jadechatLogout(); //ws 연결은 유지
                                         await FirebaseMessaging.instance.deleteToken();                                         
                                         SharedPreferences prefs = await SharedPreferences.getInstance();
-                                        prefs.remove('login_type');
+                                        bool isRemoved = await prefs.remove('login_type');
                                         prefs.remove('basic_id');
                                         prefs.remove('basic_pw');
                                         prefs.remove('token');
                                         prefs.remove('url_encoded_token');
-                                        if(FirebaseAuth.instance!=null ) await FirebaseAuth.instance.signOut();
+           
+                                        if(FirebaseAuth.instance.currentUser !=null ){
+                                          var reponse =  await FirebaseAuth.instance.signOut();
+                                          print("11");
+                                        }
+                                        tinode_global.logout(); 
+
                                         //Get.offAll(()=>LoignScreen.Login());
+
+                                        if (isRemoved) {
+                                          print("Key 'login_type' removed successfully.");
+                                        } else {
+                                          print("Failed to remove key 'login_type'.");
+                                        }
                                         Get.offAll(SplashPage());
                                         // await DioClient.deleteFCM(
                                         //     gPushKey);
